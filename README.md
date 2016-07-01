@@ -4,7 +4,7 @@ Sork is a program that performs various operations on source files in a C/C++ pr
 [Commands](#commands) for a list of available commands.
 
 Example that [checks](#check) all source files in the folder `src/lib/bar` of the project "foo" and
-finds an error in the naming of an include guard of a header:
+finds an error in the naming of an include guard header:
 
 ```shell
 $ sork check ~/Source/foo/src/lib/bar
@@ -24,9 +24,13 @@ $
 
 You can run Sork directly from a git checkout. For convenience you might want to create a link to
 `sork.py` in one of your `PATH` directories, e.g. if you are standing in the Sork source root and
-`~/.local/bin` is in your `PATH` run: `ln -s $(pwd)/sork.py ~/.local/bin/sork`
+`~/.local/bin` is in your `PATH` run:
 
-Adding a `setup.py` is on the [TODO list](#TODO).
+```shell
+ln -s $(pwd)/sork.py ~/.local/bin/sork`
+```
+
+Adding a `setup.py` is on the [TODO list](#todo).
 
 
 ## Project root path detection
