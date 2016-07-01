@@ -4,7 +4,7 @@ Sork is a program that performs various operations on source files in a C/C++ pr
 [Commands](#commands) for a list of available commands.
 
 Example that [checks](#check) all source files in the folder `src/lib/bar` of the project "foo" and
-finds an error in the naming of an include guard header:
+finds an error in the naming of a header include guard:
 
 ```shell
 $ sork check ~/Source/foo/src/lib/bar
