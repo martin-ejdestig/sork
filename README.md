@@ -27,7 +27,7 @@ You can run Sork directly from a git checkout. For convenience you might want to
 `~/.local/bin` is in your `PATH` run:
 
 ```shell
-ln -s $(pwd)/sork.py ~/.local/bin/sork`
+ln -s $(pwd)/sork.py ~/.local/bin/sork
 ```
 
 Adding a `setup.py` is on the [TODO list](#todo).
@@ -91,7 +91,7 @@ Style check source files. Available checks:
   formatting.
 - clang_tidy: Runs [clang-tidy](http://clang.llvm.org/extra/clang-tidy/index.html). Only invoked for
   source files that have an entry in the compilation database.
-- include_guard: Verifies that the include guard in header files are properly named. Currently
+- include_guard: Verifies that include guards in header files are properly named. Currently
   requires include guards to be named according to the following format: &lt;PREFIX&gt;&lt;Upper
   case path of header with space, / and - replaced with underscore&gt;&lt;SUFFIX&gt;.
 
@@ -121,11 +121,13 @@ Style check source files. Available checks:
 - Implement --fix flag for check that fixes found errors if possible.
 - Add regular expression in configuration for source files that should be excluded.
 - Multiple recursive glob.glob() is slow on large repositories. E.g. it takes 2-3 minutes
-  to find all source files in the Chromium repository while it only takes 2-3 seconds with `find`).
+  to find all source files in the Chromium repository both with and without a warm cache while it
+  takes ~50 seconds with `find` and a cold cache and 3 seconds with a warm cache.
 - Exit code other than 0 if analyze/check finds any errors or if asm cannot output assembler?
 - More robust project root detection (check for more VCS dot directories, ... other ideas?)
 - Add user specific configuration in $HOME/.config/ that lets user add search paths for how to find
   build directories. Want to avoid -bp/--build-path flag as much as possible.
 - More tests.
 - Add a setup.py. https://docs.python.org/3.5/distutils/setupscript.html
-
+- --dump-config/-dc (a la clang-format)? Need to set default values instead of relying on fallback
+  to get().
