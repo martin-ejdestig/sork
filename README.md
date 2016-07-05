@@ -17,7 +17,7 @@ $
 ## Dependencies
 
 - Python (version 3.2 or later)
-- Clang (clang-format and clang-tidy)
+- Clang (clang-format, clang-tidy and static analyzer)
 
 
 ## Installing from source
@@ -113,6 +113,33 @@ Style check source files. Available checks:
   - suffix: String all include guard identifiers must end with.
   - strip_paths: Leading paths to remove from header path before inserting it between prefix and
     suffix.
+
+
+## Build system targets example
+
+If you have an IDE or editor that can detect targets in your build system and/or makes build error
+output in the format `<file>:<line>[:<column>]:<error message>` clickable you may want to add some
+convenience targets that use Sork. If you use Git you may also want to add Sork as a submodule so
+that it is readily available. The following example shows how to add targets for
+[Meson](https://github.com/mesonbuild/meson) but it should be similar in any other build system.
+
+In your project root run:
+
+```shell
+git submodule add https://github.com/martin-ejdestig/sork external/sork
+```
+
+Open `external/meson.build` in an editor and enter:
+
+```
+sork = find_program('sork/sork.py')
+run_target('analyze', command : [sork, '--build-path', meson.build_root(), 'analyze', meson.source_root()])
+run_target('style_check', command : [sork, '--build-path', meson.build_root(), 'check', meson.source_root()])
+```
+
+And add `subdir('external')` in you root `meson.build` if Sork is the first external component you
+add. Then commit everything. You should now have two build targets called `analyze` and
+`style_check` available that automatically use the correct build directory.
 
 
 ## TODO
