@@ -29,14 +29,13 @@ def _strip_path(path, strip_paths):
 
 
 def _include_guard_for_source_file(source_file):
-    config = source_file.environment.config.get('checks.include_guard', {})
+    config = source_file.environment.config['checks.include_guard']
 
-    stripped_path = _strip_path(source_file.stem,
-                                config.get('strip_paths', ['include', 'src']))
+    stripped_path = _strip_path(source_file.stem, config['strip_paths'])
 
-    return ''.join([config.get('prefix', ''),
+    return ''.join([config['prefix'],
                     re.sub(r"[ /\\-]", '_', stripped_path).upper(),
-                    config.get('suffix', '_H')])
+                    config['suffix']])
 
 
 def check(source_file):

@@ -17,10 +17,10 @@
 
 import glob
 import itertools
-import json
 import os
 
 from . import compilation_database
+from . import config
 
 
 NORMALIZED_PROJECT_PATH = os.path.curdir
@@ -90,12 +90,9 @@ def _find_build_path(project_path):
 
 def _load_config(path):
     try:
-        with open(path) as file:
-            return json.load(file)
-    except FileNotFoundError:
-        return {}
-    except Exception as exception:
-        raise Error('Failed to load "{}": {}'.format(path, exception))
+        return config.load_config(path)
+    except config.Error as exception:
+        raise Error('{}: {}'.format(path, exception))
 
 
 class Environment:
@@ -103,14 +100,6 @@ class Environment:
         self.project_path = _find_project_path(path_in_project)
         self.build_path = build_path or _find_build_path(self.project_path)
         self.config = _load_config(os.path.join(self.project_path, _DOT_SORK_PATH))
-
-    @property
-    def source_paths(self):
-        return self.config.get('source_paths', ['.'])
-
-    @source_paths.setter
-    def source_paths(self, paths):
-        self.config['source_paths'] = paths
 
     def normalize_path(self, path):
         return os.path.normpath(os.path.relpath(path, start=self.project_path))

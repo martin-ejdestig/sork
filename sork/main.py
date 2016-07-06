@@ -87,7 +87,7 @@ def _create_environment(arg_parser, args):
         filtered_paths = [path for path in normalized_paths
                           if path != environment.NORMALIZED_PROJECT_PATH]
         if filtered_paths:  # Empty if only project path (should not override what is in config).
-            env.source_paths = filtered_paths
+            env.config['source_paths'] = filtered_paths
 
     return env
 

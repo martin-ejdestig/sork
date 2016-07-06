@@ -70,7 +70,7 @@ def _find_source_file_paths(environment):
     paths = set()
     dir_paths = []
 
-    for path in environment.source_paths:
+    for path in environment.config['source_paths']:
         if os.path.isdir(os.path.join(environment.project_path, path)):
             dir_paths.append(path)
         else:
