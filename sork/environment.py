@@ -94,6 +94,8 @@ def _load_config(path):
             return json.load(file)
     except FileNotFoundError:
         return {}
+    except Exception as exception:
+        raise Error('Failed to load "{}": {}'.format(path, exception))
 
 
 class Environment:
