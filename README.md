@@ -63,10 +63,14 @@ Detailed documentation for configuration relating to a specific command can be f
 
 ```json
 {
+    "source_exclude": "",
     "source_paths": ["."]
 }
 ```
 
+- source_exclude: Regular expression for paths relative to project root to exclude. The value is
+  passed to [re.compile](https://docs.python.org/library/re.html#re.compile) if set to something
+  other than the empty string.
 - source_paths: List of paths relative to project root to traverse when looking for source files.
   Used when no source paths are passed on the command line.
 
@@ -146,7 +150,6 @@ add. Then commit everything. You should now have two build targets called `analy
 
 - Check that verifies that copyright/license header is correct (text, year, etc.).
 - Implement --fix flag for check that fixes found errors if possible.
-- Add regular expression in configuration for source files that should be excluded.
 - Multiple recursive glob.glob() is slow on large repositories. E.g. it takes 2-3 minutes
   to find all source files in the Chromium repository both with and without a warm cache while it
   takes ~50 seconds with `find` and a cold cache and 3 seconds with a warm cache.

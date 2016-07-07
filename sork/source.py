@@ -18,6 +18,7 @@
 import glob
 import itertools
 import os
+import re
 import threading
 
 from . import compilation_database
@@ -66,20 +67,35 @@ class SourceFile:
         return stem
 
 
+def _get_exclude_regex(environment):
+    pattern = environment.config['source_exclude']
+    if not pattern:
+        return None
+    try:
+        return re.compile(pattern)
+    except re.error:
+        return None
+
+
 def _find_source_file_paths(environment):
     paths = set()
     dir_paths = []
+    exclude_regex = _get_exclude_regex(environment)
+
+    def should_be_included(path):
+        return exclude_regex.match(path) is None if exclude_regex else True
 
     for path in environment.config['source_paths']:
         if os.path.isdir(os.path.join(environment.project_path, path)):
             dir_paths.append(path)
-        else:
+        elif should_be_included(path):
             paths.add(path)
 
     for dir_path, extension in itertools.product(dir_paths, _EXTENSIONS):
         pattern = os.path.join(environment.project_path, dir_path, '**', '*' + extension)
-        paths.update(environment.normalize_path(path)
-                     for path in glob.glob(pattern, recursive=True))
+        found_paths = (environment.normalize_path(path)
+                       for path in glob.glob(pattern, recursive=True))
+        paths.update(path for path in found_paths if should_be_included(path))
 
     return sorted(paths)
 

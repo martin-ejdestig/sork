@@ -19,6 +19,7 @@ import json
 
 
 _DEFAULT_CONFIG = {
+    'source_exclude': '',
     'source_paths': ['.'],
 
     'checks.include_guard': {
