@@ -150,7 +150,6 @@ add. Then commit everything. You should now have two build targets called `analy
 - Multiple recursive glob.glob() is slow on large repositories. E.g. it takes 2-3 minutes
   to find all source files in the Chromium repository both with and without a warm cache while it
   takes ~50 seconds with `find` and a cold cache and 3 seconds with a warm cache.
-- Exit code other than 0 if analyze/check finds any errors or if asm cannot output assembler?
 - More robust project root detection (check for more VCS dot directories, ... other ideas?)
 - Add user specific configuration in $HOME/.config/ that lets user add search paths for how to find
   build directories. Want to avoid -bp/--build-path flag as much as possible.
