@@ -158,5 +158,3 @@ add. Then commit everything. You should now have two build targets called `analy
   build directories. Want to avoid -bp/--build-path flag as much as possible.
 - More tests.
 - Add a setup.py. https://docs.python.org/3.5/distutils/setupscript.html
-- --dump-config/-dc (a la clang-format)? Need to set default values instead of relying on fallback
-  to get().
