@@ -15,26 +15,30 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-from . import checks
-from . import concurrent
-from . import source
+import abc
 
 
-def _check_source_file(source_file):
-    outputs = []
-
-    if source_file.compile_command:
-        outputs.append(checks.clang_tidy.check(source_file))
-
-    if source_file.is_header:
-        outputs.append(checks.include_guard.check(source_file))
-
-    outputs.append(checks.clang_format.check(source_file))
-
-    return '\n'.join(o for o in outputs if o)
+class Error(Exception):
+    pass
 
 
-def check(environment):
-    concurrent.for_each_with_progress_printer('Checking source',
-                                              _check_source_file,
-                                              source.find_source_files(environment))
+class Command(abc.ABC):
+    def __init__(self):
+        super().__init__()
+
+    @abc.abstractmethod
+    def add_arg_subparser(self, subparsers):
+        pass
+
+    def _create_arg_subparser(self, subparsers, name, aliases=None, arg_help=None):
+        parser = subparsers.add_parser(name,
+                                       aliases=aliases if aliases else [],
+                                       help=arg_help)
+
+        parser.set_defaults(run_command=self.run)
+
+        return parser
+
+    @abc.abstractmethod
+    def run(self, args, environment):
+        pass

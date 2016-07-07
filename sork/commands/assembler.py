@@ -18,15 +18,16 @@
 import re
 import subprocess
 
-from . import source
+from .. import command
+from .. import source
 
 
-def output_for_source_file(environment, file_path):
-    source_file = source.get_source_file(environment, file_path)
+def _output_for_source_file(args, environment):
+    path = args.source_paths[0]
+    source_file = source.get_source_file(environment, path)
 
     if not source_file.compile_command:
-        print('Do not know how to compile "{}".'.format(file_path))
-        return
+        raise command.Error('Do not know how to compile "{}".'.format(path))
 
     args = source_file.compile_command.invokation
     args = re.sub(r" -c ", ' -S ', args)
@@ -38,4 +39,23 @@ def output_for_source_file(environment, file_path):
                           cwd=source_file.compile_command.work_dir,
                           shell=True) as process:
         if process.wait() != 0:
-            print('Failed to run compiler command for outputting assembler.')
+            raise command.Error('Failed to run compiler command for outputting assembler.')
+
+
+class AssemblerCommand(command.Command):
+    def __init__(self):
+        super().__init__()
+
+    def add_arg_subparser(self, subparsers):
+        parser = self._create_arg_subparser(subparsers,
+                                            'asm',
+                                            aliases=['assembler'],
+                                            arg_help='output assembler for compilation unit')
+
+        parser.add_argument('source_paths',
+                            nargs=1,
+                            help='source file to output assembler for',
+                            metavar='<file>')
+
+    def run(self, args, environment):
+        _output_for_source_file(args, environment)

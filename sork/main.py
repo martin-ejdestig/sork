@@ -18,49 +18,34 @@
 import argparse
 import os
 
-from . import analyze
-from . import assembler
-from . import check
+from . import command
+from . import commands
 from . import environment
+
+
+_COMMANDS = [
+    commands.analyze.AnalyzeCommand(),
+    commands.assembler.AssemblerCommand(),
+    commands.check.CheckCommand()
+]
 
 
 def _create_arg_parser():
     parser = argparse.ArgumentParser()
+
     parser.add_argument('-bp',
                         '--build-path',
                         help='path to build directory, automatically detected if possible',
                         metavar='<path>')
+
     subparsers = parser.add_subparsers(dest='command',
                                        help='-h or --help after <command> for more help',
                                        metavar='<command>')
     # Fix for bug introduced in 3.3.5. See http://bugs.python.org/issue9253#msg186387 .
     subparsers.required = True
 
-    parser_analyze = subparsers.add_parser('analyze',
-                                           help='run static analyzer')
-    parser_analyze.add_argument('source_paths',
-                                nargs='*',
-                                help='analyze path(s) (directories are recursed)',
-                                metavar='<path>')
-
-    parser_assembler = subparsers.add_parser('asm',
-                                             aliases=['assembler'],
-                                             help='output assembler for compilation unit')
-    parser_assembler.add_argument('source_paths',
-                                  nargs=1,
-                                  help='source file to output assembler for',
-                                  metavar='<file>')
-
-    parser_check = subparsers.add_parser('check',
-                                         help='style check source code')
-    parser_check.add_argument('-f',
-                              '--fix',
-                              action='store_true',
-                              help='fix violations (NOTE: modifies source files) (TODO)')
-    parser_check.add_argument('source_paths',
-                              nargs='*',
-                              help='only check path(s) (directories are recursed)',
-                              metavar='<path>')
+    for cmd in _COMMANDS:
+        cmd.add_arg_subparser(subparsers)
 
     return parser
 
@@ -94,16 +79,11 @@ def _create_environment(arg_parser, args):
 
 def _run_command(args, env):
     try:
-        if args.command == 'analyze':
-            analyze.analyze(env)
-        elif args.command in ['asm', 'assembler']:
-            assembler.output_for_source_file(env, args.source_paths[0])
-        elif args.command == 'check':
-            check.check(env)
-        else:
-            assert False
+        args.run_command(args, env)
     except KeyboardInterrupt:
         pass
+    except command.Error as error:
+        print(error)
 
 
 def main():

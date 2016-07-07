@@ -18,8 +18,9 @@
 import re
 import subprocess
 
-from . import concurrent
-from . import source
+from .. import command
+from .. import concurrent
+from .. import source
 
 
 def _analyze_source_file(source_file):
@@ -41,9 +42,23 @@ def _analyze_source_file(source_file):
         return process.communicate()[0]
 
 
-def analyze(environment):
-    source_files = [sf for sf in source.find_source_files(environment)
-                    if sf.compile_command]
-    concurrent.for_each_with_progress_printer('Analyzing source',
-                                              _analyze_source_file,
-                                              source_files)
+class AnalyzeCommand(command.Command):
+    def __init__(self):
+        super().__init__()
+
+    def add_arg_subparser(self, subparsers):
+        parser = self._create_arg_subparser(subparsers,
+                                            'analyze',
+                                            arg_help='run static analyzer')
+
+        parser.add_argument('source_paths',
+                            nargs='*',
+                            help='analyze path(s) (directories are recursed)',
+                            metavar='<path>')
+
+    def run(self, args, environment):
+        source_files = [sf for sf in source.find_source_files(environment)
+                        if sf.compile_command]
+        concurrent.for_each_with_progress_printer('Analyzing source',
+                                                  _analyze_source_file,
+                                                  source_files)
