@@ -18,6 +18,7 @@
 import difflib
 import subprocess
 
+from .. import check
 from .. import string
 
 
@@ -47,17 +48,21 @@ def _custom_diff(path, content, formatted):
     return diff_lines
 
 
-def check(source_file):
-    with subprocess.Popen('clang-format',
-                          stdin=subprocess.PIPE,
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE,
-                          cwd=source_file.environment.project_path,
-                          universal_newlines=True) as process:
-        stdout, stderr = process.communicate(input=source_file.content)
-        if process.returncode != 0:
-            return stderr
+class ClangFormatCheck(check.Check):
+    def __init__(self):
+        super().__init__()
 
-    diff_lines = _custom_diff(source_file.path, source_file.content, stdout)
+    def check(self, source_file):
+        with subprocess.Popen('clang-format',
+                              stdin=subprocess.PIPE,
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE,
+                              cwd=source_file.environment.project_path,
+                              universal_newlines=True) as process:
+            stdout, stderr = process.communicate(input=source_file.content)
+            if process.returncode != 0:
+                return stderr
 
-    return string.rstrip_single_char(''.join(diff_lines), '\n')
+        diff_lines = _custom_diff(source_file.path, source_file.content, stdout)
+
+        return string.rstrip_single_char(''.join(diff_lines), '\n')

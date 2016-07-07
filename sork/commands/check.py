@@ -21,16 +21,15 @@ from .. import concurrent
 from .. import source
 
 
+_CHECKS = [
+    checks.clang_format.ClangFormatCheck(),
+    checks.clang_tidy.ClangTidyCheck(),
+    checks.include_guard.IncludeGuardCheck()
+]
+
+
 def _check_source_file(source_file):
-    outputs = []
-
-    if source_file.compile_command:
-        outputs.append(checks.clang_tidy.check(source_file))
-
-    if source_file.is_header:
-        outputs.append(checks.include_guard.check(source_file))
-
-    outputs.append(checks.clang_format.check(source_file))
+    outputs = (c.check(source_file) for c in _CHECKS)
 
     return '\n'.join(o for o in outputs if o)
 

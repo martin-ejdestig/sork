@@ -18,6 +18,8 @@
 import re
 import subprocess
 
+from .. import check
+
 
 _CLANG_TIDY_NOISE_LINES = [
     r"[0-9]+ warnings? (and [0-9]+ errors? )?generated.",
@@ -28,17 +30,24 @@ _CLANG_TIDY_NOISE_LINES = [
 _CLANG_TIDY_NOISE_REGEX = re.compile('(?m)^(' + '|'.join(_CLANG_TIDY_NOISE_LINES) + ')$')
 
 
-def check(source_file):
-    args = re.sub(r"^.*?\+\+", 'clang-tidy {} -- '.format(source_file.compile_command.file),
-                  source_file.compile_command.invokation)
-    args = re.sub(r" '?-W[a-z0-9-=]+'?", '', args)
+class ClangTidyCheck(check.Check):
+    def __init__(self):
+        super().__init__()
 
-    with subprocess.Popen(args,
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.STDOUT,
-                          shell=True,
-                          cwd=source_file.compile_command.work_dir,
-                          universal_newlines=True) as process:
-        output = process.communicate()[0]
+    def check(self, source_file):
+        if not source_file.compile_command:
+            return
 
-    return _CLANG_TIDY_NOISE_REGEX.sub('', output).strip()
+        args = re.sub(r"^.*?\+\+", 'clang-tidy {} -- '.format(source_file.compile_command.file),
+                      source_file.compile_command.invokation)
+        args = re.sub(r" '?-W[a-z0-9-=]+'?", '', args)
+
+        with subprocess.Popen(args,
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.STDOUT,
+                              shell=True,
+                              cwd=source_file.compile_command.work_dir,
+                              universal_newlines=True) as process:
+            output = process.communicate()[0]
+
+        return _CLANG_TIDY_NOISE_REGEX.sub('', output).strip()

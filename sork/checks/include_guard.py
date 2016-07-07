@@ -18,6 +18,7 @@
 import os
 import re
 
+from .. import check
 from .. import string
 
 
@@ -38,25 +39,32 @@ def _include_guard_for_source_file(source_file):
                     config['suffix']])
 
 
-def check(source_file):
-    match = re.match(r"^(?:\s*|/\*.*?\*/|//[^\n]*)*"
-                     r"#ifndef\s+(\S*)\s*\n\s*"
-                     r"#define\s(\S*).*\n.*"
-                     r"#endif\s+//\s+(\S*)\s*$",
-                     source_file.content,
-                     flags=re.DOTALL)
-    if not match:
-        return '{}: error: missing include guard'.format(source_file.path)
+class IncludeGuardCheck(check.Check):
+    def __init__(self):
+        super().__init__()
 
-    guard = _include_guard_for_source_file(source_file)
+    def check(self, source_file):
+        if not source_file.is_header:
+            return
 
-    error_positions = [string.index_to_line_and_column(source_file.content, match.start(group))
-                       for group, found_guard in enumerate(match.groups(), start=1)
-                       if found_guard != guard]
+        match = re.match(r"^(?:\s*|/\*.*?\*/|//[^\n]*)*"
+                         r"#ifndef\s+(\S*)\s*\n\s*"
+                         r"#define\s(\S*).*\n.*"
+                         r"#endif\s+//\s+(\S*)\s*$",
+                         source_file.content,
+                         flags=re.DOTALL)
+        if not match:
+            return '{}: error: missing include guard'.format(source_file.path)
 
-    output = ['{}:{}:{}: error: include guard name should be {}'.format(source_file.path,
-                                                                        *position,
-                                                                        guard)
-              for position in error_positions]
+        guard = _include_guard_for_source_file(source_file)
 
-    return '\n'.join(output)
+        error_positions = [string.index_to_line_and_column(source_file.content, match.start(group))
+                           for group, found_guard in enumerate(match.groups(), start=1)
+                           if found_guard != guard]
+
+        output = ['{}:{}:{}: error: include guard name should be {}'.format(source_file.path,
+                                                                            *position,
+                                                                            guard)
+                  for position in error_positions]
+
+        return '\n'.join(output)
