@@ -101,5 +101,15 @@ class Environment:
         self.build_path = build_path or _find_build_path(self.project_path)
         self.config = _load_config(os.path.join(self.project_path, _DOT_SORK_PATH))
 
+        self._source_paths = None
+
+    @property
+    def source_paths(self):
+        return self._source_paths or self.config['source_paths']
+
+    @source_paths.setter
+    def source_paths(self, paths):
+        self._source_paths = paths
+
     def normalize_path(self, path):
         return os.path.normpath(os.path.relpath(path, start=self.project_path))

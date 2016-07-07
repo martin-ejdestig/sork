@@ -85,7 +85,7 @@ def _find_source_file_paths(environment):
     def should_be_included(path):
         return exclude_regex.match(path) is None if exclude_regex else True
 
-    for path in environment.config['source_paths']:
+    for path in environment.source_paths:
         if os.path.isdir(os.path.join(environment.project_path, path)):
             dir_paths.append(path)
         elif should_be_included(path):
