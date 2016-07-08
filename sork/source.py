@@ -77,7 +77,10 @@ def _get_exclude_regex(environment):
         return None
 
 
-def _find_source_file_paths(environment):
+def _find_source_file_paths(environment, source_paths=None):
+    if not source_paths:
+        source_paths = environment.config['source_paths']
+
     paths = set()
     dir_paths = []
     exclude_regex = _get_exclude_regex(environment)
@@ -85,7 +88,7 @@ def _find_source_file_paths(environment):
     def should_be_included(path):
         return exclude_regex.match(path) is None if exclude_regex else True
 
-    for path in environment.source_paths:
+    for path in source_paths:
         if os.path.isdir(os.path.join(environment.project_path, path)):
             dir_paths.append(path)
         elif should_be_included(path):
@@ -100,11 +103,12 @@ def _find_source_file_paths(environment):
     return sorted(paths)
 
 
-def find_source_files(environment):
-    paths = _find_source_file_paths(environment)
+def find_source_files(environment, paths=None):
+    normpaths = environment.normalize_paths(paths, filter_project_path=True) if paths else None
     compile_commands = compilation_database.load_from_file(environment)
 
-    return [SourceFile(path, compile_commands.get(path), environment) for path in paths]
+    return [SourceFile(path, compile_commands.get(path), environment)
+            for path in _find_source_file_paths(environment, normpaths)]
 
 
 def get_source_file(environment, path):

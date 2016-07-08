@@ -23,7 +23,7 @@ from . import compilation_database
 from . import config
 
 
-NORMALIZED_PROJECT_PATH = os.path.curdir
+_NORMALIZED_PROJECT_PATH = os.path.curdir
 
 _DOT_SORK_PATH = '.sork'
 _DOT_PATHS_IN_PROJECT_ROOT = ['.git', _DOT_SORK_PATH]
@@ -101,15 +101,12 @@ class Environment:
         self.build_path = build_path or _find_build_path(self.project_path)
         self.config = _load_config(os.path.join(self.project_path, _DOT_SORK_PATH))
 
-        self._source_paths = None
-
-    @property
-    def source_paths(self):
-        return self._source_paths or self.config['source_paths']
-
-    @source_paths.setter
-    def source_paths(self, paths):
-        self._source_paths = paths
-
     def normalize_path(self, path):
         return os.path.normpath(os.path.relpath(path, start=self.project_path))
+
+    def normalize_paths(self, paths, filter_project_path=False):
+        normalized_paths = [self.normalize_path(path) for path in paths]
+        if filter_project_path:
+            normalized_paths = [path for path in normalized_paths
+                                if path != _NORMALIZED_PROJECT_PATH]
+        return normalized_paths
