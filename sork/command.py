@@ -24,7 +24,7 @@ class Error(Exception):
 
 class Command(abc.ABC):
     def __init__(self):
-        super().__init__()
+        pass
 
     @abc.abstractmethod
     def add_arg_subparser(self, subparsers):
