@@ -22,7 +22,7 @@ from .. import command
 from .. import source
 
 
-def _output_for_source_file(args, environment):
+def _output_assembler(args, environment):
     path = args.source_paths[0]
     source_file = source.get_source_file(environment, path)
 
@@ -58,4 +58,4 @@ class AssemblerCommand(command.Command):
                             metavar='<file>')
 
     def run(self, args, environment):
-        _output_for_source_file(args, environment)
+        _output_assembler(args, environment)
