@@ -57,5 +57,5 @@ class AssemblerCommand(command.Command):
                             help='source file to output assembler for',
                             metavar='<file>')
 
-    def run(self, args, environment):
+    def _run(self, args, environment):
         _output_assembler(args, environment)

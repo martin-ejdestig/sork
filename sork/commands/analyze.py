@@ -56,7 +56,7 @@ class AnalyzeCommand(command.Command):
                             help='analyze path(s) (directories are recursed)',
                             metavar='<path>')
 
-    def run(self, args, environment):
+    def _run(self, args, environment):
         source_files = [sf for sf in source.find_source_files(environment, args.source_paths)
                         if sf.compile_command]
         concurrent.for_each_with_progress_printer('Analyzing source',

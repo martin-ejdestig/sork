@@ -53,7 +53,7 @@ class CheckCommand(command.Command):
                             help='only check path(s) (directories are recursed)',
                             metavar='<path>')
 
-    def run(self, args, environment):
+    def _run(self, args, environment):
         concurrent.for_each_with_progress_printer('Checking source',
                                                   _check_source_file,
                                                   source.find_source_files(environment,

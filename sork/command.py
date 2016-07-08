@@ -35,10 +35,10 @@ class Command(abc.ABC):
                                        aliases=aliases if aliases else [],
                                        help=arg_help)
 
-        parser.set_defaults(run_command=self.run)
+        parser.set_defaults(run_command=self._run)
 
         return parser
 
     @abc.abstractmethod
-    def run(self, args, environment):
+    def _run(self, args, environment):
         pass
