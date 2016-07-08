@@ -50,18 +50,22 @@ def _create_arg_parser():
     return parser
 
 
-def _create_environment(arg_parser, args):
+def _path_in_project(args):
     source_paths = args.source_paths if hasattr(args, 'source_paths') else None
 
-    if source_paths:
-        path_in_project = source_paths[0]
-        if os.path.isfile(path_in_project):
-            path_in_project = os.path.dirname(path_in_project)
-    else:
-        path_in_project = os.path.curdir
+    if not source_paths:
+        return os.path.curdir
 
+    path = source_paths[0]
+    if os.path.isfile(path):
+        path = os.path.dirname(path)
+
+    return path
+
+
+def _create_environment(arg_parser, args):
     try:
-        env = environment.Environment(path_in_project, build_path=args.build_path)
+        env = environment.Environment(_path_in_project(args), build_path=args.build_path)
     except environment.Error as error:
         print(error)
         arg_parser.print_help()
