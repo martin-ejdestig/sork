@@ -36,13 +36,9 @@ def _check_source_file(source_file):
 
 class CheckCommand(command.Command):
     def __init__(self):
-        super().__init__()
+        super().__init__('check', arg_help='style check source code')
 
-    def add_arg_subparser(self, subparsers):
-        parser = self._create_arg_subparser(subparsers,
-                                            'check',
-                                            arg_help='style check source code')
-
+    def _add_argparse_arguments(self, parser):
         parser.add_argument('-f',
                             '--fix',
                             action='store_true',

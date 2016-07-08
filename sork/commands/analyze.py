@@ -44,13 +44,9 @@ def _analyze_source_file(source_file):
 
 class AnalyzeCommand(command.Command):
     def __init__(self):
-        super().__init__()
+        super().__init__('analyze', arg_help='run static analyzer')
 
-    def add_arg_subparser(self, subparsers):
-        parser = self._create_arg_subparser(subparsers,
-                                            'analyze',
-                                            arg_help='run static analyzer')
-
+    def _add_argparse_arguments(self, parser):
         parser.add_argument('source_paths',
                             nargs='*',
                             help='analyze path(s) (directories are recursed)',

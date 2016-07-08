@@ -23,21 +23,23 @@ class Error(Exception):
 
 
 class Command(abc.ABC):
-    def __init__(self):
-        pass
+    def __init__(self, name, aliases=None, arg_help=None):
+        self._name = name
+        self._aliases = aliases
+        self._arg_help = arg_help
 
-    @abc.abstractmethod
-    def add_arg_subparser(self, subparsers):
-        pass
-
-    def _create_arg_subparser(self, subparsers, name, aliases=None, arg_help=None):
-        parser = subparsers.add_parser(name,
-                                       aliases=aliases if aliases else [],
-                                       help=arg_help)
+    def add_argparse_subparser(self, subparsers):
+        parser = subparsers.add_parser(self._name,
+                                       aliases=self._aliases if self._aliases else [],
+                                       help=self._arg_help)
 
         parser.set_defaults(run_command=self._run)
 
-        return parser
+        self._add_argparse_arguments(parser)
+
+    @abc.abstractmethod
+    def _add_argparse_arguments(self, parser):
+        pass
 
     @abc.abstractmethod
     def _run(self, args, environment):

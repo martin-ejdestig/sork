@@ -45,7 +45,7 @@ def _create_arg_parser():
     subparsers.required = True
 
     for cmd in _COMMANDS:
-        cmd.add_arg_subparser(subparsers)
+        cmd.add_argparse_subparser(subparsers)
 
     return parser
 

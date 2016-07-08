@@ -44,14 +44,11 @@ def _output_assembler(args, environment):
 
 class AssemblerCommand(command.Command):
     def __init__(self):
-        super().__init__()
+        super().__init__('asm',
+                         aliases=['assembler'],
+                         arg_help='output assembler for compilation unit')
 
-    def add_arg_subparser(self, subparsers):
-        parser = self._create_arg_subparser(subparsers,
-                                            'asm',
-                                            aliases=['assembler'],
-                                            arg_help='output assembler for compilation unit')
-
+    def _add_argparse_arguments(self, parser):
         parser.add_argument('source_paths',
                             nargs=1,
                             help='source file to output assembler for',
