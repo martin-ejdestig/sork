@@ -65,13 +65,11 @@ def _path_in_project(args):
 
 def _create_environment(arg_parser, args):
     try:
-        env = environment.Environment(_path_in_project(args), build_path=args.build_path)
+        return environment.Environment(_path_in_project(args), build_path=args.build_path)
     except environment.Error as error:
         print(error)
         arg_parser.print_help()
         arg_parser.exit(1)
-
-    return env
 
 
 def _run_command(args, env):
