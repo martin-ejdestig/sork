@@ -50,8 +50,9 @@ Some build systems capable of generating a compilation database are [CMake](http
 by default).
 
 By default Sork looks for a compilation database in build directories matching `path_to_project/*`,
-`path_to_project/../name_of_project_directory*` and
-`path_to_project/../build*/name_of_project_directory*`. Sork requires the path to be passed manually
+`path_to_project/../name_of_project_directory*`,
+`path_to_project/../build*/name_of_project_directory*` and
+`path_to_project/../build-name_of_project_directory*`. Sork requires the path to be passed manually
 on the command line if no or more than one database is found.
 
 

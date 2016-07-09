@@ -56,7 +56,8 @@ def _build_path_patterns(project_path, basename):
     pattern_dir_components = [
         ['*'],
         [os.path.pardir, basename + '*'],
-        [os.path.pardir, 'build*', basename + '*']
+        [os.path.pardir, 'build*', basename + '*'],
+        [os.path.pardir, 'build-' + basename + '*']
     ]
     return [os.path.join(project_path, *cs) for cs in pattern_dir_components]
 
