@@ -22,26 +22,6 @@ from .. import command
 from .. import source
 
 
-def _output_assembler(args, environment):
-    path = args.source_paths[0]
-    source_file = source.get_source_file(environment, path)
-
-    if not source_file.compile_command:
-        raise command.Error('Do not know how to compile "{}".'.format(path))
-
-    args = source_file.compile_command.invokation
-    args = re.sub(r" -c ", ' -S ', args)
-    args = re.sub(r" -o '?.*\.o'? ", ' -o- ', args)
-    args = re.sub(r" '?-M(?:[MGPD]|MD)?'?(?= )", '', args)
-    args = re.sub(r" '?-M[FTQ]'? '?.*?\.[do]'?(?= )", '', args)
-
-    with subprocess.Popen(args,
-                          cwd=source_file.compile_command.work_dir,
-                          shell=True) as process:
-        if process.wait() != 0:
-            raise command.Error('Failed to run compiler command for outputting assembler.')
-
-
 class AssemblerCommand(command.Command):
     def __init__(self):
         super().__init__('asm',
@@ -55,4 +35,20 @@ class AssemblerCommand(command.Command):
                             metavar='<file>')
 
     def _run(self, args, environment):
-        _output_assembler(args, environment)
+        path = args.source_paths[0]
+        source_file = source.get_source_file(environment, path)
+
+        if not source_file.compile_command:
+            raise command.Error('Do not know how to compile "{}".'.format(path))
+
+        args = source_file.compile_command.invokation
+        args = re.sub(r" -c ", ' -S ', args)
+        args = re.sub(r" -o '?.*\.o'? ", ' -o- ', args)
+        args = re.sub(r" '?-M(?:[MGPD]|MD)?'?(?= )", '', args)
+        args = re.sub(r" '?-M[FTQ]'? '?.*?\.[do]'?(?= )", '', args)
+
+        with subprocess.Popen(args,
+                              cwd=source_file.compile_command.work_dir,
+                              shell=True) as process:
+            if process.wait() != 0:
+                raise command.Error('Failed to run compiler command for outputting assembler.')
