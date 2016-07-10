@@ -30,7 +30,6 @@ _CHECKS = [
 
 def _check_source_file(source_file):
     outputs = (c.check(source_file) for c in _CHECKS)
-
     return '\n'.join(o for o in outputs if o)
 
 
