@@ -82,9 +82,8 @@ def _find_build_path(project_path):
                     .format('\n'.join(_build_path_patterns('path_to_project',
                                                            'name_of_project_directory'))))
     elif len(paths) > 1:
-        raise Error('Multiple {} found:\n{}'
-                    .format(compilation_database.COMPILE_COMMANDS_JSON_PATH,
-                            '\n'.join(sorted(paths))))
+        raise Error('Multiple build paths found:\n{}'
+                    .format('\n'.join(sorted(os.path.dirname(path) for path in paths))))
 
     return os.path.dirname(paths[0])
 
