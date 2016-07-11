@@ -57,4 +57,5 @@ class AnalyzeCommand(command.Command):
                         if sf.compile_command]
         concurrent.for_each_with_progress_printer('Analyzing source',
                                                   _analyze_source_file,
-                                                  source_files)
+                                                  source_files,
+                                                  num_threads=args.jobs)

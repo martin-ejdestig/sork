@@ -16,13 +16,11 @@
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
 import concurrent.futures
-import os
 
 from . import progress_printer
 
 
-def for_each_with_progress_printer(info_string, func, values):
-    num_threads = os.cpu_count() or 1
+def for_each_with_progress_printer(info_string, func, values, num_threads=None):
     aborted = False
     printer = progress_printer.ProgressPrinter()
 

@@ -52,4 +52,5 @@ class CheckCommand(command.Command):
         concurrent.for_each_with_progress_printer('Checking source',
                                                   _check_source_file,
                                                   source.find_source_files(environment,
-                                                                           args.source_paths))
+                                                                           args.source_paths),
+                                                  num_threads=args.jobs)

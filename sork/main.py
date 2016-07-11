@@ -30,6 +30,13 @@ _COMMANDS = [
 ]
 
 
+def _int_argument_greater_than_zero(string):
+    value = int(string)
+    if value <= 0:
+        raise argparse.ArgumentTypeError('invalid value {}, must be > 0'.format(value))
+    return value
+
+
 def _create_arg_parser():
     parser = argparse.ArgumentParser()
 
@@ -37,6 +44,13 @@ def _create_arg_parser():
                         '--build-path',
                         help='path to build directory, automatically detected if possible',
                         metavar='<path>')
+
+    parser.add_argument('-j',
+                        '--jobs',
+                        default=os.cpu_count() or 1,
+                        type=_int_argument_greater_than_zero,
+                        help='run N jobs in parallel (default: %(default)s)',
+                        metavar='N')
 
     subparsers = parser.add_subparsers(dest='command',
                                        help='-h or --help after <command> for more help',
