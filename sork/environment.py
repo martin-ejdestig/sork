@@ -92,7 +92,7 @@ def _load_config(path):
     try:
         return config.load_config(path)
     except config.Error as exception:
-        raise Error('{}: {}'.format(path, exception))
+        raise Error('{}'.format(exception))
 
 
 class Environment:

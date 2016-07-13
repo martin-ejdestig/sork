@@ -73,11 +73,10 @@ def load_config(path):
     try:
         with open(path) as file:
             config = json.load(file)
+        _verify_config(config, _DEFAULT_CONFIG)
     except FileNotFoundError:
         pass
     except Exception as exception:
-        raise Error('Failed to load "{}": {}'.format(path, exception))
-
-    _verify_config(config, _DEFAULT_CONFIG)
+        raise Error('{}: {}'.format(path, exception))
 
     return _merge_configs(_DEFAULT_CONFIG, config)
