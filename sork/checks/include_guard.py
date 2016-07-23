@@ -50,11 +50,14 @@ class IncludeGuardCheck(check.Check):
         match = re.match(r"^(?:\s*|/\*.*?\*/|//[^\n]*)*"
                          r"#ifndef\s+(\S*)\s*\n\s*"
                          r"#define\s(\S*).*\n.*"
-                         r"#endif\s+//\s+(\S*)\s*$",
+                         r"#endif(?:\s+//\s+(?P<endif_comment>\S*))?\s*$",
                          source_file.content,
                          flags=re.DOTALL)
         if not match:
             return '{}: error: missing include guard'.format(source_file.path)
+
+        if not match.group('endif_comment'):
+            return '{}: error: missing include guard #endif comment'.format(source_file.path)
 
         guard = _include_guard_for_source_file(source_file)
 
