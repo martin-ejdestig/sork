@@ -50,13 +50,13 @@ class AssemblerCommand(command.Command):
         if args.verbose:
             output_asm_args += ' -fverbose-asm'
 
-        args = source_file.compile_command.invokation
-        args = re.sub(r" -c ", ' ' + output_asm_args + ' ', args)
-        args = re.sub(r" -o '?.*\.o'? ", ' -o- ', args)
-        args = re.sub(r" '?-M(?:[MGPD]|MD)?'?(?= )", '', args)
-        args = re.sub(r" '?-M[FTQ]'? '?.*?\.[do]'?(?= )", '', args)
+        command_args = source_file.compile_command.invokation
+        command_args = re.sub(r" -c ", ' ' + output_asm_args + ' ', command_args)
+        command_args = re.sub(r" -o '?.*\.o'? ", ' -o- ', command_args)
+        command_args = re.sub(r" '?-M(?:[MGPD]|MD)?'?(?= )", '', command_args)
+        command_args = re.sub(r" '?-M[FTQ]'? '?.*?\.[do]'?(?= )", '', command_args)
 
-        with subprocess.Popen(args,
+        with subprocess.Popen(command_args,
                               cwd=source_file.compile_command.work_dir,
                               shell=True) as process:
             if process.wait() != 0:
