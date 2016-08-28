@@ -29,6 +29,11 @@ class AssemblerCommand(command.Command):
                          arg_help='output assembler for compilation unit')
 
     def _add_argparse_arguments(self, parser):
+        parser.add_argument('-v',
+                            '--verbose',
+                            action='store_true',
+                            help='tell compiler to output verbose assembler')
+
         parser.add_argument('source_paths',
                             nargs=1,
                             help='source file to output assembler for',
@@ -41,8 +46,12 @@ class AssemblerCommand(command.Command):
         if not source_file.compile_command:
             raise command.Error('Do not know how to compile "{}".'.format(path))
 
+        output_asm_args = '-S'
+        if args.verbose:
+            output_asm_args += ' -fverbose-asm'
+
         args = source_file.compile_command.invokation
-        args = re.sub(r" -c ", ' -S ', args)
+        args = re.sub(r" -c ", ' ' + output_asm_args + ' ', args)
         args = re.sub(r" -o '?.*\.o'? ", ' -o- ', args)
         args = re.sub(r" '?-M(?:[MGPD]|MD)?'?(?= )", '', args)
         args = re.sub(r" '?-M[FTQ]'? '?.*?\.[do]'?(?= )", '', args)
