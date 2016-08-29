@@ -19,8 +19,9 @@ import abc
 
 
 class Check(abc.ABC):
-    def __init__(self):
+    def __init__(self, name):
         super().__init__()
+        self.name = name
 
     @abc.abstractmethod
     def check(self, source_file):

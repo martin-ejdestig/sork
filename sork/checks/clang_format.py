@@ -50,7 +50,7 @@ def _custom_diff(path, content, formatted):
 
 class ClangFormatCheck(check.Check):
     def __init__(self):
-        super().__init__()
+        super().__init__('clang-format')
 
     def check(self, source_file):
         with subprocess.Popen('clang-format',

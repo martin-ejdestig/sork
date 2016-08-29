@@ -97,9 +97,9 @@ up in the compilation database.
 
 Style check source files. Available checks:
 
-- clang_format: Runs [clang-format](http://clang.llvm.org/docs/ClangFormat.html). Used to check
+- clang-format: Runs [clang-format](http://clang.llvm.org/docs/ClangFormat.html). Used to check
   formatting.
-- clang_tidy: Runs [clang-tidy](http://clang.llvm.org/extra/clang-tidy/index.html). Only invoked for
+- clang-tidy: Runs [clang-tidy](http://clang.llvm.org/extra/clang-tidy/index.html). Only invoked for
   source files that have an entry in the compilation database.
 - include_guard: Verifies that include guards in header files are properly named. Currently
   requires include guards to be named according to the following format: &lt;PREFIX&gt;&lt;Upper

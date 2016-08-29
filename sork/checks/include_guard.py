@@ -41,7 +41,7 @@ def _include_guard_for_source_file(source_file):
 
 class IncludeGuardCheck(check.Check):
     def __init__(self):
-        super().__init__()
+        super().__init__('include_guard')
 
     def check(self, source_file):
         if not source_file.is_header:
