@@ -49,7 +49,7 @@ class AnalyzeCommand(command.Command):
     def _add_argparse_arguments(self, parser):
         parser.add_argument('source_paths',
                             nargs='*',
-                            help='analyze path(s) (directories are recursed)',
+                            help='Analyze path(s) (directories are recursed).',
                             metavar='<path>')
 
     def _run(self, args, environment):

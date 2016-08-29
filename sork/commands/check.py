@@ -41,11 +41,11 @@ class CheckCommand(command.Command):
         parser.add_argument('-f',
                             '--fix',
                             action='store_true',
-                            help='fix violations (NOTE: modifies source files) (TODO)')
+                            help='Fix violations (NOTE: modifies source files) (TODO).')
 
         parser.add_argument('source_paths',
                             nargs='*',
-                            help='only check path(s) (directories are recursed)',
+                            help='Only check path(s) (directories are recursed).',
                             metavar='<path>')
 
     def _run(self, args, environment):

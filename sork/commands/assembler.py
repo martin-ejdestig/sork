@@ -32,11 +32,11 @@ class AssemblerCommand(command.Command):
         parser.add_argument('-v',
                             '--verbose',
                             action='store_true',
-                            help='tell compiler to output verbose assembler')
+                            help='Tell compiler to output verbose assembler.')
 
         parser.add_argument('source_paths',
                             nargs=1,
-                            help='source file to output assembler for',
+                            help='Source file to output assembler for.',
                             metavar='<file>')
 
     def _run(self, args, environment):

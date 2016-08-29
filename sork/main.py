@@ -42,14 +42,14 @@ def _create_arg_parser():
 
     parser.add_argument('-bp',
                         '--build-path',
-                        help='path to build directory, automatically detected if possible',
+                        help='Path to build directory, automatically detected if possible.',
                         metavar='<path>')
 
     parser.add_argument('-j',
                         '--jobs',
                         default=os.cpu_count() or 1,
                         type=_int_argument_greater_than_zero,
-                        help='run N jobs in parallel (default: %(default)s)',
+                        help='Run N jobs in parallel (default: %(default)s).',
                         metavar='N')
 
     subparsers = parser.add_subparsers(dest='command',
