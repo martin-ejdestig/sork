@@ -109,6 +109,7 @@ Style check source files. Available checks:
 
 ```json
 {
+    "checks": "",
     "checks.include_guard": {
         "prefix": "",
         "suffix": "_H",
@@ -117,7 +118,11 @@ Style check source files. Available checks:
 }
 ```
 
-- checks.include_guard
+- checks: Comma separated string of checks to perform. Defaults to all checks if the empty string.
+  Prepend - to disable a check. Regular expressions may be used. All checks except foo: "-foo".
+  Checks starting with clang- not containing bar: "clang-.*,-.*bar.*" . Can be overridden from
+  command line.
+- checks.include_guard:
   - prefix: String all include guard identifiers must start with. Usually set to something like
     PROJECT_NAME_. Defaults to the empty string.
   - suffix: String all include guard identifiers must end with.
@@ -154,7 +159,6 @@ add. Then commit everything. You should now have two build targets called `analy
 
 ## TODO
 
-- Check that verifies that copyright/license header is correct (text, year, etc.).
 - Implement --fix flag for check that fixes found errors if possible.
 - Multiple recursive glob.glob() is slow on large repositories. E.g. it takes 2-3 minutes
   to find all source files in the Chromium repository both with and without a warm cache while it

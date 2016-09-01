@@ -22,6 +22,7 @@ _DEFAULT_CONFIG = {
     'source_exclude': '',
     'source_paths': ['.'],
 
+    'checks': '',
     'checks.include_guard': {
         'prefix': '',
         'suffix': '_H',

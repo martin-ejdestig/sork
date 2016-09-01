@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
+import re
+
 from .. import checks
 from .. import command
 from .. import concurrent
@@ -28,9 +30,22 @@ _CHECKS = [
 ]
 
 
-def _check_source_file(source_file):
-    outputs = (c.check(source_file) for c in _CHECKS)
-    return '\n'.join(o for o in outputs if o)
+def _get_enabled_checks(checks_string):
+    available_names = [c.name for c in _CHECKS]
+    enabled_names = set()
+    if not checks_string or checks_string.startswith('-'):
+        enabled_names.update(available_names)
+
+    for check_string in checks_string.split(','):
+        disable = check_string.startswith('-')
+        pattern = check_string.lstrip('-')
+        names = [n for n in available_names if re.match(pattern, n)]
+        if disable:
+            enabled_names.difference_update(names)
+        else:
+            enabled_names.update(names)
+
+    return [c for c in _CHECKS if c.name in enabled_names]
 
 
 class CheckCommand(command.Command):
@@ -38,6 +53,15 @@ class CheckCommand(command.Command):
         super().__init__('check', arg_help='style check source code')
 
     def _add_argparse_arguments(self, parser):
+        parser.add_argument('-c',
+                            '--checks',
+                            type=str,
+                            help='Comma separated list of checks to perform. Defaults to all '
+                            'checks. Prepend - to disable a check. Regular expressions may be '
+                            'used. All checks except foo: --checks=-foo . Checks starting with '
+                            'clang- not containing bar: --checks=clang-.*,-.*bar.* .',
+                            metavar='<checks>')
+
         parser.add_argument('-f',
                             '--fix',
                             action='store_true',
@@ -49,8 +73,17 @@ class CheckCommand(command.Command):
                             metavar='<path>')
 
     def _run(self, args, environment):
+        enabled_checks = _get_enabled_checks(args.checks or environment.config['checks'])
+
+        if not enabled_checks:
+            raise command.Error('No checks enabled.')
+
+        def check_source_file(source_file):
+            outputs = (c.check(source_file) for c in enabled_checks)
+            return '\n'.join(o for o in outputs if o)
+
         concurrent.for_each_with_progress_printer('Checking source',
-                                                  _check_source_file,
+                                                  check_source_file,
                                                   source.find_source_files(environment,
                                                                            args.source_paths),
                                                   num_threads=args.jobs)
