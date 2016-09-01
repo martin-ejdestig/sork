@@ -74,10 +74,10 @@ Detailed documentation for configuration relating to a specific command can be f
 }
 ```
 
-- source_exclude: Regular expression for paths relative to project root to exclude. The value is
+- source\_exclude: Regular expression for paths relative to project root to exclude. The value is
   passed to [re.compile](https://docs.python.org/library/re.html#re.compile) if set to something
   other than the empty string.
-- source_paths: List of paths relative to project root to traverse when looking for source files.
+- source\_paths: List of paths relative to project root to traverse when looking for source files.
   Used when no source paths are passed on the command line.
 
 
@@ -101,7 +101,7 @@ Style check source files. Available checks:
   formatting.
 - clang-tidy: Runs [clang-tidy](http://clang.llvm.org/extra/clang-tidy/index.html). Only invoked for
   source files that have an entry in the compilation database.
-- include_guard: Verifies that include guards in header files are properly named. Currently
+- include\_guard: Verifies that include guards in header files are properly named. Currently
   requires include guards to be named according to the following format: &lt;PREFIX&gt;&lt;Upper
   case path of header with space, / and - replaced with underscore&gt;&lt;SUFFIX&gt;.
 
@@ -120,13 +120,13 @@ Style check source files. Available checks:
 
 - checks: Comma separated string of checks to perform. Defaults to all checks if the empty string.
   Prepend - to disable a check. Regular expressions may be used. All checks except foo: "-foo".
-  Checks starting with clang- not containing bar: "clang-.*,-.*bar.*" . Can be overridden from
+  Checks starting with clang- not containing bar: "clang-.\*,-.\*bar.\*" . Can be overridden from
   command line.
-- checks.include_guard:
+- checks.include\_guard:
   - prefix: String all include guard identifiers must start with. Usually set to something like
-    PROJECT_NAME_. Defaults to the empty string.
+    PROJECT\_NAME\_. Defaults to the empty string.
   - suffix: String all include guard identifiers must end with.
-  - strip_paths: Leading paths to remove from header path before inserting it between prefix and
+  - strip\_paths: Leading paths to remove from header path before inserting it between prefix and
     suffix.
 
 
