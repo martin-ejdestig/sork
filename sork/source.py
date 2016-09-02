@@ -36,7 +36,8 @@ class SourceFile:
     def __init__(self, path, compile_command, environment):
         self.path = path
         self.compile_command = compile_command
-        self.environment = environment
+
+        self._environment = environment
 
         self._content = None
         self._content_lock = threading.Lock()
@@ -49,7 +50,7 @@ class SourceFile:
             return self._content
 
     def _read_content(self):
-        with open(os.path.join(self.environment.project_path, self.path)) as file:
+        with open(os.path.join(self._environment.project_path, self.path)) as file:
             return file.read()
 
     @property

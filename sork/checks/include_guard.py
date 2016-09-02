@@ -29,16 +29,6 @@ def _strip_path(path, strip_paths):
     return path
 
 
-def _include_guard_for_source_file(source_file):
-    config = source_file.environment.config['checks.include_guard']
-
-    stripped_path = _strip_path(source_file.stem, config['strip_paths'])
-
-    return ''.join([config['prefix'],
-                    re.sub(r"[ /\\-]", '_', stripped_path).upper(),
-                    config['suffix']])
-
-
 class IncludeGuardCheck(check.Check):
     name = 'include_guard'
 
@@ -61,7 +51,7 @@ class IncludeGuardCheck(check.Check):
         if not match.group('endif_comment'):
             return '{}: error: missing include guard #endif comment'.format(source_file.path)
 
-        guard = _include_guard_for_source_file(source_file)
+        guard = self._include_guard_for_source_file(source_file)
 
         error_positions = [string.index_to_line_and_column(source_file.content, match.start(group))
                            for group, found_guard in enumerate(match.groups(), start=1)
@@ -73,3 +63,12 @@ class IncludeGuardCheck(check.Check):
                   for position in error_positions]
 
         return '\n'.join(output)
+
+    def _include_guard_for_source_file(self, source_file):
+        config = self._environment.config['checks.include_guard']
+
+        stripped_path = _strip_path(source_file.stem, config['strip_paths'])
+
+        return ''.join([config['prefix'],
+                        re.sub(r"[ /\\-]", '_', stripped_path).upper(),
+                        config['suffix']])
