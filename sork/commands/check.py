@@ -23,29 +23,31 @@ from .. import concurrent
 from .. import source
 
 
-_CHECKS = [
-    checks.clang_format.ClangFormatCheck(),
-    checks.clang_tidy.ClangTidyCheck(),
-    checks.include_guard.IncludeGuardCheck()
+_CHECK_CLASSES = [
+    checks.clang_format.ClangFormatCheck,
+    checks.clang_tidy.ClangTidyCheck,
+    checks.include_guard.IncludeGuardCheck
 ]
 
+_CHECK_NAMES = [c.name for c in _CHECK_CLASSES]
 
-def _get_enabled_checks(checks_string):
-    available_names = [c.name for c in _CHECKS]
+
+def _get_enabled_checks(args, environment):
+    checks_string = args.checks or environment.config['checks']
     enabled_names = set()
     if not checks_string or checks_string.startswith('-'):
-        enabled_names.update(available_names)
+        enabled_names.update(_CHECK_NAMES)
 
     for check_string in checks_string.split(','):
         disable = check_string.startswith('-')
         pattern = check_string.lstrip('-')
-        names = [n for n in available_names if re.match(pattern, n)]
+        names = [n for n in _CHECK_NAMES if re.match(pattern, n)]
         if disable:
             enabled_names.difference_update(names)
         else:
             enabled_names.update(names)
 
-    return [c for c in _CHECKS if c.name in enabled_names]
+    return [c(environment) for c in _CHECK_CLASSES if c.name in enabled_names]
 
 
 class CheckCommand(command.Command):
@@ -73,7 +75,7 @@ class CheckCommand(command.Command):
                             metavar='<path>')
 
     def _run(self, args, environment):
-        enabled_checks = _get_enabled_checks(args.checks or environment.config['checks'])
+        enabled_checks = _get_enabled_checks(args, environment)
 
         if not enabled_checks:
             raise command.Error('No checks enabled.')

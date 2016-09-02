@@ -31,8 +31,10 @@ _CLANG_TIDY_NOISE_REGEX = re.compile('(?m)^(' + '|'.join(_CLANG_TIDY_NOISE_LINES
 
 
 class ClangTidyCheck(check.Check):
-    def __init__(self):
-        super().__init__('clang-tidy')
+    name = 'clang-tidy'
+
+    def __init__(self, environment):
+        super().__init__(environment)
 
     def check(self, source_file):
         if not source_file.compile_command:
