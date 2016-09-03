@@ -1,3 +1,11 @@
-from . import clang_format
-from . import clang_tidy
-from . import include_guard
+from .clang_format import ClangFormatCheck
+from .clang_tidy import ClangTidyCheck
+from .include_guard import IncludeGuardCheck
+
+CLASSES = [
+    ClangFormatCheck,
+    ClangTidyCheck,
+    IncludeGuardCheck
+]
+
+NAMES = [c.name for c in CLASSES]
