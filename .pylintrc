@@ -1,2 +1,2 @@
 [MESSAGES CONTROL]
-disable=missing-docstring,too-few-public-methods
+disable=fixme,missing-docstring,too-few-public-methods
