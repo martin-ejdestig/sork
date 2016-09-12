@@ -17,6 +17,7 @@
 
 import re
 
+from .. import check
 from .. import checks
 from .. import command
 from .. import concurrent
@@ -39,6 +40,23 @@ def _get_enabled_checks(args, environment):
             enabled_names.update(names)
 
     return [c(environment) for c in checks.CLASSES if c.name in enabled_names]
+
+
+def _run_checks(args, environment):
+    enabled_checks = _get_enabled_checks(args, environment)
+
+    if not enabled_checks:
+        raise command.Error('No checks enabled.')
+
+    def check_source_file(source_file):
+        outputs = (c.check(source_file) for c in enabled_checks)
+        return '\n'.join(o for o in outputs if o)
+
+    concurrent.for_each_with_progress_printer('Checking source',
+                                              check_source_file,
+                                              source.find_source_files(environment,
+                                                                       args.source_paths),
+                                              num_threads=args.jobs)
 
 
 class CheckCommand(command.Command):
@@ -66,17 +84,7 @@ class CheckCommand(command.Command):
                             metavar='<path>')
 
     def _run(self, args, environment):
-        enabled_checks = _get_enabled_checks(args, environment)
-
-        if not enabled_checks:
-            raise command.Error('No checks enabled.')
-
-        def check_source_file(source_file):
-            outputs = (c.check(source_file) for c in enabled_checks)
-            return '\n'.join(o for o in outputs if o)
-
-        concurrent.for_each_with_progress_printer('Checking source',
-                                                  check_source_file,
-                                                  source.find_source_files(environment,
-                                                                           args.source_paths),
-                                                  num_threads=args.jobs)
+        try:
+            _run_checks(args, environment)
+        except check.Error as error:
+            raise command.Error(error)
