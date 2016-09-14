@@ -67,7 +67,7 @@ Project specific configuration can be stored in a JSON file named `.sork` in the
 Detailed documentation for configuration relating to a specific command can be found in the
 [Commands](#commands) section. JSON for default global configuration:
 
-```js
+```json
 {
     "source_exclude": "",
     "source_paths": ["."]
@@ -108,7 +108,7 @@ Style check source files. Available checks:
 
 #### Configuration
 
-```js
+```json
 {
     "checks": "",
     "checks.include_guard": {
