@@ -115,7 +115,7 @@ Style check source files. Available checks:
         "prefix": "",
         "suffix": "_H",
         "strip_paths": ["include", "src"]
-    }
+    },
     "checks.license_header": {
         "license": "",
         "project": "",
