@@ -104,6 +104,7 @@ Style check source files. Available checks:
 - include\_guard: Verifies that include guards in header files are properly named. Currently
   requires include guards to be named according to the following format: &lt;PREFIX&gt;&lt;Upper
   case path of header with space, / and - replaced with underscore&gt;&lt;SUFFIX&gt;.
+- license\_header: Checks that all source files have a correct license header.
 
 #### Configuration
 
@@ -114,6 +115,13 @@ Style check source files. Available checks:
         "prefix": "",
         "suffix": "_H",
         "strip_paths": ["include", "src"]
+    }
+    "checks.license_header": {
+        "license": "",
+        "project": "",
+        "prefix": "/**\n",
+        "line_prefix": " * ",
+        "suffix": "\n */\n"
     }
 }
 ```
@@ -128,6 +136,15 @@ Style check source files. Available checks:
   - suffix: String all include guard identifiers must end with.
   - strip\_paths: Leading paths to remove from header path before inserting it between prefix and
     suffix.
+- checks.license\_header:
+  - license: License used in project. If set to the empty string (the default) Sork tries to detect
+    the license automatically by examining files matching COPYING\* and LICENSE\* in the project
+    root (case is ignored). List of licenses currently recognized: Apache2, GPLv2, GPLv3, LGPLv2,
+    LGPLv2.1 and LGPLv3. Value is case insensitive.
+  - project: String to insert for project in license header.
+  - prefix: String to insert before license text. Defaults to "/\*\*\\n" .
+  - line\_prefix: String to insert before each line in license text. Defaults to " \* ".
+  - suffix: String to insert after license text. Defaults to "\\n \*/\\n".
 
 
 ## Build system targets example

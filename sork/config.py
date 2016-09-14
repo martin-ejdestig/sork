@@ -27,6 +27,13 @@ _DEFAULT_CONFIG = {
         'prefix': '',
         'suffix': '_H',
         'strip_paths': ['include', 'src']
+    },
+    'checks.license_header': {
+        'license': '',
+        'project': '',
+        'prefix': '/**\n',
+        'line_prefix': ' * ',
+        'suffix': '\n */\n'
     }
 }
 
