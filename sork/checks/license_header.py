@@ -185,11 +185,14 @@ _LICENSE_BASE_FILE_NAMES = ['COPYING', 'LICENSE']
 
 
 def _pattern_ignore_case(pattern):
-    return ''.join(['[{}{}]'.format(c.upper(), c.lower()) for c in pattern])
+    def ignore_case_if_alpha(char):
+        return '[{}{}]'.format(char.upper(), char.lower()) if char.isalpha() else char
+
+    return ''.join([ignore_case_if_alpha(char) for char in pattern])
 
 
 def _find_license_paths(environment):
-    patterns = [os.path.join(environment.project_path, _pattern_ignore_case(n) + '*')
+    patterns = [os.path.join(environment.project_path, _pattern_ignore_case(n + '*'))
                 for n in _LICENSE_BASE_FILE_NAMES]
 
     paths = itertools.chain.from_iterable(glob.glob(p) for p in patterns)
