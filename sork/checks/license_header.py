@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-import fnmatch
 import itertools
 import glob
 import os
@@ -226,10 +225,7 @@ def _detect_license(environment):
         return licenses[0]
 
     if len(paths) == 2 and 'gplv3' in licenses and 'lgplv3' in licenses:
-        dot_lesser_pattern = '*.' + _pattern_ignore_case('LESSER')
-        has_dot_lesser_file = any(fnmatch.fnmatch(path, dot_lesser_pattern) for path in paths)
-        if has_dot_lesser_file:
-            return 'lgplv3'
+        return 'lgplv3'
 
     raise check.Error('Unable to automatically determine license in {}.'.
                       format(environment.project_path))
