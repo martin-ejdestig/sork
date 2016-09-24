@@ -35,16 +35,18 @@ class IncludeGuardCheck(check.Check):
     def __init__(self, environment):
         super().__init__(environment)
 
+        self._regex = re.compile(r"^(?:\s*|/\*.*?\*/|//[^\n]*)*"
+                                 r"#ifndef\s+(\S*)\s*\n\s*"
+                                 r"#define\s(\S*).*\n.*"
+                                 r"#endif(?:\s+//\s+(?P<endif_comment>\S*))?\s*$",
+                                 flags=re.DOTALL)
+
     def check(self, source_file):
         if not source_file.is_header:
             return
 
-        match = re.match(r"^(?:\s*|/\*.*?\*/|//[^\n]*)*"
-                         r"#ifndef\s+(\S*)\s*\n\s*"
-                         r"#define\s(\S*).*\n.*"
-                         r"#endif(?:\s+//\s+(?P<endif_comment>\S*))?\s*$",
-                         source_file.content,
-                         flags=re.DOTALL)
+        match = self._regex.match(source_file.content)
+
         if not match:
             return '{}: error: missing include guard'.format(source_file.path)
 
