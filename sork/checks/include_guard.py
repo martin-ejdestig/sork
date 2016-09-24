@@ -50,19 +50,20 @@ class IncludeGuardCheck(check.Check):
         if not match:
             return '{}: error: missing include guard'.format(source_file.path)
 
-        if not match.group('endif_comment'):
-            return '{}: error: missing include guard #endif comment'.format(source_file.path)
-
         guard = self._include_guard_for_source_file(source_file)
 
         error_positions = [string.index_to_line_and_column(source_file.content, match.start(group))
                            for group, found_guard in enumerate(match.groups(), start=1)
-                           if found_guard != guard]
+                           if found_guard and found_guard != guard]
 
         output = ['{}:{}:{}: error: include guard name should be {}'.format(source_file.path,
                                                                             *position,
                                                                             guard)
                   for position in error_positions]
+
+        if not match.group('endif_comment'):
+            output.append('{}: error: missing include guard #endif comment'.
+                          format(source_file.path))
 
         return '\n'.join(output)
 
