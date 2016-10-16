@@ -1,6 +1,6 @@
 # Sork
 
-[![License](http://img.shields.io/:License-GPLv3-blue.svg)](COPYING)
+[![License](http://img.shields.io/:License-GPLv3+-blue.svg)](COPYING)
 
 Sork is a program that performs various operations on source files in a C/C++ project. See
 [Commands](#commands) for a list of available commands.
