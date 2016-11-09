@@ -69,9 +69,12 @@ class IncludeGuardCheck(check.Check):
 
     def _include_guard_for_source_file(self, source_file):
         config = self._environment.config['checks.include_guard']
+        prefix = config['prefix']
+        suffix = config['suffix']
 
         stripped_path = _strip_path(source_file.stem, config['strip_paths'])
+        path_part = re.sub(r"[ /\\-]", '_', stripped_path).upper()
+        if path_part.startswith(prefix):
+            path_part = path_part[len(prefix):]
 
-        return ''.join([config['prefix'],
-                        re.sub(r"[ /\\-]", '_', stripped_path).upper(),
-                        config['suffix']])
+        return ''.join([prefix, path_part, suffix])
