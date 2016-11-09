@@ -23,8 +23,11 @@ from .. import check
 
 _CLANG_TIDY_NOISE_LINES = [
     r"[0-9]+ warnings? (and [0-9]+ errors? )?generated.",
+
     r"Suppressed [0-9]+ warnings? \([0-9]+ in non-user code(, [0-9]+ NOLINT)?\).",
-    r"Use -header-filter=.* to display errors from all non-system headers."
+
+    r"Use -header-filter=.* to display errors from all non-system headers.( Use -system-headers "
+    r"to display errors from system headers as well.)?"
 ]
 
 _CLANG_TIDY_NOISE_REGEX = re.compile('(?m)^(' + '|'.join(_CLANG_TIDY_NOISE_LINES) + ')$')
