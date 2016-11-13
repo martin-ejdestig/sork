@@ -84,10 +84,18 @@ def _find_source_file_paths(environment, source_paths=None):
 
     paths = set()
     dir_paths = []
+
     exclude_regex = _get_exclude_regex(environment)
+    build_path = environment.normalize_path(environment.build_path)
+    if build_path == os.path.curdir:
+        build_path = None
 
     def should_be_included(path):
-        return exclude_regex.match(path) is None if exclude_regex else True
+        if exclude_regex and exclude_regex.match(path):
+            return False
+        if build_path and os.path.commonpath([build_path, path]):
+            return False
+        return True
 
     for path in source_paths:
         if os.path.isdir(os.path.join(environment.project_path, path)):
