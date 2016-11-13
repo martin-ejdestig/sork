@@ -82,7 +82,7 @@ def _find_build_path(project_path):
                     .format('\n'.join(_build_path_patterns('path_to_project',
                                                            'name_of_project_directory'))))
     elif len(paths) > 1:
-        raise Error('Multiple build paths found:\n{}'
+        raise Error('Multiple build paths found, specify a path manually:\n{}'
                     .format('\n'.join(sorted(os.path.dirname(path) for path in paths))))
 
     return os.path.dirname(paths[0])
