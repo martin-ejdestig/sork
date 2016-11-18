@@ -81,7 +81,8 @@ def _get_exclude_regex(environment):
 def _find_source_file_paths(environment, source_paths=None):
     if not source_paths:
         source_paths = environment.config['source_paths']
-    source_paths = [path for path in source_paths if os.path.exists(path)]
+    source_paths = [path for path in source_paths
+                    if os.path.exists(os.path.join(environment.project_path, path))]
 
     paths = set()
     dir_paths = []
