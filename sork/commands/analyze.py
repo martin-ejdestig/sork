@@ -53,9 +53,13 @@ class AnalyzeCommand(command.Command):
                             metavar='<path>')
 
     def _run(self, args, environment):
-        source_files = [sf for sf in source.find_source_files(environment, args.source_paths)
-                        if sf.compile_command]
-        concurrent.for_each_with_progress_printer('Analyzing source',
-                                                  _analyze_source_file,
-                                                  source_files,
-                                                  num_threads=args.jobs)
+        try:
+            source_files = [sf for sf in source.find_source_files(environment, args.source_paths)
+                            if sf.compile_command]
+
+            concurrent.for_each_with_progress_printer('Analyzing source',
+                                                      _analyze_source_file,
+                                                      source_files,
+                                                      num_threads=args.jobs)
+        except source.Error as error:
+            raise command.Error(error)

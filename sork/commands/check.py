@@ -86,5 +86,5 @@ class CheckCommand(command.Command):
     def _run(self, args, environment):
         try:
             _run_checks(args, environment)
-        except check.Error as error:
+        except (check.Error, source.Error) as error:
             raise command.Error(error)

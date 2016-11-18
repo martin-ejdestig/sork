@@ -32,6 +32,10 @@ _EXTENSIONS = _C_EXTENSIONS + _CPP_EXTENSIONS + _HEADER_EXTENSIONS + \
               [e + _IN_EXTENSION for e in _HEADER_EXTENSIONS]
 
 
+class Error(Exception):
+    pass
+
+
 class SourceFile:
     def __init__(self, path, compile_command, environment):
         self.path = path
@@ -78,18 +82,31 @@ def _get_exclude_regex(environment):
         return None
 
 
-def _find_source_file_paths(environment, source_paths=None):
+def _verify_source_paths(environment, source_paths):
     if not source_paths:
-        source_paths = environment.config['source_paths']
-    source_paths = [path for path in source_paths
-                    if os.path.exists(os.path.join(environment.project_path, path))]
+        raise Error('No source paths specified.')
+
+    does_not_exist = [path for path in source_paths
+                      if not os.path.exists(os.path.join(environment.project_path, path))]
+
+    if does_not_exist:
+        raise Error('The following source paths do not exist:\n{}'.
+                    format('\n'.join(does_not_exist)))
+
+
+def _find_source_file_paths(environment, source_paths=None):
+    project_path = environment.normalize_path(environment.project_path)
+
+    if not source_paths:
+        source_paths = environment.config['source_paths'] or project_path
+    _verify_source_paths(environment, source_paths)
 
     paths = set()
     dir_paths = []
 
     exclude_regex = _get_exclude_regex(environment)
     build_path = environment.normalize_path(environment.build_path)
-    if build_path == os.path.curdir:
+    if build_path == project_path:
         build_path = None
 
     def should_be_included(path):
