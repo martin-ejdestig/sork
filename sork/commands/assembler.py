@@ -22,6 +22,27 @@ from .. import command
 from .. import source
 
 
+def _assembler_for_source_file(args, source_file):
+    if not source_file.compile_command:
+        raise command.Error('Do not know how to compile "{}".'.format(source_file.path))
+
+    output_asm_args = '-S'
+    if args.verbose:
+        output_asm_args += ' -fverbose-asm'
+
+    command_args = source_file.compile_command.invokation
+    command_args = re.sub(r" -c ", ' ' + output_asm_args + ' ', command_args)
+    command_args = re.sub(r" -o '?.*\.o'? ", ' -o- ', command_args)
+    command_args = re.sub(r" '?-M(?:[MGPD]|MD)?'?(?= )", '', command_args)
+    command_args = re.sub(r" '?-M[FTQ]'? '?.*?\.[do]'?(?= )", '', command_args)
+
+    with subprocess.Popen(command_args,
+                          cwd=source_file.compile_command.work_dir,
+                          shell=True) as process:
+        if process.wait() != 0:
+            raise command.Error('Failed to run compiler command for outputting assembler.')
+
+
 class AssemblerCommand(command.Command):
     def __init__(self):
         super().__init__('asm',
@@ -40,24 +61,5 @@ class AssemblerCommand(command.Command):
                             metavar='<file>')
 
     def _run(self, args, environment):
-        path = args.source_paths[0]
-        source_file = source.get_source_file(environment, path)
-
-        if not source_file.compile_command:
-            raise command.Error('Do not know how to compile "{}".'.format(path))
-
-        output_asm_args = '-S'
-        if args.verbose:
-            output_asm_args += ' -fverbose-asm'
-
-        command_args = source_file.compile_command.invokation
-        command_args = re.sub(r" -c ", ' ' + output_asm_args + ' ', command_args)
-        command_args = re.sub(r" -o '?.*\.o'? ", ' -o- ', command_args)
-        command_args = re.sub(r" '?-M(?:[MGPD]|MD)?'?(?= )", '', command_args)
-        command_args = re.sub(r" '?-M[FTQ]'? '?.*?\.[do]'?(?= )", '', command_args)
-
-        with subprocess.Popen(command_args,
-                              cwd=source_file.compile_command.work_dir,
-                              shell=True) as process:
-            if process.wait() != 0:
-                raise command.Error('Failed to run compiler command for outputting assembler.')
+        _assembler_for_source_file(args, source.get_source_file(environment,
+                                                                args.source_paths[0]))
