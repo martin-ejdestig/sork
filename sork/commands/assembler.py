@@ -61,5 +61,8 @@ class AssemblerCommand(command.Command):
                             metavar='<file>')
 
     def _run(self, args, environment):
-        _assembler_for_source_file(args, source.get_source_file(environment,
-                                                                args.source_paths[0]))
+        try:
+            _assembler_for_source_file(args, source.get_source_file(environment,
+                                                                    args.source_paths[0]))
+        except source.Error as error:
+            raise command.Error(error)

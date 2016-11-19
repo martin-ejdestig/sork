@@ -140,7 +140,9 @@ def find_source_files(environment, paths=None):
 
 
 def get_source_file(environment, path):
-    normpath = environment.normalize_path(path)
-    compile_commands = compilation_database.load_from_file(environment)
+    files = find_source_files(environment, [path])
 
-    return SourceFile(normpath, compile_commands.get(normpath), environment)
+    if len(files) != 1:
+        raise Error('Unable to find source file {}.'.format(path))
+
+    return files[0]
