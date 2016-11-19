@@ -42,6 +42,16 @@ def _analyze_source_file(source_file):
         return process.communicate()[0]
 
 
+def _run_analyzer(args, environment):
+    source_files = [sf for sf in source.find_source_files(environment, args.source_paths)
+                    if sf.compile_command]
+
+    concurrent.for_each_with_progress_printer('Analyzing source',
+                                              _analyze_source_file,
+                                              source_files,
+                                              num_threads=args.jobs)
+
+
 class AnalyzeCommand(command.Command):
     def __init__(self):
         super().__init__('analyze', arg_help='run static analyzer')
@@ -54,12 +64,6 @@ class AnalyzeCommand(command.Command):
 
     def _run(self, args, environment):
         try:
-            source_files = [sf for sf in source.find_source_files(environment, args.source_paths)
-                            if sf.compile_command]
-
-            concurrent.for_each_with_progress_printer('Analyzing source',
-                                                      _analyze_source_file,
-                                                      source_files,
-                                                      num_threads=args.jobs)
+            _run_analyzer(args, environment)
         except source.Error as error:
             raise command.Error(error)
