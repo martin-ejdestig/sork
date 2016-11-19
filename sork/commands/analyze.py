@@ -42,9 +42,8 @@ def _analyze_source_file(source_file):
         return process.communicate()[0]
 
 
-def _run_analyzer(args, environment):
-    source_files = [sf for sf in source.find_source_files(environment, args.source_paths)
-                    if sf.compile_command]
+def _analyze_source_files(args, source_files):
+    source_files = [sf for sf in source_files if sf.compile_command]
 
     concurrent.for_each_with_progress_printer('Analyzing source',
                                               _analyze_source_file,
@@ -64,6 +63,6 @@ class AnalyzeCommand(command.Command):
 
     def _run(self, args, environment):
         try:
-            _run_analyzer(args, environment)
+            _analyze_source_files(args, source.find_source_files(environment, args.source_paths))
         except source.Error as error:
             raise command.Error(error)
