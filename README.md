@@ -169,7 +169,7 @@ run_target('analyze', command : [sork, '--build-path', meson.build_root(), 'anal
 run_target('style_check', command : [sork, '--build-path', meson.build_root(), 'check', meson.source_root()])
 ```
 
-And add `subdir('external')` in you root `meson.build` if Sork is the first external component you
+And add `subdir('external')` in your root `meson.build` if Sork is the first external component you
 add. Then commit everything. You should now have two build targets called `analyze` and
 `style_check` available that automatically use the correct build directory.
 
