@@ -22,12 +22,12 @@ from .. import command
 from .. import source
 
 
-def _assembler_for_source_file(args, source_file):
+def _assembler_for_source_file(source_file, verbose=False):
     if not source_file.compile_command:
         raise command.Error('Do not know how to compile "{}".'.format(source_file.path))
 
     output_asm_args = '-S'
-    if args.verbose:
+    if verbose:
         output_asm_args += ' -fverbose-asm'
 
     command_args = source_file.compile_command.invokation
@@ -62,7 +62,7 @@ class AssemblerCommand(command.Command):
 
     def _run(self, args, environment):
         try:
-            _assembler_for_source_file(args, source.get_source_file(environment,
-                                                                    args.source_paths[0]))
+            _assembler_for_source_file(source.get_source_file(environment, args.source_paths[0]),
+                                       args.verbose)
         except source.Error as error:
             raise command.Error(error)
