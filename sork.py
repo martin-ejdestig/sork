@@ -2,7 +2,7 @@
 #
 # This file is part of Sork.
 #
-# Copyright (C) 2016 Martin Ejdestig <marejde@gmail.com>
+# Copyright (C) 2016-2017 Martin Ejdestig <marejde@gmail.com>
 #
 # Sork is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
