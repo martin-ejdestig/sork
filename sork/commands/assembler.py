@@ -37,10 +37,64 @@ def _assembler_for_source_file(source_file, verbose=False):
     command_args = re.sub(r" '?-M[FTQ]'? '?.*?\.[do]'?(?= )", '', command_args)
 
     with subprocess.Popen(command_args,
+                          stdout=subprocess.PIPE,
                           cwd=source_file.compile_command.work_dir,
-                          shell=True) as process:
-        if process.wait() != 0:
+                          shell=True,
+                          universal_newlines=True) as process:
+        stdout, _ = process.communicate()
+        if process.returncode != 0:
             raise command.Error('Failed to run compiler command for outputting assembler.')
+
+    return stdout
+
+
+def _count_opcodes(asm):
+    total = {}
+    current = total
+    per_label = []
+
+    label_re = r"(?P<label>[a-zA-Z_]+.*):"
+    opcode_re = r"\s+(?P<opcode>[a-z]+)\s+"
+    regex = re.compile('|'.join([label_re, opcode_re]))
+
+    def count_opcode(counters, opcode):
+        if opcode in counters:
+            counters[opcode] += 1
+        else:
+            counters[opcode] = 1
+
+    for line in asm.splitlines(True):
+        matches = regex.match(line)
+        if not matches:
+            continue
+
+        label = matches.group('label')
+        if label:
+            current = {}
+            per_label.append((label, current))
+
+        opcode = matches.group('opcode')
+        if opcode:
+            count_opcode(total, opcode)
+            count_opcode(current, opcode)
+
+    return total, per_label
+
+
+def _opcode_count_comment(asm):
+    total, per_label = _count_opcodes(asm)
+    labels_and_counters = [('Total opcode count', total)] if len(per_label) > 1 else []
+    labels_and_counters += per_label
+
+    comment = ''
+
+    for label, counters in labels_and_counters:
+        comment += '# ' + label + ':\n'
+        for opcode, count in sorted(counters.items()):
+            comment += '#\t' + opcode + ': ' + str(count) + '\n'
+        comment += '#\n'
+
+    return comment
 
 
 class AssemblerCommand(command.Command):
@@ -50,6 +104,13 @@ class AssemblerCommand(command.Command):
                          arg_help='output assembler for compilation unit')
 
     def _add_argparse_arguments(self, parser):
+        parser.add_argument('-c',
+                            '--count',
+                            action='store_true',
+                            help='Count occurance of different opcodes per global label (and in '
+                                 'total if there is more than one). Result is printed as a comment '
+                                 'before the generated assembly.')
+
         parser.add_argument('-v',
                             '--verbose',
                             action='store_true',
@@ -62,7 +123,13 @@ class AssemblerCommand(command.Command):
 
     def _run(self, args, environment):
         try:
-            _assembler_for_source_file(source.get_source_file(environment, args.source_paths[0]),
-                                       args.verbose)
+            asm = _assembler_for_source_file(source.get_source_file(environment,
+                                                                    args.source_paths[0]),
+                                             args.verbose)
+            if args.count:
+                asm = _opcode_count_comment(asm) + asm
+
+            print(asm)
+
         except source.Error as error:
             raise command.Error(error)
