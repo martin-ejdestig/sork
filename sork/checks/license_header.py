@@ -212,7 +212,7 @@ def _determine_license_in_file(path):
 def _detect_license(environment):
     paths = _find_license_paths(environment)
     if not paths:
-        raise check.Error('Unable to find any license file(s) in {}.'.
+        raise check.Error('Unable to find any license file(s) in \'{}\'.'.
                           format(environment.project_path))
 
     licenses = [_determine_license_in_file(path) for path in paths]
@@ -223,7 +223,7 @@ def _detect_license(environment):
     if len(paths) == 2 and 'gplv3' in licenses and 'lgplv3' in licenses:
         return 'lgplv3'
 
-    raise check.Error('Unable to automatically determine license in {}.'.
+    raise check.Error('Unable to automatically determine license in \'{}\'.'.
                       format(environment.project_path))
 
 
