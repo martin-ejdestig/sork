@@ -74,10 +74,10 @@ Detailed documentation for configuration relating to a specific command can be f
 }
 ```
 
-- source\_exclude: Regular expression for paths relative to project root to exclude. The value is
+- `source_exclude`: Regular expression for paths relative to project root to exclude. The value is
   passed to [re.compile](https://docs.python.org/library/re.html#re.compile) if set to something
   other than the empty string.
-- source\_paths: List of paths relative to project root to traverse when looking for source files.
+- `source_paths`: List of paths relative to project root to traverse when looking for source files.
   Used when no source paths are passed on the command line.
 
 
@@ -97,14 +97,14 @@ up in the compilation database.
 
 Style check source files. Available checks:
 
-- clang-format: Runs [clang-format](http://clang.llvm.org/docs/ClangFormat.html). Used to check
+- `clang-format`: Runs [clang-format](http://clang.llvm.org/docs/ClangFormat.html). Used to check
   formatting.
-- clang-tidy: Runs [clang-tidy](http://clang.llvm.org/extra/clang-tidy/index.html). Only invoked for
-  source files that have an entry in the compilation database.
-- include\_guard: Verifies that include guards in header files are properly named. Currently
+- `clang-tidy`: Runs [clang-tidy](http://clang.llvm.org/extra/clang-tidy/index.html). Only invoked
+  for source files that have an entry in the compilation database.
+- `include_guard`: Verifies that include guards in header files are properly named. Currently
   requires include guards to be named according to the following format: &lt;PREFIX&gt;&lt;Upper
   case path of header with space, / and - replaced with underscore&gt;&lt;SUFFIX&gt;.
-- license\_header: Checks that all source files have a correct license header.
+- `license_header`: Checks that all source files have a correct license header.
 
 #### Configuration
 
@@ -126,25 +126,25 @@ Style check source files. Available checks:
 }
 ```
 
-- checks: Comma separated string of checks to perform. Defaults to all checks if the empty string.
+- `checks`: Comma separated string of checks to perform. Defaults to all checks if the empty string.
   Prepend - to disable a check. Regular expressions may be used. All checks except foo: "-foo".
   Checks starting with clang- not containing bar: "clang-.\*,-.\*bar.\*" . Can be overridden from
   command line.
-- checks.include\_guard:
-  - prefix: String all include guard identifiers must start with. Usually set to something like
+- `checks.include_guard`:
+  - `prefix`: String all include guard identifiers must start with. Usually set to something like
     PROJECT\_NAME\_. Defaults to the empty string.
-  - suffix: String all include guard identifiers must end with.
-  - strip\_paths: Leading paths to remove from header path before inserting it between prefix and
+  - `suffix`: String all include guard identifiers must end with.
+  - `strip_paths`: Leading paths to remove from header path before inserting it between prefix and
     suffix.
-- checks.license\_header:
-  - license: License used in project. If set to the empty string (the default) Sork tries to detect
-    the license automatically by examining files matching COPYING\* and LICENSE\* in the project
-    root (case is ignored). List of licenses currently recognized: Apache2, GPLv2, GPLv3, LGPLv2,
-    LGPLv2.1 and LGPLv3. Value is case insensitive.
-  - project: String to insert for project in license header.
-  - prefix: String to insert before license text. Defaults to "/\*\*\\n" .
-  - line\_prefix: String to insert before each line in license text. Defaults to " \* ".
-  - suffix: String to insert after license text. Defaults to "\\n \*/\\n".
+- `checks.license_header`:
+  - `license`: License used in project. If set to the empty string (the default) Sork tries to
+    detect the license automatically by examining files matching COPYING\* and LICENSE\* in the
+    project root (case is ignored). List of licenses currently recognized: Apache2, GPLv2, GPLv3,
+    LGPLv2, LGPLv2.1 and LGPLv3. Value is case insensitive.
+  - `project`: String to insert for project in license header.
+  - `prefix`: String to insert before license text. Defaults to "/\*\*\\n" .
+  - `line_prefix`: String to insert before each line in license text. Defaults to " \* ".
+  - `suffix`: String to insert after license text. Defaults to "\\n \*/\\n".
 
 
 ## Build system targets example
