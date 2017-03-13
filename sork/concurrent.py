@@ -34,7 +34,7 @@ def for_each_with_progress_printer(info_string, func, values, num_threads=None):
             futures = [executor.submit(wrapped_func, value) for value in values]
             for future in concurrent.futures.as_completed(futures):
                 printer.result(future.result())
-        except:
+        except BaseException:
             aborted = True
             printer.abort()
             raise
