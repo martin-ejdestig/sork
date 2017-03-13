@@ -17,12 +17,14 @@
 
 import json
 
+from . import checks
+
 
 _DEFAULT_CONFIG = {
     'source_exclude': '',
     'source_paths': ['.'],
 
-    'checks': '',
+    'checks': checks.NAMES,
     'checks.include_guard': {
         'prefix': '',
         'suffix': '_H',

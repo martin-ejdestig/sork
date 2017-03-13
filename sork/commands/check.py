@@ -25,12 +25,12 @@ from .. import source
 
 
 def _get_enabled_checks(args, environment):
-    checks_string = args.checks or environment.config['checks']
+    check_strings = args.checks.split(',') if args.checks else environment.config['checks']
     enabled_names = set()
-    if not checks_string or checks_string.startswith('-'):
+    if not check_strings or check_strings[0].startswith('-'):
         enabled_names.update(checks.NAMES)
 
-    for check_string in checks_string.split(','):
+    for check_string in check_strings:
         disable = check_string.startswith('-')
         pattern = check_string.lstrip('-')
         names = [n for n in checks.NAMES if re.match(pattern, n)]

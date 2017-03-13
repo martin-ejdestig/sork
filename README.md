@@ -110,7 +110,7 @@ Style check source files. Available checks:
 
 ```json
 {
-    "checks": "",
+    "checks": ["clang-format", "clang-tidy", "include_guard", "license_header"],
     "checks.include_guard": {
         "prefix": "",
         "suffix": "_H",
@@ -126,10 +126,10 @@ Style check source files. Available checks:
 }
 ```
 
-- `checks`: Comma separated string of checks to perform. Defaults to all checks if the empty string.
-  Prepend - to disable a check. Regular expressions may be used. All checks except foo: "-foo".
-  Checks starting with clang- not containing bar: "clang-.\*,-.\*bar.\*" . Can be overridden from
-  command line.
+- `checks`: Array of checks to perform. Defaults to all available checks. Prepend - to name of check
+  to disable it. Regular expressions may be used. All checks are enabled if array is empty. All
+  checks except foo: ["-foo"]. Checks starting with clang- not containing bar:
+  ["clang-.\*", "-.\*bar.\*"] . Can be overridden from command line.
 - `checks.include_guard`:
   - `prefix`: String all include guard identifiers must start with. Usually set to something like
     PROJECT\_NAME\_. Defaults to the empty string.
