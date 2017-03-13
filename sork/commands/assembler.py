@@ -48,6 +48,13 @@ def _assembler_for_source_file(source_file, verbose=False):
     return stdout
 
 
+def _count_opcode(counters, opcode):
+    if opcode in counters:
+        counters[opcode] += 1
+    else:
+        counters[opcode] = 1
+
+
 def _count_opcodes(asm):
     total = {}
     current = total
@@ -56,12 +63,6 @@ def _count_opcodes(asm):
     label_re = r"(?P<label>[a-zA-Z_]+.*):"
     opcode_re = r"\s+(?P<opcode>[a-z]+)\s+"
     regex = re.compile('|'.join([label_re, opcode_re]))
-
-    def count_opcode(counters, opcode):
-        if opcode in counters:
-            counters[opcode] += 1
-        else:
-            counters[opcode] = 1
 
     for line in asm.splitlines(True):
         matches = regex.match(line)
@@ -75,8 +76,8 @@ def _count_opcodes(asm):
 
         opcode = matches.group('opcode')
         if opcode:
-            count_opcode(total, opcode)
-            count_opcode(current, opcode)
+            _count_opcode(total, opcode)
+            _count_opcode(current, opcode)
 
     return total, per_label
 
