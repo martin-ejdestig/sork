@@ -16,6 +16,7 @@
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+import threading
 
 
 _CLEAR_ENTIRE_LINE = '\x1b[2K'
@@ -24,27 +25,31 @@ _CLEAR_ENTIRE_LINE = '\x1b[2K'
 class ProgressPrinter:
     def __init__(self, output=None):
         self._output = sys.stdout if output is None else output
+        self._lock = threading.Lock()
         self._info_string = ''
         self._count = 0
         self._done_count = 0
         self._aborted = False
 
     def start(self, info_string, done_count):
-        self._info_string = info_string
-        self._count = 0
-        self._done_count = done_count
-        self._aborted = False
-        self._print()
+        with self._lock:
+            self._info_string = info_string
+            self._count = 0
+            self._done_count = done_count
+            self._aborted = False
+            self._print()
 
     def abort(self):
-        self._aborted = True
-        self._print()
+        with self._lock:
+            self._aborted = True
+            self._print()
 
     def result(self, result):
-        self._count += 1
-        if result:
-            self._output.write(_CLEAR_ENTIRE_LINE + '\r' + str(result) + '\n')
-        self._print()
+        with self._lock:
+            self._count += 1
+            if result:
+                self._output.write(_CLEAR_ENTIRE_LINE + '\r' + str(result) + '\n')
+            self._print()
 
     def _print(self):
         if self._count == self._done_count:
