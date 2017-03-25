@@ -24,22 +24,30 @@ from .. import concurrent
 from .. import source
 
 
-def _get_enabled_checks(args, environment):
-    check_strings = args.checks.split(',') if args.checks else environment.config['checks']
-    enabled_names = set()
+def _check_string_to_check_names(check_string):
+    return [n for n in checks.NAMES if re.match(check_string, n)]
+
+
+def _check_strings_to_check_names(check_strings):
+    check_names = set()
     if not check_strings or check_strings[0].startswith('-'):
-        enabled_names.update(checks.NAMES)
+        check_names.update(checks.NAMES)
 
     for check_string in check_strings:
         disable = check_string.startswith('-')
-        pattern = check_string.lstrip('-')
-        names = [n for n in checks.NAMES if re.match(pattern, n)]
+        names = _check_string_to_check_names(check_string.lstrip('-'))
         if disable:
-            enabled_names.difference_update(names)
+            check_names.difference_update(names)
         else:
-            enabled_names.update(names)
+            check_names.update(names)
 
-    return [c(environment) for c in checks.CLASSES if c.name in enabled_names]
+    return check_names
+
+
+def _get_enabled_checks(args, environment):
+    check_strings = args.checks.split(',') if args.checks else environment.config['checks']
+    names = _check_strings_to_check_names(check_strings)
+    return [c(environment) for c in checks.CLASSES if c.name in names]
 
 
 def _run_checks(args, environment):
