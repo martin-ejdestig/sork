@@ -47,14 +47,15 @@ def _check_strings_to_check_names(check_strings):
 def _get_enabled_checks(args, environment):
     check_strings = args.checks.split(',') if args.checks else environment.config['checks']
     names = _check_strings_to_check_names(check_strings)
+
+    if not names:
+        raise command.Error('No checks enabled.')
+
     return [c(environment) for c in checks.CLASSES if c.name in names]
 
 
 def _run_checks(args, environment):
     enabled_checks = _get_enabled_checks(args, environment)
-
-    if not enabled_checks:
-        raise command.Error('No checks enabled.')
 
     def check_source_file(source_file):
         outputs = (c.check(source_file) for c in enabled_checks)
