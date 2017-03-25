@@ -81,6 +81,28 @@ Detailed documentation for configuration relating to a specific command can be f
   Used when no source paths are passed on the command line.
 
 
+## Command line usage
+
+See the [Commands](#commands) section for command specific arguments.
+
+```
+sork [-h] [-bp <path>] [-j N] <command> ...
+
+positional arguments:
+  <command>             -h or --help after <command> for more help
+    analyze             run static analyzer
+    asm (assembler)     output assembler for compilation unit
+    check               style check source code
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -bp <path>, --build-path <path>
+                        Path to build directory, automatically detected if
+                        possible.
+  -j N, --jobs N        Run N jobs in parallel (default: 8).
+```
+
+
 ## Commands
 
 ### analyze
@@ -88,10 +110,38 @@ Detailed documentation for configuration relating to a specific command can be f
 Run Clang's static analyzer on source files that have an entry in the compilation database. Flags
 not understood by Clang, GCC specific warning flags for instance, are filtered out.
 
+Command line usage:
+```
+sork analyze [-h] [<path> [<path> ...]]
+
+positional arguments:
+  <path>      Analyze path(s). Directories are recursed. All source code in
+              project, subject to configuration in .sork, is analyzed if no
+              <path> is passed or if only <path> passed is the project's root.
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
 ### asm
 
 Output assembler for compilation unit to standard output. Compiler and compilation flags are looked
 up in the compilation database.
+
+Command line usage:
+```
+sork asm [-h] [-c] [-v] <file>
+
+positional arguments:
+  <file>         Source file to output assembler for.
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -c, --count    Count occurance of different opcodes per global label and in
+                 total if there is more than one global label. Result is
+                 printed as a comment before the generated assembly.
+  -v, --verbose  Tell compiler to output verbose assembler.
+```
 
 ### check
 
@@ -106,8 +156,27 @@ Style check source files. Available checks:
   case path of header with space, / and - replaced with underscore&gt;&lt;SUFFIX&gt;.
 - `license_header`: Checks that all source files have a correct license header.
 
-#### Configuration
+Command line usage:
+```
+sork check [-h] [-c <checks>] [<path> [<path> ...]]
 
+positional arguments:
+  <path>                Check path(s). Directories are recursed. All source
+                        code in project, subject to configuration in .sork, is
+                        checked if no <path> is passed or if only <path>
+                        passed is the project's root.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c <checks>, --checks <checks>
+                        Comma separated list of checks to perform. Overrides
+                        configuration in .sork. Prepend - to disable a check.
+                        Regular expressions may be used. All checks except
+                        foo: --checks=-foo . Checks starting with clang-:
+                        --checks=clang-.* .
+```
+
+Configuration:
 ```json
 {
     "checks": ["clang-format", "clang-tidy", "include_guard", "license_header"],
