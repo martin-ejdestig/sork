@@ -67,15 +67,18 @@ class CheckCommand(command.Command):
         parser.add_argument('-c',
                             '--checks',
                             type=str,
-                            help='Comma separated list of checks to perform. Defaults to all '
-                            'checks. Prepend - to disable a check. Regular expressions may be '
-                            'used. All checks except foo: --checks=-foo . Checks starting with '
-                            'clang- not containing bar: --checks=clang-.*,-.*bar.* .',
+                            help='Comma separated list of checks to perform. Overrides '
+                            'configuration in .sork. Prepend - to disable a check. Regular '
+                            'expressions may be used. All checks except foo: --checks=-foo . '
+                            'Checks starting with clang-: --checks=clang-.* .',
                             metavar='<checks>')
 
         parser.add_argument('source_paths',
                             nargs='*',
-                            help='Only check path(s) (directories are recursed).',
+                            help='Check path(s). Directories are recursed. All source code in '
+                                 'project, subject to configuration in .sork, is checked if no '
+                                 '%(metavar)s is passed or if only %(metavar)s passed is the '
+                                 'project\'s root.',
                             metavar='<path>')
 
     def _run(self, args, environment):

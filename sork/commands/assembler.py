@@ -108,9 +108,9 @@ class AssemblerCommand(command.Command):
         parser.add_argument('-c',
                             '--count',
                             action='store_true',
-                            help='Count occurance of different opcodes per global label (and in '
-                                 'total if there is more than one). Result is printed as a comment '
-                                 'before the generated assembly.')
+                            help='Count occurance of different opcodes per global label and in '
+                                 'total if there is more than one global label. Result is printed '
+                                 'as a comment before the generated assembly.')
 
         parser.add_argument('-v',
                             '--verbose',

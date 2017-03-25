@@ -58,7 +58,10 @@ class AnalyzeCommand(command.Command):
     def _add_argparse_arguments(self, parser):
         parser.add_argument('source_paths',
                             nargs='*',
-                            help='Analyze path(s) (directories are recursed).',
+                            help='Analyze path(s). Directories are recursed. All source code in '
+                                 'project, subject to configuration in .sork, is analyzed if no '
+                                 '%(metavar)s is passed or if only %(metavar)s passed is the '
+                                 'project\'s root.',
                             metavar='<path>')
 
     def _run(self, args, environment):
