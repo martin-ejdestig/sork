@@ -22,7 +22,8 @@ _CLEAR_ENTIRE_LINE = '\x1b[2K'
 
 
 class ProgressPrinter:
-    def __init__(self):
+    def __init__(self, output=None):
+        self._output = sys.stdout if output is None else output
         self._info_string = ''
         self._count = 0
         self._done_count = 0
@@ -42,7 +43,7 @@ class ProgressPrinter:
     def result(self, result):
         self._count += 1
         if result:
-            sys.stdout.write(_CLEAR_ENTIRE_LINE + '\r' + str(result) + '\n')
+            self._output.write(_CLEAR_ENTIRE_LINE + '\r' + str(result) + '\n')
         self._print()
 
     def _print(self):
@@ -53,8 +54,8 @@ class ProgressPrinter:
         else:
             trailing_str = '...'
 
-        sys.stdout.write('\r[{}/{}] {}{}'.format(self._count,
-                                                 self._done_count,
-                                                 self._info_string,
-                                                 trailing_str))
-        sys.stdout.flush()
+        self._output.write('\r[{}/{}] {}{}'.format(self._count,
+                                                   self._done_count,
+                                                   self._info_string,
+                                                   trailing_str))
+        self._output.flush()
