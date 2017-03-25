@@ -73,11 +73,6 @@ class CheckCommand(command.Command):
                             'clang- not containing bar: --checks=clang-.*,-.*bar.* .',
                             metavar='<checks>')
 
-        parser.add_argument('-f',
-                            '--fix',
-                            action='store_true',
-                            help='Fix violations (NOTE: modifies source files) (TODO).')
-
         parser.add_argument('source_paths',
                             nargs='*',
                             help='Only check path(s) (directories are recursed).',
