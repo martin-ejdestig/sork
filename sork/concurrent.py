@@ -17,24 +17,17 @@
 
 import concurrent.futures
 
-from . import progress_printer
 
-
-def for_each_with_progress_printer(info_string, func, values, num_threads=None):
+def for_each(func, values, num_threads=None):
     aborted = False
-    printer = progress_printer.ProgressPrinter()
 
     def wrapped_func(value):
         return None if aborted else func(value)
 
-    printer.start(info_string, len(values))
-
     with concurrent.futures.ThreadPoolExecutor(num_threads) as executor:
         try:
             futures = [executor.submit(wrapped_func, value) for value in values]
-            for future in concurrent.futures.as_completed(futures):
-                printer.result(future.result())
+            concurrent.futures.wait(futures)
         except BaseException:
             aborted = True
-            printer.abort()
             raise

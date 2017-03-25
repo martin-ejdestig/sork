@@ -21,6 +21,7 @@ from .. import check
 from .. import checks
 from .. import command
 from .. import concurrent
+from .. import progress_printer
 from .. import source
 
 
@@ -56,16 +57,20 @@ def _get_enabled_checks(args, environment):
 
 def _run_checks(args, environment):
     enabled_checks = _get_enabled_checks(args, environment)
+    source_files = source.find_source_files(environment, args.source_paths)
+
+    printer = progress_printer.ProgressPrinter()
+    printer.start('Checking source', len(source_files))
 
     def check_source_file(source_file):
         outputs = (c.check(source_file) for c in enabled_checks)
-        return '\n'.join(o for o in outputs if o)
+        printer.result('\n'.join(o for o in outputs if o))
 
-    concurrent.for_each_with_progress_printer('Checking source',
-                                              check_source_file,
-                                              source.find_source_files(environment,
-                                                                       args.source_paths),
-                                              num_threads=args.jobs)
+    try:
+        concurrent.for_each(check_source_file, source_files, num_threads=args.jobs)
+    except BaseException:
+        printer.abort()
+        raise
 
 
 class CheckCommand(command.Command):

@@ -20,6 +20,7 @@ import subprocess
 
 from .. import command
 from .. import concurrent
+from .. import progress_printer
 from .. import source
 
 
@@ -43,10 +44,17 @@ def _analyze_source_file(source_file):
 
 
 def _analyze_source_files(args, source_files):
-    concurrent.for_each_with_progress_printer('Analyzing source',
-                                              _analyze_source_file,
-                                              source_files,
-                                              num_threads=args.jobs)
+    printer = progress_printer.ProgressPrinter()
+    printer.start('Analyzing source', len(source_files))
+
+    def analyze(source_file):
+        printer.result(_analyze_source_file(source_file))
+
+    try:
+        concurrent.for_each(analyze, source_files, num_threads=args.jobs)
+    except BaseException:
+        printer.abort()
+        raise
 
 
 def _source_files_with_compile_command(args, environment):
