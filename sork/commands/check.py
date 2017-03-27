@@ -25,29 +25,29 @@ from .. import progress_printer
 from .. import source
 
 
-def _check_string_to_check_names(check_string):
+def _check_string_to_names(check_string):
     return [n for n in checks.NAMES if re.match(check_string, n)]
 
 
-def _check_strings_to_check_names(check_strings):
-    check_names = set()
+def _check_strings_to_names(check_strings):
+    names_set = set()
     if not check_strings or check_strings[0].startswith('-'):
-        check_names.update(checks.NAMES)
+        names_set.update(checks.NAMES)
 
     for check_string in check_strings:
         disable = check_string.startswith('-')
-        names = _check_string_to_check_names(check_string.lstrip('-'))
+        names = _check_string_to_names(check_string.lstrip('-'))
         if disable:
-            check_names.difference_update(names)
+            names_set.difference_update(names)
         else:
-            check_names.update(names)
+            names_set.update(names)
 
-    return check_names
+    return names_set
 
 
 def _get_enabled_checks(args, environment):
     check_strings = args.checks.split(',') if args.checks else environment.config['checks']
-    names = _check_strings_to_check_names(check_strings)
+    names = _check_strings_to_names(check_strings)
 
     if not names:
         raise command.Error('No checks enabled.')
