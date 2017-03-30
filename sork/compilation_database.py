@@ -68,13 +68,15 @@ def find_build_path(project_path):
     return paths[0]
 
 
-def load_from_file(environment):
+def load_from_file(project_path, build_path):
     commands = {}
 
-    with open(os.path.join(environment.build_path, COMPILE_COMMANDS_JSON_PATH)) as file:
+    def norm_path(path):
+        return os.path.normpath(os.path.relpath(path, start=project_path))
+
+    with open(os.path.join(build_path, COMPILE_COMMANDS_JSON_PATH)) as file:
         for command in json.load(file):
-            src_path = environment.normalize_path(os.path.join(command['directory'],
-                                                               command['file']))
+            src_path = norm_path(os.path.join(command['directory'], command['file']))
             commands[src_path] = CompileCommand(command['command'],
                                                 command['directory'],
                                                 command['file'])

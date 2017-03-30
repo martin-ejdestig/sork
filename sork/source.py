@@ -133,7 +133,8 @@ def _find_source_file_paths(environment, source_paths=None):
 
 def find_source_files(environment, paths=None):
     normpaths = environment.normalize_paths(paths, filter_project_path=True) if paths else None
-    compile_commands = compilation_database.load_from_file(environment)
+    compile_commands = compilation_database.load_from_file(environment.project_path,
+                                                           environment.build_path)
 
     return [SourceFile(path, compile_commands.get(path), environment)
             for path in _find_source_file_paths(environment, normpaths)]
