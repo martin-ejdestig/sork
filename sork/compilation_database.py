@@ -24,7 +24,7 @@ import os
 
 COMPILE_COMMANDS_JSON_PATH = 'compile_commands.json'
 
-CompileCommand = collections.namedtuple('CompileCommand', ['invokation', 'work_dir', 'file'])
+Command = collections.namedtuple('CompileCommand', ['invokation', 'work_dir', 'file'])
 
 
 class Error(Exception):
@@ -78,7 +78,7 @@ def _json_entries_to_commands(entries, project_path):
         path = os.path.join(entry['directory'], entry['file'])
         relpath = os.path.relpath(path, start=project_path)
         normpath = os.path.normpath(relpath)
-        commands[normpath] = CompileCommand(entry['command'], entry['directory'], entry['file'])
+        commands[normpath] = Command(entry['command'], entry['directory'], entry['file'])
 
     return commands
 
