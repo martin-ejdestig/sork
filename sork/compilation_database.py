@@ -49,10 +49,13 @@ def _find_potential_paths(project_path):
 
     paths = itertools.chain.from_iterable([glob.glob(p) for p in patterns])
 
-    return [os.path.dirname(os.path.normpath(path)) for path in paths]
+    return [os.path.normpath(path) for path in paths]
 
 
-def find_build_path(project_path):
+def _find_path(project_path, build_path=None):
+    if build_path:
+        return os.path.join(build_path, COMPILE_COMMANDS_JSON_PATH)
+
     paths = _find_potential_paths(project_path)
 
     if not paths:
@@ -63,22 +66,36 @@ def find_build_path(project_path):
 
     if len(paths) > 1:
         raise Error('Multiple build paths found, specify a path manually:\n{}'
-                    .format('\n'.join(sorted(paths))))
+                    .format('\n'.join(sorted(os.path.dirname(path) for path in paths))))
 
     return paths[0]
 
 
-def load_from_file(project_path, build_path):
+def _json_entries_to_commands(entries, project_path):
     commands = {}
 
-    def norm_path(path):
-        return os.path.normpath(os.path.relpath(path, start=project_path))
-
-    with open(os.path.join(build_path, COMPILE_COMMANDS_JSON_PATH)) as file:
-        for command in json.load(file):
-            src_path = norm_path(os.path.join(command['directory'], command['file']))
-            commands[src_path] = CompileCommand(command['command'],
-                                                command['directory'],
-                                                command['file'])
+    for entry in entries:
+        path = os.path.join(entry['directory'], entry['file'])
+        relpath = os.path.relpath(path, start=project_path)
+        normpath = os.path.normpath(relpath)
+        commands[normpath] = CompileCommand(entry['command'], entry['directory'], entry['file'])
 
     return commands
+
+
+class CompilationDatabase:
+    def __init__(self, project_path, build_path=None):
+        self.path = _find_path(project_path, build_path)
+        self._commands = self._load(project_path)
+
+    def _load(self, project_path):
+        try:
+            with open(self.path) as file:
+                entries = json.load(file)
+        except Exception as exception:
+            raise Error('{}: {}'.format(self.path, exception))
+
+        return _json_entries_to_commands(entries, project_path)
+
+    def get_command(self, path):
+        return self._commands.get(path)
