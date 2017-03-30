@@ -64,11 +64,21 @@ def _load_config(path):
         raise Error('{}'.format(exception))
 
 
+def _load_compilation_database(project_path, build_path):
+    try:
+        return compilation_database.load_from_file(project_path, build_path)
+    except compilation_database.Error as exception:
+        raise Error('{}'.format(exception))
+
+
 class Environment:
     def __init__(self, path_in_project, build_path=None):
         self.project_path = _find_project_path(path_in_project)
         self.build_path = build_path or _find_build_path(self.project_path)
+
         self.config = _load_config(os.path.join(self.project_path, _DOT_SORK_PATH))
+
+        self.compilation_database = _load_compilation_database(self.project_path, self.build_path)
 
     def normalize_path(self, path):
         return os.path.normpath(os.path.relpath(path, start=self.project_path))
