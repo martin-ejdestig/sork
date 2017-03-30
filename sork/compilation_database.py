@@ -16,6 +16,8 @@
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
 import collections
+import glob
+import itertools
 import json
 import os
 
@@ -23,6 +25,47 @@ import os
 COMPILE_COMMANDS_JSON_PATH = 'compile_commands.json'
 
 CompileCommand = collections.namedtuple('CompileCommand', ['invokation', 'work_dir', 'file'])
+
+
+class Error(Exception):
+    pass
+
+
+def _build_path_patterns(project_path, basename):
+    pattern_dir_components = [
+        ['*'],
+        [os.path.pardir, basename + '*'],
+        [os.path.pardir, 'build*', basename + '*'],
+        [os.path.pardir, 'build-' + basename + '*']
+    ]
+    return [os.path.join(project_path, *cs) for cs in pattern_dir_components]
+
+
+def _find_potential_paths(project_path):
+    basename = os.path.basename(os.path.abspath(project_path))
+
+    patterns = [os.path.join(pattern, COMPILE_COMMANDS_JSON_PATH)
+                for pattern in _build_path_patterns(project_path, basename)]
+
+    paths = itertools.chain.from_iterable([glob.glob(p) for p in patterns])
+
+    return [os.path.dirname(os.path.normpath(path)) for path in paths]
+
+
+def find_build_path(project_path):
+    paths = _find_potential_paths(project_path)
+
+    if not paths:
+        raise Error('Unable to determine build path. Specify a path manually or '
+                    'use one of the standard locations:\n{}'
+                    .format('\n'.join(_build_path_patterns('path_to_project',
+                                                           'name_of_project_directory'))))
+
+    if len(paths) > 1:
+        raise Error('Multiple build paths found, specify a path manually:\n{}'
+                    .format('\n'.join(sorted(paths))))
+
+    return paths[0]
 
 
 def load_from_file(environment):

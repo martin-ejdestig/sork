@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-import glob
-import itertools
 import os
 
 from . import compilation_database
@@ -52,40 +50,11 @@ def _find_project_path(path):
     return path
 
 
-def _build_path_patterns(project_path, basename):
-    pattern_dir_components = [
-        ['*'],
-        [os.path.pardir, basename + '*'],
-        [os.path.pardir, 'build*', basename + '*'],
-        [os.path.pardir, 'build-' + basename + '*']
-    ]
-    return [os.path.join(project_path, *cs) for cs in pattern_dir_components]
-
-
-def _find_compile_commands_paths(project_path):
-    basename = os.path.basename(os.path.abspath(project_path))
-
-    patterns = [os.path.join(pattern, compilation_database.COMPILE_COMMANDS_JSON_PATH)
-                for pattern in _build_path_patterns(project_path, basename)]
-
-    paths = itertools.chain.from_iterable([glob.glob(p) for p in patterns])
-
-    return [os.path.normpath(path) for path in paths]
-
-
 def _find_build_path(project_path):
-    paths = _find_compile_commands_paths(project_path)
-
-    if not paths:
-        raise Error('Unable to determine build path. Specify a path manually or '
-                    'use one of the standard locations:\n{}'
-                    .format('\n'.join(_build_path_patterns('path_to_project',
-                                                           'name_of_project_directory'))))
-    elif len(paths) > 1:
-        raise Error('Multiple build paths found, specify a path manually:\n{}'
-                    .format('\n'.join(sorted(os.path.dirname(path) for path in paths))))
-
-    return os.path.dirname(paths[0])
+    try:
+        return compilation_database.find_build_path(project_path)
+    except compilation_database.Error as exception:
+        raise Error('{}'.format(exception))
 
 
 def _load_config(path):
