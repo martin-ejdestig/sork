@@ -37,6 +37,9 @@ def _is_project_path(path):
 
 
 def _find_project_path(path):
+    if os.path.isfile(path):
+        path = os.path.dirname(path)
+
     while not _is_project_path(path):
         parent_path = os.path.relpath(os.path.join(path, os.path.pardir))
 

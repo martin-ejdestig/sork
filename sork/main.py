@@ -66,15 +66,7 @@ def _create_arg_parser():
 
 def _path_in_project(args):
     source_paths = args.source_paths if hasattr(args, 'source_paths') else None
-
-    if not source_paths:
-        return os.path.curdir
-
-    path = source_paths[0]
-    if os.path.isfile(path):
-        path = os.path.dirname(path)
-
-    return path
+    return source_paths[0] if source_paths else os.path.curdir
 
 
 def _create_environment(arg_parser, args):
