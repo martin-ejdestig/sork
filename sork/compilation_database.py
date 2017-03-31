@@ -83,19 +83,20 @@ def _json_entries_to_commands(entries, project_path):
     return commands
 
 
+def _load(path, project_path):
+    try:
+        with open(path) as file:
+            entries = json.load(file)
+    except Exception as exception:
+        raise Error('{}: {}'.format(path, exception))
+
+    return _json_entries_to_commands(entries, project_path)
+
+
 class CompilationDatabase:
     def __init__(self, project_path, build_path=None):
         self.path = _find_path(project_path, build_path)
-        self._commands = self._load(project_path)
-
-    def _load(self, project_path):
-        try:
-            with open(self.path) as file:
-                entries = json.load(file)
-        except Exception as exception:
-            raise Error('{}: {}'.format(self.path, exception))
-
-        return _json_entries_to_commands(entries, project_path)
+        self._commands = _load(self.path, project_path)
 
     def get_command(self, path):
         return self._commands.get(path)
