@@ -18,10 +18,6 @@
 import abc
 
 
-class Error(Exception):
-    pass
-
-
 class Check(abc.ABC):
     def __init__(self, environment):
         super().__init__()

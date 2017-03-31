@@ -43,25 +43,6 @@ def _analyze_source_file(source_file):
         return process.communicate()[0]
 
 
-def _analyze_source_files(args, source_files):
-    printer = progress_printer.ProgressPrinter()
-    printer.start('Analyzing source', len(source_files))
-
-    def analyze(source_file):
-        printer.result(_analyze_source_file(source_file))
-
-    try:
-        concurrent.for_each(analyze, source_files, num_threads=args.jobs)
-    except BaseException:
-        printer.abort()
-        raise
-
-
-def _source_files_with_compile_command(args, environment):
-    source_files = source.find_source_files(environment, args.source_paths)
-    return [sf for sf in source_files if sf.compile_command]
-
-
 class AnalyzeCommand(command.Command):
     def __init__(self):
         super().__init__('analyze', arg_help='run static analyzer')
@@ -76,7 +57,17 @@ class AnalyzeCommand(command.Command):
                             metavar='<path>')
 
     def _run(self, args, environment):
+        source_files = [sf for sf in source.find_source_files(environment, args.source_paths)
+                        if sf.compile_command]
+
+        printer = progress_printer.ProgressPrinter()
+        printer.start('Analyzing source', len(source_files))
+
+        def analyze(source_file):
+            printer.result(_analyze_source_file(source_file))
+
         try:
-            _analyze_source_files(args, _source_files_with_compile_command(args, environment))
-        except source.Error as error:
-            raise command.Error(error)
+            concurrent.for_each(analyze, source_files, num_threads=args.jobs)
+        except BaseException:
+            printer.abort()
+            raise

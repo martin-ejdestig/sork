@@ -15,28 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-import abc
 
-
-class Command(abc.ABC):
-    def __init__(self, name, aliases=None, arg_help=None):
-        self._name = name
-        self._aliases = aliases
-        self._arg_help = arg_help
-
-    def add_argparse_subparser(self, subparsers):
-        parser = subparsers.add_parser(self._name,
-                                       aliases=self._aliases if self._aliases else [],
-                                       help=self._arg_help)
-
-        parser.set_defaults(run_command=self._run)
-
-        self._add_argparse_arguments(parser)
-
-    @abc.abstractmethod
-    def _add_argparse_arguments(self, parser):
-        pass
-
-    @abc.abstractmethod
-    def _run(self, args, environment):
-        pass
+class Error(Exception):
+    pass

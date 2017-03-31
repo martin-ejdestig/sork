@@ -19,12 +19,13 @@ import re
 import subprocess
 
 from .. import command
+from .. import error
 from .. import source
 
 
 def _assembler_for_source_file(source_file, verbose=False):
     if not source_file.compile_command:
-        raise command.Error('Do not know how to compile "{}".'.format(source_file.path))
+        raise error.Error('Do not know how to compile "{}".'.format(source_file.path))
 
     output_asm_args = '-S'
     if verbose:
@@ -43,7 +44,7 @@ def _assembler_for_source_file(source_file, verbose=False):
                           universal_newlines=True) as process:
         stdout, _ = process.communicate()
         if process.returncode != 0:
-            raise command.Error('Failed to run compiler command for outputting assembler.')
+            raise error.Error('Failed to run compiler command for outputting assembler.')
 
     return stdout
 
@@ -123,14 +124,9 @@ class AssemblerCommand(command.Command):
                             metavar='<file>')
 
     def _run(self, args, environment):
-        try:
-            asm = _assembler_for_source_file(source.get_source_file(environment,
-                                                                    args.source_paths[0]),
-                                             args.verbose)
-            if args.count:
-                asm = _opcode_count_comment(asm) + asm
+        asm = _assembler_for_source_file(source.get_source_file(environment, args.source_paths[0]),
+                                         args.verbose)
+        if args.count:
+            asm = _opcode_count_comment(asm) + asm
 
-            print(asm)
-
-        except source.Error as error:
-            raise command.Error(error)
+        print(asm)

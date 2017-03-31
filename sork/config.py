@@ -18,6 +18,7 @@
 import json
 
 from . import checks
+from . import error
 
 
 _DEFAULT_CONFIG = {
@@ -40,29 +41,26 @@ _DEFAULT_CONFIG = {
 }
 
 
-class Error(Exception):
-    pass
-
-
 def _verify_config(config, default_config, parent_path=None):
     def full_path(key):
         return '{}.{}'.format(parent_path, key) if parent_path else key
 
     for key, value in config.items():
         if key not in default_config:
-            raise Error('Unknown configuration key "{}"'.format(full_path(key)))
+            raise error.Error('Unknown configuration key "{}"'.format(full_path(key)))
 
         default_value = default_config[key]
 
         if not isinstance(value, type(default_value)):
-            raise Error('Value for "{}" is of wrong type'.format(full_path(key)))
+            raise error.Error('Value for "{}" is of wrong type'.format(full_path(key)))
 
         if isinstance(value, dict):
             _verify_config(value, default_value, full_path(key))
         elif isinstance(value, list):
             if value and default_value:
                 if not all(isinstance(element, type(default_value[0])) for element in value):
-                    raise Error('List element for "{}" is of wrong type'.format(full_path(key)))
+                    raise error.Error('List element for "{}" is of wrong type'.
+                                      format(full_path(key)))
 
 
 def _merge_configs(default_config, override_config):
@@ -87,6 +85,6 @@ def load_config(path):
     except FileNotFoundError:
         pass
     except Exception as exception:
-        raise Error('{}: {}'.format(path, exception))
+        raise error.Error('{}: {}'.format(path, exception))
 
     return _merge_configs(_DEFAULT_CONFIG, config)

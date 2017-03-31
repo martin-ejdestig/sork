@@ -21,6 +21,8 @@ import os
 import re
 import threading
 
+from . import error
+
 
 _IN_EXTENSION = '.in'
 _C_EXTENSIONS = ['.c']
@@ -28,10 +30,6 @@ _CPP_EXTENSIONS = ['.cpp', '.cxx', '.cc', '.C', '.c++']
 _HEADER_EXTENSIONS = ['.h', '.hh' '.hp', '.hpp', '.h++', '.hxx']
 _EXTENSIONS = _C_EXTENSIONS + _CPP_EXTENSIONS + _HEADER_EXTENSIONS + \
               [e + _IN_EXTENSION for e in _HEADER_EXTENSIONS]
-
-
-class Error(Exception):
-    pass
 
 
 class SourceFile:
@@ -82,14 +80,14 @@ def _get_exclude_regex(environment):
 
 def _verify_source_paths(environment, source_paths):
     if not source_paths:
-        raise Error('No source paths specified.')
+        raise error.Error('No source paths specified.')
 
     does_not_exist = [path for path in source_paths
                       if not os.path.exists(os.path.join(environment.project_path, path))]
 
     if does_not_exist:
-        raise Error('The following source paths do not exist:\n{}'.
-                    format('\n'.join(does_not_exist)))
+        raise error.Error('The following source paths do not exist:\n{}'.
+                          format('\n'.join(does_not_exist)))
 
 
 def _find_source_file_paths(environment, source_paths=None):
@@ -140,6 +138,6 @@ def get_source_file(environment, path):
     files = find_source_files(environment, [path])
 
     if len(files) != 1:
-        raise Error('Unable to find source file {}.'.format(path))
+        raise error.Error('Unable to find source file {}.'.format(path))
 
     return files[0]

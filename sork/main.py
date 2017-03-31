@@ -18,9 +18,9 @@
 import argparse
 import os
 
-from . import command
 from . import commands
 from . import environment
+from . import error
 
 
 _COMMANDS = [
@@ -72,8 +72,8 @@ def _path_in_project(args):
 def _create_environment(arg_parser, args):
     try:
         return environment.Environment(_path_in_project(args), build_path=args.build_path)
-    except environment.Error as error:
-        print('{}\n'.format(error))
+    except error.Error as exception:
+        print('{}\n'.format(exception))
         arg_parser.print_help()
         arg_parser.exit(1)
 
@@ -83,8 +83,8 @@ def _run_command(args, env):
         args.run_command(args, env)
     except KeyboardInterrupt:
         pass
-    except command.Error as error:
-        print(error)
+    except error.Error as exception:
+        print(exception)
 
 
 def main():

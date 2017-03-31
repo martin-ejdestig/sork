@@ -22,6 +22,7 @@ import re
 import string
 
 from .. import check
+from .. import error
 
 
 # TODO: Make it possible to set allowed start/end year in config (default to start year <= current
@@ -199,20 +200,20 @@ def _determine_license_in_file(path):
     try:
         with open(path) as file:
             content = file.read()
-    except OSError as error:
-        raise check.Error(error)
+    except OSError as exception:
+        raise error.Error(exception)
 
     for key, value in _LICENSES.items():
         if re.match(value['content_pattern'], content):
             return key
 
-    raise check.Error('Unknown license in {}.'.format(path))
+    raise error.Error('Unknown license in {}.'.format(path))
 
 
 def _detect_license(environment):
     paths = _find_license_paths(environment)
     if not paths:
-        raise check.Error('Unable to find any license file(s) in \'{}\'.'.
+        raise error.Error('Unable to find any license file(s) in \'{}\'.'.
                           format(environment.project_path))
 
     licenses = [_determine_license_in_file(path) for path in paths]
@@ -223,14 +224,14 @@ def _detect_license(environment):
     if len(paths) == 2 and 'gplv3' in licenses and 'lgplv3' in licenses:
         return 'lgplv3'
 
-    raise check.Error('Unable to automatically determine license in \'{}\'.'.
+    raise error.Error('Unable to automatically determine license in \'{}\'.'.
                       format(environment.project_path))
 
 
 def _get_header_lines(environment, license_key=None):
     if license_key:
         if license_key.lower() not in _LICENSES:
-            raise check.Error('{} is an unknown license'.format(license_key))
+            raise error.Error('{} is an unknown license'.format(license_key))
         license_key = license_key.lower()
     else:
         license_key = _detect_license(environment)
@@ -269,7 +270,7 @@ def _compile_license_regex(environment):
     try:
         return re.compile(regex_str, flags=re.DOTALL)
     except re.error:
-        raise check.Error('Failed to compile regular expression for license header')
+        raise error.Error('Failed to compile regular expression for license header')
 
 
 class LicenseHeaderCheck(check.Check):

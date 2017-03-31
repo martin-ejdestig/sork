@@ -19,16 +19,13 @@ import os
 
 from . import compilation_database
 from . import config
+from . import error
 
 
 _NORMALIZED_PROJECT_PATH = os.path.curdir
 
 _DOT_SORK_PATH = '.sork'
 _DOT_PATHS_IN_PROJECT_ROOT = ['.git', _DOT_SORK_PATH]
-
-
-class Error(Exception):
-    pass
 
 
 def _is_project_path(path):
@@ -44,27 +41,13 @@ def _find_project_path(path):
         parent_path = os.path.relpath(os.path.join(path, os.path.pardir))
 
         if path == parent_path:
-            raise Error('Unable to determine project root path. '
-                        'Currently looking for: {}'
-                        .format(', '.join(_DOT_PATHS_IN_PROJECT_ROOT)))
+            raise error.Error('Unable to determine project root path. '
+                              'Currently looking for: {}'
+                              .format(', '.join(_DOT_PATHS_IN_PROJECT_ROOT)))
 
         path = parent_path
 
     return path
-
-
-def _load_config(path):
-    try:
-        return config.load_config(path)
-    except config.Error as exception:
-        raise Error('{}'.format(exception))
-
-
-def _load_compilation_database(project_path, build_path=None):
-    try:
-        return compilation_database.CompilationDatabase(project_path, build_path)
-    except compilation_database.Error as exception:
-        raise Error('{}'.format(exception))
 
 
 class Environment:
@@ -72,9 +55,10 @@ class Environment:
         self.project_path = _find_project_path(path_in_project)
         self.build_path = build_path
 
-        self.config = _load_config(os.path.join(self.project_path, _DOT_SORK_PATH))
+        self.config = config.load_config(os.path.join(self.project_path, _DOT_SORK_PATH))
 
-        self.compilation_database = _load_compilation_database(self.project_path, self.build_path)
+        self.compilation_database = compilation_database.CompilationDatabase(self.project_path,
+                                                                             self.build_path)
         if not self.build_path:
             self.build_path = os.path.dirname(self.compilation_database.path)
 

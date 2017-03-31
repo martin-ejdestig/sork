@@ -21,14 +21,12 @@ import itertools
 import json
 import os
 
+from . import error
+
 
 COMPILE_COMMANDS_JSON_PATH = 'compile_commands.json'
 
 Command = collections.namedtuple('Command', ['invokation', 'work_dir', 'file'])
-
-
-class Error(Exception):
-    pass
 
 
 def _build_path_patterns(project_path, basename):
@@ -59,14 +57,14 @@ def _find_path(project_path, build_path=None):
     paths = _find_potential_paths(project_path)
 
     if not paths:
-        raise Error('Unable to determine build path. Specify a path manually or '
-                    'use one of the standard locations:\n{}'
-                    .format('\n'.join(_build_path_patterns('path_to_project',
-                                                           'name_of_project_directory'))))
+        raise error.Error('Unable to determine build path. Specify a path manually or '
+                          'use one of the standard locations:\n{}'
+                          .format('\n'.join(_build_path_patterns('path_to_project',
+                                                                 'name_of_project_directory'))))
 
     if len(paths) > 1:
-        raise Error('Multiple build paths found, specify a path manually:\n{}'
-                    .format('\n'.join(sorted(os.path.dirname(path) for path in paths))))
+        raise error.Error('Multiple build paths found, specify a path manually:\n{}'
+                          .format('\n'.join(sorted(os.path.dirname(path) for path in paths))))
 
     return paths[0]
 
@@ -88,7 +86,7 @@ def _load(path, project_path):
         with open(path) as file:
             entries = json.load(file)
     except Exception as exception:
-        raise Error('{}: {}'.format(path, exception))
+        raise error.Error('{}: {}'.format(path, exception))
 
     return _json_entries_to_commands(entries, project_path)
 
