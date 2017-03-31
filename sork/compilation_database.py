@@ -24,7 +24,7 @@ import os
 
 COMPILE_COMMANDS_JSON_PATH = 'compile_commands.json'
 
-Command = collections.namedtuple('CompileCommand', ['invokation', 'work_dir', 'file'])
+Command = collections.namedtuple('Command', ['invokation', 'work_dir', 'file'])
 
 
 class Error(Exception):
