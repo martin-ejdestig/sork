@@ -269,7 +269,7 @@ def _compile_license_regex(environment):
     try:
         return re.compile(regex_str, flags=re.DOTALL)
     except re.error:
-        check.Error('Failed to compile regular expression for license header')
+        raise check.Error('Failed to compile regular expression for license header')
 
 
 class LicenseHeaderCheck(check.Check):
