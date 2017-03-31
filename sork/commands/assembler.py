@@ -90,10 +90,11 @@ class OpcodeCounter:
         comment = ''
 
         for label, counters in labels_and_counters:
-            comment += '# ' + label + ':\n'
-            for opcode, count in sorted(counters.items()):
-                comment += '#\t' + opcode + ': ' + str(count) + '\n'
-            comment += '#\n'
+            if counters:
+                comment += '# ' + label + ':\n'
+                for opcode, count in sorted(counters.items()):
+                    comment += '#\t' + opcode + ': ' + str(count) + '\n'
+                comment += '#\n'
 
         return comment
 
