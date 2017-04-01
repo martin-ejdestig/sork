@@ -22,18 +22,14 @@ from .. import check
 from .. import string
 
 
-def _strip_path(path, strip_paths):
-    for strip_path in strip_paths:
-        if os.path.commonpath([path, strip_path]):
-            return os.path.relpath(path, start=strip_path)
-    return path
-
-
 class IncludeGuardCheck(check.Check):
     name = 'include_guard'
 
     def __init__(self, environment):
-        super().__init__(environment)
+        super().__init__(self.name, environment)
+
+        self._prefix = self._config['prefix']
+        self._suffix = self._config['suffix']
 
         self._regex = re.compile(r"^(?:\s*|/\*.*?\*/|//[^\n]*)*"
                                  r"#ifndef\s+(\S*)\s*\n\s*"
@@ -68,13 +64,17 @@ class IncludeGuardCheck(check.Check):
         return '\n'.join(output)
 
     def _include_guard_for_source_file(self, source_file):
-        config = self._environment.config['checks.include_guard']
-        prefix = config['prefix']
-        suffix = config['suffix']
-
-        stripped_path = _strip_path(source_file.stem, config['strip_paths'])
+        stripped_path = self._strip_path(source_file.stem)
         path_part = re.sub(r"[ /\\-]", '_', stripped_path).upper()
-        if path_part.startswith(prefix):
-            path_part = path_part[len(prefix):]
 
-        return ''.join([prefix, path_part, suffix])
+        if path_part.startswith(self._prefix):
+            path_part = path_part[len(self._prefix):]
+
+        return ''.join([self._prefix, path_part, self._suffix])
+
+    def _strip_path(self, path):
+        for strip_path in self._config['strip_paths']:
+            if os.path.commonpath([path, strip_path]):
+                return os.path.relpath(path, start=strip_path)
+
+        return path
