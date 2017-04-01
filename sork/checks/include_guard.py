@@ -23,10 +23,10 @@ from .. import string
 
 
 class IncludeGuardCheck(check.Check):
-    name = 'include_guard'
+    NAME = 'include_guard'
 
     def __init__(self, environment):
-        super().__init__(self.name, environment)
+        super().__init__(self.NAME, environment)
 
         self._prefix = self._config['prefix']
         self._suffix = self._config['suffix']

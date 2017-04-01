@@ -10,4 +10,4 @@ CLASSES = [
     LicenseHeaderCheck
 ]
 
-NAMES = [c.name for c in CLASSES]
+NAMES = [c.NAME for c in CLASSES]

@@ -52,7 +52,7 @@ def _get_enabled_checks(args, environment):
     if not names:
         raise error.Error('No checks enabled.')
 
-    return [c(environment) for c in checks.CLASSES if c.name in names]
+    return [c(environment) for c in checks.CLASSES if c.NAME in names]
 
 
 class CheckCommand(command.Command):
