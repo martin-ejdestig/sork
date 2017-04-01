@@ -180,59 +180,62 @@ _LICENSES = {
 _LICENSE_BASE_FILE_NAMES = ['COPYING', 'LICENSE']
 
 
-def _pattern_ignore_case(pattern):
-    def ignore_case_if_alpha(char):
-        return '[{}{}]'.format(char.upper(), char.lower()) if char.isalpha() else char
-
-    return ''.join([ignore_case_if_alpha(char) for char in pattern])
-
-
-def _find_license_paths(environment):
-    patterns = [os.path.join(environment.project_path, _pattern_ignore_case(n + '*'))
-                for n in _LICENSE_BASE_FILE_NAMES]
-
-    paths = itertools.chain.from_iterable(glob.glob(p) for p in patterns)
-
-    return list(paths)
-
-
-def _determine_license_in_file(path):
-    try:
-        with open(path) as file:
-            content = file.read()
-    except OSError as exception:
-        raise error.Error(exception)
-
-    for key, value in _LICENSES.items():
-        if re.match(value['content_pattern'], content):
-            return key
-
-    raise error.Error('Unknown license in {}.'.format(path))
-
-
-def _detect_license(environment):
-    paths = _find_license_paths(environment)
-    if not paths:
-        raise error.Error('Unable to find any license file(s) in \'{}\'.'.
-                          format(environment.project_path))
-
-    licenses = [_determine_license_in_file(path) for path in paths]
-
-    if len(paths) == 1:
-        return licenses[0]
-
-    if len(paths) == 2 and 'gplv3' in licenses and 'lgplv3' in licenses:
-        return 'lgplv3'
-
-    raise error.Error('Unable to automatically determine license in \'{}\'.'.
-                      format(environment.project_path))
-
-
 def _escape_regex_chars(unescaped):
     escaped = unescaped
     escaped = re.sub(r'\*', r'\*', escaped)
     escaped = re.sub(r'([()])', r'\\\1', escaped)
     return escaped
+
+
+class LicenseDetector:
+    def __init__(self, environment):
+        self._environment = environment
+
+    def detect_license(self):
+        paths = self._find_license_paths()
+        if not paths:
+            raise error.Error('Unable to find any license file(s) in \'{}\'.'.
+                              format(self._environment.project_path))
+
+        licenses = [self._determine_license_in_file(path) for path in paths]
+
+        if len(paths) == 1:
+            return licenses[0]
+
+        if len(paths) == 2 and 'gplv3' in licenses and 'lgplv3' in licenses:
+            return 'lgplv3'
+
+        raise error.Error('Unable to automatically determine license in \'{}\'.'.
+                          format(self._environment.project_path))
+
+    def _find_license_paths(self):
+        patterns = [os.path.join(self._environment.project_path, self._pattern_ignore_case(n + '*'))
+                    for n in _LICENSE_BASE_FILE_NAMES]
+
+        paths = itertools.chain.from_iterable(glob.glob(p) for p in patterns)
+
+        return list(paths)
+
+    @staticmethod
+    def _pattern_ignore_case(pattern):
+        def ignore_case_if_alpha(char):
+            return '[{}{}]'.format(char.upper(), char.lower()) if char.isalpha() else char
+
+        return ''.join([ignore_case_if_alpha(char) for char in pattern])
+
+    @staticmethod
+    def _determine_license_in_file(path):
+        try:
+            with open(path) as file:
+                content = file.read()
+        except OSError as exception:
+            raise error.Error(exception)
+
+        for key, value in _LICENSES.items():
+            if re.match(value['content_pattern'], content):
+                return key
+
+        raise error.Error('Unknown license in {}.'.format(path))
 
 
 class LicenseHeaderCheck(check.Check):
@@ -263,7 +266,8 @@ class LicenseHeaderCheck(check.Check):
                 raise error.Error('{} is an unknown license'.format(license_key))
             license_key = license_key.lower()
         else:
-            license_key = _detect_license(self._environment)
+            detector = LicenseDetector(self._environment)
+            license_key = detector.detect_license()
 
         return _LICENSES[license_key]['header_lines']
 
