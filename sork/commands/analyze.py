@@ -63,6 +63,7 @@ class AnalyzeCommand(command.Command):
         printer.start('Analyzing source', len(source_files))
 
         def analyze(source_file):
+            printer.start_with_item(source_file.path)
             printer.result(_analyze_source_file(source_file))
 
         try:

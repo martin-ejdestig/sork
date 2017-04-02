@@ -85,6 +85,7 @@ class CheckCommand(command.Command):
         printer.start('Checking source', len(source_files))
 
         def check_source_file(source_file):
+            printer.start_with_item(source_file.path)
             outputs = (c.check(source_file) for c in enabled_checks)
             printer.result('\n'.join(o for o in outputs if o))
 

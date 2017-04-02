@@ -27,6 +27,7 @@ class ProgressPrinter:
         self._output = sys.stdout if output is None else output
         self._lock = threading.Lock()
         self._info_string = ''
+        self._item = ''
         self._count = 0
         self._done_count = 0
         self._aborted = False
@@ -34,6 +35,7 @@ class ProgressPrinter:
     def start(self, info_string, done_count):
         with self._lock:
             self._info_string = info_string
+            self._item = ''
             self._count = 0
             self._done_count = done_count
             self._aborted = False
@@ -42,6 +44,11 @@ class ProgressPrinter:
     def abort(self):
         with self._lock:
             self._aborted = True
+            self._print()
+
+    def start_with_item(self, item):
+        with self._lock:
+            self._item = item
             self._print()
 
     def result(self, result):
@@ -56,11 +63,13 @@ class ProgressPrinter:
             trailing_str = '. Done.\n'
         elif self._aborted:
             trailing_str = '. Aborted.\n'
+        elif self._item:
+            trailing_str = ': ' + self._item
         else:
             trailing_str = '...'
 
-        self._output.write('\r[{}/{}] {}{}'.format(self._count,
-                                                   self._done_count,
-                                                   self._info_string,
-                                                   trailing_str))
+        self._output.write(_CLEAR_ENTIRE_LINE + '\r[{}/{}] {}{}'.format(self._count,
+                                                                        self._done_count,
+                                                                        self._info_string,
+                                                                        trailing_str))
         self._output.flush()
