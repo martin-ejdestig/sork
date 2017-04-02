@@ -33,9 +33,9 @@ _EXTENSIONS = _C_EXTENSIONS + _CPP_EXTENSIONS + _HEADER_EXTENSIONS + \
 
 
 class SourceFile:
-    def __init__(self, path, compile_command, environment):
+    def __init__(self, path, environment):
         self.path = path
-        self.compile_command = compile_command
+        self.compile_command = environment.compilation_database.get_command(path)
 
         self._environment = environment
 
@@ -130,7 +130,7 @@ def _find_source_file_paths(environment, source_paths=None):
 def find_source_files(environment, paths=None):
     normpaths = environment.normalize_paths(paths, filter_project_path=True) if paths else None
 
-    return [SourceFile(path, environment.compilation_database.get_command(path), environment)
+    return [SourceFile(path, environment)
             for path in _find_source_file_paths(environment, normpaths)]
 
 
