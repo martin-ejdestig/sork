@@ -68,77 +68,88 @@ class SourceFile:
         return stem
 
 
-def _get_exclude_regex(environment):
-    pattern = environment.config['source_exclude']
-    if not pattern:
-        return None
-    try:
-        return re.compile(pattern)
-    except re.error:
-        raise error.Error('Failed to compile \'source_exclude\' regex (\'{}\') in configuration.'.
-                          format(pattern))
+class SourceFinder:
+    def __init__(self, environment):
+        self._environment = environment
+        self._normalized_project_path = environment.normalize_path(environment.project_path)
+        self._normalized_build_path = environment.normalize_path(environment.build_path)
+        self._exclude_regex = self._compile_exclude_regex(environment)
 
+    @staticmethod
+    def _compile_exclude_regex(environment):
+        pattern = environment.config['source_exclude']
+        if not pattern:
+            return None
+        try:
+            return re.compile(pattern)
+        except re.error:
+            raise error.Error('Failed to compile \'source_exclude\' regex (\'{}\') in '
+                              'configuration.'.format(pattern))
 
-def _verify_source_paths(environment, source_paths):
-    if not source_paths:
-        raise error.Error('No source paths specified.')
+    def find_files(self, source_paths=None):
+        if source_paths:
+            source_paths = self._environment.normalize_paths(source_paths, filter_project_path=True)
 
-    does_not_exist = [path for path in source_paths
-                      if not os.path.exists(os.path.join(environment.project_path, path))]
+        return [SourceFile(path, self._environment) for path in self._find_file_paths(source_paths)]
 
-    if does_not_exist:
-        raise error.Error('The following source paths do not exist:\n{}'.
-                          format('\n'.join(does_not_exist)))
+    def find_file(self, path):
+        files = self.find_files([path])
 
+        if len(files) != 1:
+            raise error.Error('Unable to find source file {}.'.format(path))
 
-def _find_source_file_paths(environment, source_paths=None):
-    project_path = environment.normalize_path(environment.project_path)
+        return files[0]
 
-    if not source_paths:
-        source_paths = environment.config['source_paths'] or project_path
-    _verify_source_paths(environment, source_paths)
+    def find_buildable_files(self, source_paths=None):
+        return [sf for sf in self.find_files(source_paths) if sf.compile_command]
 
-    paths = set()
-    dir_paths = []
+    def _find_file_paths(self, source_paths=None):
+        if not source_paths:
+            source_paths = self._environment.config['source_paths'] or self._normalized_project_path
+        self._verify_source_paths(source_paths)
 
-    exclude_regex = _get_exclude_regex(environment)
-    build_path = environment.normalize_path(environment.build_path)
-    if build_path == project_path:
-        build_path = None
+        paths = set()
+        dir_paths = []
 
-    def should_be_included(path):
-        if exclude_regex and exclude_regex.match(path):
-            return False
-        if build_path and os.path.commonpath([build_path, path]):
-            return False
+        for path in source_paths:
+            if os.path.isdir(os.path.join(self._environment.project_path, path)):
+                dir_paths.append(path)
+            elif self._should_be_included(path):
+                paths.add(path)
+
+        for dir_path in dir_paths:
+            paths.update(path for path in self._find_paths_in_dir(dir_path)
+                         if self._should_be_included(path))
+
+        return sorted(paths)
+
+    def _verify_source_paths(self, source_paths):
+        if not source_paths:
+            raise error.Error('No source paths specified.')
+
+        does_not_exist = [path for path in source_paths
+                          if not os.path.exists(os.path.join(self._environment.project_path, path))]
+
+        if does_not_exist:
+            raise error.Error('The following source paths do not exist:\n{}'.
+                              format('\n'.join(does_not_exist)))
+
+    def _should_be_included(self, path):
+        if self._exclude_regex:
+            if self._exclude_regex.match(path):
+                return False
+
+        if self._normalized_build_path != self._normalized_project_path:
+            if os.path.commonpath([self._normalized_build_path, path]):
+                return False
+
         return True
 
-    for path in source_paths:
-        if os.path.isdir(os.path.join(environment.project_path, path)):
-            dir_paths.append(path)
-        elif should_be_included(path):
-            paths.add(path)
+    def _find_paths_in_dir(self, dir_path):
+        patterns = [os.path.join(self._environment.project_path, dir_path, '**', '*' + extension)
+                    for extension in _EXTENSIONS]
 
-    for dir_path, extension in itertools.product(dir_paths, _EXTENSIONS):
-        pattern = os.path.join(environment.project_path, dir_path, '**', '*' + extension)
-        found_paths = (environment.normalize_path(path)
-                       for path in glob.glob(pattern, recursive=True))
-        paths.update(path for path in found_paths if should_be_included(path))
+        paths = itertools.chain.from_iterable(glob.glob(pattern, recursive=True)
+                                              for pattern in patterns)
 
-    return sorted(paths)
-
-
-def find_source_files(environment, paths=None):
-    normpaths = environment.normalize_paths(paths, filter_project_path=True) if paths else None
-
-    return [SourceFile(path, environment)
-            for path in _find_source_file_paths(environment, normpaths)]
-
-
-def get_source_file(environment, path):
-    files = find_source_files(environment, [path])
-
-    if len(files) != 1:
-        raise error.Error('Unable to find source file {}.'.format(path))
-
-    return files[0]
+        return (self._environment.normalize_path(path) for path in paths)

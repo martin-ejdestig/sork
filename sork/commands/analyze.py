@@ -57,8 +57,7 @@ class AnalyzeCommand(command.Command):
                             metavar='<path>')
 
     def _run(self, args, environment):
-        source_files = [sf for sf in source.find_source_files(environment, args.source_paths)
-                        if sf.compile_command]
+        source_files = source.SourceFinder(environment).find_buildable_files(args.source_paths)
 
         printer = progress_printer.ProgressPrinter()
         printer.start('Analyzing source', len(source_files))

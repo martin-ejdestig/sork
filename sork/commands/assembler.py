@@ -124,8 +124,8 @@ class AssemblerCommand(command.Command):
                             metavar='<file>')
 
     def _run(self, args, environment):
-        asm = _assembler_for_source_file(source.get_source_file(environment, args.source_paths[0]),
-                                         args.verbose)
+        source_file = source.SourceFinder(environment).find_file(args.source_paths[0])
+        asm = _assembler_for_source_file(source_file, args.verbose)
 
         if args.count:
             counter = OpcodeCounter()

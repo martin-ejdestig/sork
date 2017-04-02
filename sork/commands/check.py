@@ -79,7 +79,7 @@ class CheckCommand(command.Command):
 
     def _run(self, args, environment):
         enabled_checks = _get_enabled_checks(args, environment)
-        source_files = source.find_source_files(environment, args.source_paths)
+        source_files = source.SourceFinder(environment).find_files(args.source_paths)
 
         printer = progress_printer.ProgressPrinter()
         printer.start('Checking source', len(source_files))
