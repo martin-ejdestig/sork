@@ -75,7 +75,8 @@ def _get_exclude_regex(environment):
     try:
         return re.compile(pattern)
     except re.error:
-        return None
+        raise error.Error('Failed to compile \'source_exclude\' regex (\'{}\') in configuration.'.
+                          format(pattern))
 
 
 def _verify_source_paths(environment, source_paths):
