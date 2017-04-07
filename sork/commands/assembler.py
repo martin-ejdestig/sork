@@ -18,7 +18,8 @@
 import re
 import subprocess
 
-from .. import command
+from . import command
+
 from .. import error
 from .. import source
 

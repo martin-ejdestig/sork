@@ -17,8 +17,9 @@
 
 import re
 
+from . import command
+
 from .. import checks
-from .. import command
 from .. import concurrent
 from .. import error
 from .. import progress_printer

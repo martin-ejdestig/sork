@@ -18,7 +18,8 @@
 import re
 import subprocess
 
-from .. import command
+from . import command
+
 from .. import concurrent
 from .. import progress_printer
 from .. import source
