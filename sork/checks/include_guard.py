@@ -18,7 +18,8 @@
 import os
 import re
 
-from .. import check
+from . import check
+
 from .. import string
 
 

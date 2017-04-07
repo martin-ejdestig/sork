@@ -18,7 +18,8 @@
 import difflib
 import subprocess
 
-from .. import check
+from . import check
+
 from .. import string
 
 

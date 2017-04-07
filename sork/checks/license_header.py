@@ -21,7 +21,8 @@ import os
 import re
 import string
 
-from .. import check
+from . import check
+
 from .. import error
 
 

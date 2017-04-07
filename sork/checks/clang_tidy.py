@@ -18,7 +18,7 @@
 import re
 import subprocess
 
-from .. import check
+from . import check
 
 
 _CLANG_TIDY_NOISE_LINES = [
