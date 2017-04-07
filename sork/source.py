@@ -105,7 +105,9 @@ class SourceFinder:
 
     def _find_file_paths(self, source_paths=None):
         if not source_paths:
-            source_paths = self._environment.config['source_paths'] or self._normalized_project_path
+            source_paths = self._environment.config['source_paths'] or \
+                           [self._normalized_project_path]
+
         self._verify_source_paths(source_paths)
 
         paths = set()
