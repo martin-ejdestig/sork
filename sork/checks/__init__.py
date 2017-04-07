@@ -1,13 +1,1 @@
-from .clang_format import ClangFormatCheck
-from .clang_tidy import ClangTidyCheck
-from .include_guard import IncludeGuardCheck
-from .license_header import LicenseHeaderCheck
-
-CLASSES = [
-    ClangFormatCheck,
-    ClangTidyCheck,
-    IncludeGuardCheck,
-    LicenseHeaderCheck
-]
-
-NAMES = [c.NAME for c in CLASSES]
+from .checks_creator import ChecksCreator, NAMES

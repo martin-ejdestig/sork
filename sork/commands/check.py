@@ -15,45 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-import re
-
 from . import command
 
 from .. import checks
 from .. import concurrent
-from .. import error
 from .. import progress_printer
 from .. import source
-
-
-def _check_string_to_names(check_string):
-    return [n for n in checks.NAMES if re.match(check_string, n)]
-
-
-def _check_strings_to_names(check_strings):
-    names_set = set()
-    if not check_strings or check_strings[0].startswith('-'):
-        names_set.update(checks.NAMES)
-
-    for check_string in check_strings:
-        disable = check_string.startswith('-')
-        names = _check_string_to_names(check_string.lstrip('-'))
-        if disable:
-            names_set.difference_update(names)
-        else:
-            names_set.update(names)
-
-    return names_set
-
-
-def _get_enabled_checks(args, environment):
-    check_strings = args.checks.split(',') if args.checks else environment.config['checks']
-    names = _check_strings_to_names(check_strings)
-
-    if not names:
-        raise error.Error('No checks enabled.')
-
-    return [c(environment) for c in checks.CLASSES if c.NAME in names]
 
 
 class CheckCommand(command.Command):
@@ -79,7 +46,9 @@ class CheckCommand(command.Command):
                             metavar='<path>')
 
     def _run(self, args, environment):
-        enabled_checks = _get_enabled_checks(args, environment)
+        check_strings = args.checks.split(',') if args.checks else environment.config['checks']
+        enabled_checks = checks.ChecksCreator(environment).create(check_strings, allow_none=False)
+
         source_files = source.SourceFinder(environment).find_files(args.source_paths)
 
         printer = progress_printer.ProgressPrinter()
