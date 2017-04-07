@@ -266,8 +266,7 @@ class LicenseHeaderCheck(check.Check):
                 raise error.Error('{} is an unknown license'.format(license_key))
             license_key = license_key.lower()
         else:
-            detector = LicenseDetector(self._environment)
-            license_key = detector.detect_license()
+            license_key = LicenseDetector(self._environment).detect_license()
 
         return _LICENSES[license_key]['header_lines']
 
