@@ -151,7 +151,7 @@ class SourceFinder:
         patterns = [os.path.join(self._environment.project_path, dir_path, '**', '*' + extension)
                     for extension in _EXTENSIONS]
 
-        paths = itertools.chain.from_iterable(glob.glob(pattern, recursive=True)
+        paths = itertools.chain.from_iterable(glob.iglob(pattern, recursive=True)
                                               for pattern in patterns)
 
         return (self._environment.normalize_path(path) for path in paths)
