@@ -137,17 +137,18 @@ up in the compilation database.
 
 Command line usage:
 ```
-sork asm [-h] [-c] [-v] <file>
+usage: sork asm [-h] [-c] [-va] <file>
 
 positional arguments:
-  <file>         Source file to output assembler for.
+  <file>              Source file to output assembler for.
 
 optional arguments:
-  -h, --help     show this help message and exit
-  -c, --count    Count occurance of different opcodes per global label and in
-                 total if there is more than one global label. Result is
-                 printed as a comment before the generated assembly.
-  -v, --verbose  Tell compiler to output verbose assembler.
+  -h, --help          show this help message and exit
+  -c, --count         Count occurance of different opcodes per global label
+                      and in total if there is more than one global label.
+                      Result is printed as a comment before the generated
+                      assembly.
+  -va, --verbose-asm  Tell compiler to output verbose assembler.
 ```
 
 ### check

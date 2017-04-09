@@ -114,8 +114,8 @@ class AssemblerCommand(command.Command):
                                  'total if there is more than one global label. Result is printed '
                                  'as a comment before the generated assembly.')
 
-        parser.add_argument('-v',
-                            '--verbose',
+        parser.add_argument('-va',
+                            '--verbose-asm',
                             action='store_true',
                             help='Tell compiler to output verbose assembler.')
 
@@ -126,7 +126,7 @@ class AssemblerCommand(command.Command):
 
     def _run(self, args, environment):
         source_file = source.SourceFinder(environment).find_file(args.source_paths[0])
-        asm = _assembler_for_source_file(source_file, args.verbose)
+        asm = _assembler_for_source_file(source_file, args.verbose_asm)
 
         if args.count:
             counter = OpcodeCounter()
