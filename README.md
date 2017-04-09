@@ -252,8 +252,8 @@ find_program(SORK sork)
 if(NOT SORK)
 	message(FATAL_ERROR "sork not found")
 endif()
-add_custom_target(analyze COMMAND sork --build-path ${CMAKE_BINARY_DIR} analyze ${CMAKE_SOURCE_DIR})
-add_custom_target(style_check COMMAND sork --build-path ${CMAKE_BINARY_DIR} check ${CMAKE_SOURCE_DIR})
+add_custom_target(analyze COMMAND ${SORK} --build-path ${CMAKE_BINARY_DIR} analyze ${CMAKE_SOURCE_DIR})
+add_custom_target(style_check COMMAND ${SORK} --build-path ${CMAKE_BINARY_DIR} check ${CMAKE_SOURCE_DIR})
 ```
 
 You must make sure CMake is invoked with `-DCMAKE_EXPORT_COMPILE_COMMANDS=1` for it to generate a
