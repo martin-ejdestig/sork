@@ -253,16 +253,12 @@ find_program(SORK sork)
 if(NOT SORK)
 	message(FATAL_ERROR "sork not found")
 endif()
-add_custom_target(analyze COMMAND ${SORK} --build-path ${CMAKE_BINARY_DIR} analyze ${CMAKE_SOURCE_DIR})
-add_custom_target(style_check COMMAND ${SORK} --build-path ${CMAKE_BINARY_DIR} check ${CMAKE_SOURCE_DIR})
+add_custom_target(analyze USES_TERMINAL COMMAND ${SORK} --build-path ${CMAKE_BINARY_DIR} analyze ${CMAKE_SOURCE_DIR})
+add_custom_target(style_check USES_TERMINAL COMMAND ${SORK} --build-path ${CMAKE_BINARY_DIR} check ${CMAKE_SOURCE_DIR})
 ```
 
 You must make sure CMake is invoked with `-DCMAKE_EXPORT_COMPILE_COMMANDS=1` for it to generate a
 [compilation database](#build-directory-and-the-compilation-database) in the build directory.
-
-Note that CMake seems to do something strange when using the Ninja backend that causes
-progress output from Sork to not be displayed. It works as expected when using CMake's Makefile
-backend and with Meson (that uses Ninja).
 
 
 ## TODO
