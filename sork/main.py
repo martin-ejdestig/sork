@@ -52,6 +52,11 @@ def _create_arg_parser():
                         help='Run N jobs in parallel (default: %(default)s).',
                         metavar='N')
 
+    parser.add_argument('-v',
+                        '--verbose',
+                        action='store_true',
+                        help='More verbose output.')
+
     subparsers = parser.add_subparsers(dest='command',
                                        help='-h or --help after <command> for more help',
                                        metavar='<command>')

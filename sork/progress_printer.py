@@ -23,9 +23,12 @@ _CLEAR_ENTIRE_LINE = '\x1b[2K'
 
 
 class ProgressPrinter:
-    def __init__(self, output=None):
+    def __init__(self, output=None, verbose=False):
         self._output = sys.stdout if output is None else output
+        self._verbose = verbose
+
         self._lock = threading.Lock()
+
         self._info_string = ''
         self._item = ''
         self._count = 0
@@ -48,7 +51,10 @@ class ProgressPrinter:
 
     def start_with_item(self, item):
         with self._lock:
-            self._item = item
+            if self._verbose:
+                self._print('{}: {}\n'.format(self._info_string, item))
+            else:
+                self._item = item
             self._print_status()
 
     def result(self, result):

@@ -93,7 +93,7 @@ Detailed documentation for configuration relating to a specific command can be f
 See the [Commands](#commands) section for command specific arguments.
 
 ```
-sork [-h] [-bp <path>] [-j N] <command> ...
+sork [-h] [-bp <path>] [-j N] [-v] <command> ...
 
 positional arguments:
   <command>             -h or --help after <command> for more help
@@ -107,6 +107,7 @@ optional arguments:
                         Path to build directory, automatically detected if
                         possible.
   -j N, --jobs N        Run N jobs in parallel (default: 8).
+  -v, --verbose         More verbose output.
 ```
 
 

@@ -1,2 +1,5 @@
 [MESSAGES CONTROL]
 disable=fixme,missing-docstring,too-few-public-methods
+
+[DESIGN]
+max-attributes=10

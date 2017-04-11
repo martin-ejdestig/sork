@@ -60,7 +60,7 @@ class AnalyzeCommand(command.Command):
     def _run(self, args, environment):
         source_files = source.SourceFinder(environment).find_buildable_files(args.source_paths)
 
-        printer = progress_printer.ProgressPrinter()
+        printer = progress_printer.ProgressPrinter(verbose=args.verbose)
         printer.start('Analyzing source', len(source_files))
 
         def analyze(source_file):

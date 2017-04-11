@@ -51,7 +51,7 @@ class CheckCommand(command.Command):
 
         source_files = source.SourceFinder(environment).find_files(args.source_paths)
 
-        printer = progress_printer.ProgressPrinter()
+        printer = progress_printer.ProgressPrinter(verbose=args.verbose)
         printer.start('Checking source', len(source_files))
 
         def check_source_file(source_file):
