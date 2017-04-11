@@ -39,26 +39,26 @@ class ProgressPrinter:
             self._count = 0
             self._done_count = done_count
             self._aborted = False
-            self._print()
+            self._print_status()
 
     def abort(self):
         with self._lock:
             self._aborted = True
-            self._print()
+            self._print_status()
 
     def start_with_item(self, item):
         with self._lock:
             self._item = item
-            self._print()
+            self._print_status()
 
     def result(self, result):
         with self._lock:
             self._count += 1
             if result:
-                self._output.write(_CLEAR_ENTIRE_LINE + '\r' + str(result) + '\n')
-            self._print()
+                self._print(str(result) + '\n')
+            self._print_status()
 
-    def _print(self):
+    def _print_status(self):
         if self._count == self._done_count:
             trailing_str = '. Done.\n'
         elif self._aborted:
@@ -68,8 +68,14 @@ class ProgressPrinter:
         else:
             trailing_str = '...'
 
-        self._output.write(_CLEAR_ENTIRE_LINE + '\r[{}/{}] {}{}'.format(self._count,
-                                                                        self._done_count,
-                                                                        self._info_string,
-                                                                        trailing_str))
-        self._output.flush()
+        self._print('[{}/{}] {}{}'.format(self._count,
+                                          self._done_count,
+                                          self._info_string,
+                                          trailing_str),
+                    flush=True)
+
+    def _print(self, string, flush=False):
+        self._output.write(_CLEAR_ENTIRE_LINE + '\r' + string)
+
+        if flush:
+            self._output.flush()
