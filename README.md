@@ -138,7 +138,7 @@ up in the compilation database.
 
 Command line usage:
 ```
-usage: sork asm [-h] [-c] [-va] <file>
+sork asm [-h] [-c] [-va] <file>
 
 positional arguments:
   <file>              Source file to output assembler for.
