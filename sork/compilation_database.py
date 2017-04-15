@@ -29,72 +29,76 @@ COMPILE_COMMANDS_JSON_PATH = 'compile_commands.json'
 Command = collections.namedtuple('Command', ['invokation', 'work_dir', 'file'])
 
 
-def _build_path_patterns(project_path, basename):
-    pattern_dir_components = [
-        ['*'],
-        [os.path.pardir, basename + '*'],
-        [os.path.pardir, 'build*', basename + '*'],
-        [os.path.pardir, 'build-' + basename + '*']
-    ]
-    return [os.path.join(project_path, *cs) for cs in pattern_dir_components]
+class BuildPathFinder:
+    def __init__(self, project_path):
+        self._project_path = project_path
 
+    def find_path(self):
+        paths = self._find_potential_paths()
 
-def _find_potential_paths(project_path):
-    basename = os.path.basename(os.path.abspath(project_path))
+        if not paths:
+            standard_locations = self._build_path_patterns('path_to_project',
+                                                           'name_of_project_directory')
+            raise error.Error('Unable to determine build path. Specify a path manually or '
+                              'use one of the standard locations:\n{}'
+                              .format('\n'.join(standard_locations)))
 
-    patterns = [os.path.join(pattern, COMPILE_COMMANDS_JSON_PATH)
-                for pattern in _build_path_patterns(project_path, basename)]
+        if len(paths) > 1:
+            raise error.Error('Multiple build paths found, specify a path manually:\n{}'
+                              .format('\n'.join(sorted(paths))))
 
-    paths = itertools.chain.from_iterable([glob.glob(p) for p in patterns])
+        return paths[0]
 
-    return [os.path.normpath(path) for path in paths]
+    def _find_potential_paths(self):
+        basename = os.path.basename(os.path.abspath(self._project_path))
 
+        patterns = [os.path.join(pattern, COMPILE_COMMANDS_JSON_PATH)
+                    for pattern in self._build_path_patterns(self._project_path, basename)]
 
-def _find_path(project_path, build_path=None):
-    if build_path:
-        return os.path.join(build_path, COMPILE_COMMANDS_JSON_PATH)
+        paths = itertools.chain.from_iterable([glob.glob(p) for p in patterns])
 
-    paths = _find_potential_paths(project_path)
+        return [os.path.dirname(os.path.normpath(path)) for path in paths]
 
-    if not paths:
-        raise error.Error('Unable to determine build path. Specify a path manually or '
-                          'use one of the standard locations:\n{}'
-                          .format('\n'.join(_build_path_patterns('path_to_project',
-                                                                 'name_of_project_directory'))))
-
-    if len(paths) > 1:
-        raise error.Error('Multiple build paths found, specify a path manually:\n{}'
-                          .format('\n'.join(sorted(os.path.dirname(path) for path in paths))))
-
-    return paths[0]
-
-
-def _json_entries_to_commands(entries, project_path):
-    commands = {}
-
-    for entry in entries:
-        path = os.path.join(entry['directory'], entry['file'])
-        relpath = os.path.relpath(path, start=project_path)
-        normpath = os.path.normpath(relpath)
-        commands[normpath] = Command(entry['command'], entry['directory'], entry['file'])
-
-    return commands
-
-
-def _load(path, project_path):
-    try:
-        with open(path) as file:
-            entries = json.load(file)
-    except Exception as exception:
-        raise error.Error('{}: {}'.format(path, exception))
-
-    return _json_entries_to_commands(entries, project_path)
+    @staticmethod
+    def _build_path_patterns(project_path, basename):
+        pattern_dir_components = [
+            ['*'],
+            [os.path.pardir, basename + '*'],
+            [os.path.pardir, 'build*', basename + '*'],
+            [os.path.pardir, 'build-' + basename + '*']
+        ]
+        return [os.path.join(project_path, *cs) for cs in pattern_dir_components]
 
 
 class CompilationDatabase:
     def __init__(self, project_path, build_path=None):
-        self.path = _find_path(project_path, build_path)
-        self._commands = _load(self.path, project_path)
+        if not build_path:
+            build_path = BuildPathFinder(project_path).find_path()
+
+        self.path = os.path.join(build_path, COMPILE_COMMANDS_JSON_PATH)
+
+        self._commands = self._load(project_path)
+
+    def _load(self, project_path):
+        try:
+            with open(self.path) as file:
+                entries = json.load(file)
+        except Exception as exception:
+            raise error.Error('{}: {}'.format(self.path, exception))
+
+        return self._json_entries_to_commands(entries, project_path)
+
+    @staticmethod
+    def _json_entries_to_commands(entries, project_path):
+        commands = {}
+
+        for entry in entries:
+            path = os.path.join(entry['directory'], entry['file'])
+            relpath = os.path.relpath(path, start=project_path)
+            normpath = os.path.normpath(relpath)
+            commands[normpath] = Command(entry['command'], entry['directory'], entry['file'])
+
+        return commands
 
     def get_command(self, path):
         return self._commands.get(path)
