@@ -65,7 +65,8 @@ be detected automatically:
 - `~/Source/build-foo`
 
 Sork requires the path to be passed manually on the command line if no or more than one database is
-found.
+found. See [Build system targets examples](#build-system-targets-examples) for how to add build
+targets that automatically pass the correct build path.
 
 
 ## Project configuration
