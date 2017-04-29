@@ -25,7 +25,7 @@ from .. import progress_printer
 from .. import source
 
 
-def _analyze_source_file(source_file):
+def _analyze_source_file(source_file, environment):
     args = source_file.compile_command.invokation
     args = re.sub(r"^.*?\+\+", 'clang++ --analyze -Xanalyzer -analyzer-output=text', args)
     args = re.sub(r" -c", '', args)
@@ -40,6 +40,7 @@ def _analyze_source_file(source_file):
                           stderr=subprocess.STDOUT,
                           shell=True,
                           cwd=source_file.compile_command.work_dir,
+                          env=environment.command_env_vars(),
                           universal_newlines=True) as process:
         return process.communicate()[0]
 
@@ -65,7 +66,7 @@ class AnalyzeCommand(command.Command):
 
         def analyze(source_file):
             printer.start_with_item(source_file.path)
-            printer.result(_analyze_source_file(source_file))
+            printer.result(_analyze_source_file(source_file, environment))
 
         try:
             concurrent.for_each(analyze, source_files, num_threads=args.jobs)

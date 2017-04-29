@@ -15,10 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
+import itertools
 import os
 
 from . import compilation_database
 from . import config
+from . import dependency
 from . import error
 
 
@@ -62,6 +64,8 @@ class Environment:
         if not self.build_path:
             self.build_path = os.path.dirname(self.compilation_database.path)
 
+        self.dependencies = dependency.DependencyFinder(self.build_path).find()
+
     def normalize_path(self, path):
         return os.path.normpath(os.path.relpath(path, start=self.project_path))
 
@@ -71,3 +75,22 @@ class Environment:
             normalized_paths = [path for path in normalized_paths
                                 if path != _NORMALIZED_PROJECT_PATH]
         return normalized_paths
+
+    def command_env_vars(self):
+        env = os.environ.copy()
+
+        include_paths = self._dependency_include_paths()
+        if include_paths:
+            self._env_append_paths(env, 'C_INCLUDE_PATH', include_paths)
+            self._env_append_paths(env, 'CPLUS_INCLUDE_PATH', include_paths)
+
+        return env
+
+    def _dependency_include_paths(self):
+        paths = itertools.chain.from_iterable([dep.include_paths for dep in self.dependencies])
+        return sorted(set(paths))
+
+    @staticmethod
+    def _env_append_paths(env, name, paths):
+        orig_value = env.get(name)
+        env[name] = os.pathsep.join(([orig_value] if orig_value else []) + paths)

@@ -24,7 +24,7 @@ from .. import error
 from .. import source
 
 
-def _assembler_for_source_file(source_file, verbose=False):
+def _assembler_for_source_file(source_file, environment, verbose=False):
     if not source_file.compile_command:
         raise error.Error('Do not know how to compile "{}".'.format(source_file.path))
 
@@ -41,6 +41,7 @@ def _assembler_for_source_file(source_file, verbose=False):
     with subprocess.Popen(command_args,
                           stdout=subprocess.PIPE,
                           cwd=source_file.compile_command.work_dir,
+                          env=environment.command_env_vars(),
                           shell=True,
                           universal_newlines=True) as process:
         stdout, _ = process.communicate()
@@ -126,7 +127,7 @@ class AssemblerCommand(command.Command):
 
     def _run(self, args, environment):
         source_file = source.SourceFinder(environment).find_file(args.source_paths[0])
-        asm = _assembler_for_source_file(source_file, args.verbose_asm)
+        asm = _assembler_for_source_file(source_file, environment, args.verbose_asm)
 
         if args.count:
             counter = OpcodeCounter()
