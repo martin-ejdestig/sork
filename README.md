@@ -116,8 +116,9 @@ optional arguments:
 
 ### analyze
 
-Run Clang's static analyzer on source files that have an entry in the compilation database. Flags
-not understood by Clang, GCC specific warning flags for instance, are filtered out.
+Run Clang's static analyzer on source files that have an entry in the
+[compilation database](#build-directory-and-the-compilation-database). Flags not understood by
+Clang, GCC specific warning flags for instance, are filtered out.
 
 Command line usage:
 ```
@@ -135,7 +136,7 @@ optional arguments:
 ### asm
 
 Output assembler for compilation unit to standard output. Compiler and compilation flags are looked
-up in the compilation database.
+up in the [compilation database](#build-directory-and-the-compilation-database).
 
 Command line usage:
 ```
@@ -160,7 +161,8 @@ Style check source files. Available checks:
 - `clang-format`: Runs [clang-format](http://clang.llvm.org/docs/ClangFormat.html). Used to check
   formatting.
 - `clang-tidy`: Runs [clang-tidy](http://clang.llvm.org/extra/clang-tidy/index.html). Only invoked
-  for source files that have an entry in the compilation database.
+  for source files that have an entry in the
+  [compilation database](#build-directory-and-the-compilation-database).
 - `include_guard`: Verifies that include guards in header files are properly named. Currently
   requires include guards to be named according to the following format: &lt;PREFIX&gt;&lt;Upper
   case path of header with space, / and - replaced with underscore&gt;&lt;SUFFIX&gt;.
