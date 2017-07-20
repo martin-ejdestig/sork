@@ -22,7 +22,8 @@ def for_each(func, values, num_threads=None):
     aborted = False
 
     def wrapped_func(value):
-        return None if aborted else func(value)
+        if not aborted:
+            func(value)
 
     with concurrent.futures.ThreadPoolExecutor(num_threads) as executor:
         try:
