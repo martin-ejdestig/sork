@@ -24,7 +24,7 @@ import os
 from . import error
 
 
-COMPILE_COMMANDS_JSON_PATH = 'compile_commands.json'
+_COMPILE_COMMANDS_JSON_PATH = 'compile_commands.json'
 
 Command = collections.namedtuple('Command', ['invokation', 'work_dir', 'file'])
 
@@ -52,7 +52,7 @@ class BuildPathFinder:
     def _find_potential_paths(self):
         basename = os.path.basename(os.path.abspath(self._project_path))
 
-        patterns = [os.path.join(pattern, COMPILE_COMMANDS_JSON_PATH)
+        patterns = [os.path.join(pattern, _COMPILE_COMMANDS_JSON_PATH)
                     for pattern in self._build_path_patterns(self._project_path, basename)]
 
         paths = itertools.chain.from_iterable([glob.glob(p) for p in patterns])
@@ -75,7 +75,7 @@ class CompilationDatabase:
         if not build_path:
             build_path = BuildPathFinder(project_path).find_path()
 
-        self.path = os.path.join(build_path, COMPILE_COMMANDS_JSON_PATH)
+        self.path = os.path.join(build_path, _COMPILE_COMMANDS_JSON_PATH)
 
         self._commands = self._load(project_path)
 
