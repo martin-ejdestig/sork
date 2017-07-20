@@ -32,7 +32,7 @@ _CLASSES = [
     license_header.LicenseHeaderCheck
 ]
 
-NAMES = [c.NAME for c in _CLASSES]
+_NAMES = [c.NAME for c in _CLASSES]
 
 
 class ChecksCreator:
@@ -52,11 +52,11 @@ class ChecksCreator:
         names_set = set()
 
         if not check_strings or check_strings[0].startswith('-'):
-            names_set.update(NAMES)
+            names_set.update(_NAMES)
 
         for check_string in check_strings:
             disable = check_string.startswith('-')
-            names = [n for n in NAMES if re.match(check_string.lstrip('-'), n)]
+            names = [n for n in _NAMES if re.match(check_string.lstrip('-'), n)]
             if disable:
                 names_set.difference_update(names)
             else:

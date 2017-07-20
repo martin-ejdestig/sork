@@ -17,7 +17,6 @@
 
 import json
 
-from . import checks
 from . import error
 
 
@@ -25,7 +24,7 @@ _DEFAULT_CONFIG = {
     'source_exclude': '',
     'source_paths': ['.'],
 
-    'checks': checks.NAMES,
+    'checks': [],
     'checks.include_guard': {
         'prefix': '',
         'suffix': '_H',
