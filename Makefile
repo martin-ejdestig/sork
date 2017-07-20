@@ -12,4 +12,4 @@ all:
 check: pycodestyle pylint
 
 unittest:
-	@python -m unittest discover
+	@python3 -m unittest discover
