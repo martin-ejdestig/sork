@@ -18,13 +18,15 @@
 import sys
 import threading
 
+from typing import Any, Optional, TextIO
+
 
 _CLEAR_ENTIRE_LINE = '\x1b[2K'
 
 
 class ProgressPrinter:
-    def __init__(self, output=None, verbose=False):
-        self._output = sys.stdout if output is None else output
+    def __init__(self, output: Optional[TextIO] = None, verbose: bool = False) -> None:
+        self._output: TextIO = sys.stdout if output is None else output
         self._verbose = verbose
 
         self._lock = threading.Lock()
@@ -35,7 +37,7 @@ class ProgressPrinter:
         self._done_count = 0
         self._aborted = False
 
-    def start(self, info_string, done_count):
+    def start(self, info_string: str, done_count: int):
         with self._lock:
             self._info_string = info_string
             self._item = ''
@@ -49,7 +51,7 @@ class ProgressPrinter:
             self._aborted = True
             self._print_status()
 
-    def start_with_item(self, item):
+    def start_with_item(self, item: str):
         with self._lock:
             if self._verbose:
                 self._print('{}: {}\n'.format(self._info_string, item))
@@ -57,7 +59,7 @@ class ProgressPrinter:
                 self._item = item
             self._print_status()
 
-    def result(self, result):
+    def result(self, result: Any):
         with self._lock:
             self._count += 1
             if result:
@@ -80,7 +82,7 @@ class ProgressPrinter:
                                           trailing_str),
                     flush=True)
 
-    def _print(self, string, flush=False):
+    def _print(self, string: str, flush: bool = False):
         self._output.write(_CLEAR_ENTIRE_LINE + '\r' + string)
 
         if flush:

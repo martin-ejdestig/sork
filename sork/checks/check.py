@@ -17,15 +17,20 @@
 
 import abc
 
+from typing import Optional
+
+from ..environment import Environment
+from ..source import SourceFile
+
 
 class Check(abc.ABC):
     NAME = ''
 
-    def __init__(self, environment):
+    def __init__(self, environment: Environment) -> None:
         super().__init__()
         self._environment = environment
         self._config = environment.config.get('checks.' + self.NAME) if self.NAME else None
 
     @abc.abstractmethod
-    def check(self, source_file):
+    def check(self, source_file: SourceFile) -> Optional[str]:
         pass

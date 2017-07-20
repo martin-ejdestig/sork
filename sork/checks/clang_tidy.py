@@ -18,7 +18,11 @@
 import re
 import subprocess
 
+from typing import Optional
+
 from . import check
+
+from ..source import SourceFile
 
 
 _CLANG_TIDY_NOISE_LINES = [
@@ -36,9 +40,9 @@ _CLANG_TIDY_NOISE_REGEX = re.compile('(?m)^(' + '|'.join(_CLANG_TIDY_NOISE_LINES
 class ClangTidyCheck(check.Check):
     NAME = 'clang-tidy'
 
-    def check(self, source_file):
+    def check(self, source_file: SourceFile) -> Optional[str]:
         if not source_file.compile_command:
-            return
+            return None
 
         args = re.sub(r"^\S+ ", 'clang-tidy {} -- '.format(source_file.compile_command.file),
                       source_file.compile_command.invokation)

@@ -15,19 +15,22 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
+import argparse
+
 from . import command
 
-from .. import checks
 from .. import concurrent
-from .. import progress_printer
-from .. import source
+from ..checks import ChecksCreator
+from ..environment import Environment
+from ..progress_printer import ProgressPrinter
+from ..source import SourceFile, SourceFinder
 
 
 class CheckCommand(command.Command):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('check', arg_help='style check source code')
 
-    def _add_argparse_arguments(self, parser):
+    def _add_argparse_arguments(self, parser: argparse.ArgumentParser):
         parser.add_argument('-c',
                             '--checks',
                             type=str,
@@ -45,16 +48,16 @@ class CheckCommand(command.Command):
                                  'project\'s root.',
                             metavar='<path>')
 
-    def _run(self, args, environment):
+    def _run(self, args: argparse.Namespace, environment: Environment):
         check_strings = args.checks.split(',') if args.checks else environment.config['checks']
-        enabled_checks = checks.ChecksCreator(environment).create(check_strings, allow_none=False)
+        enabled_checks = ChecksCreator(environment).create(check_strings, allow_none=False)
 
-        source_files = source.SourceFinder(environment).find_files(args.source_paths)
+        source_files = SourceFinder(environment).find_files(args.source_paths)
 
-        printer = progress_printer.ProgressPrinter(verbose=args.verbose)
+        printer = ProgressPrinter(verbose=args.verbose)
         printer.start('Checking source', len(source_files))
 
-        def check_source_file(source_file):
+        def check_source_file(source_file: SourceFile):
             printer.start_with_item(source_file.path)
             outputs = (c.check(source_file) for c in enabled_checks)
             printer.result('\n'.join(o for o in outputs if o))

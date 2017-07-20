@@ -20,14 +20,16 @@ import os
 import shutil
 import subprocess
 
+from typing import Any, Dict, List
+
 from .. import error
 
 
-def is_meson_build_path(build_path):
+def is_meson_build_path(build_path: str) -> bool:
     return os.path.exists(os.path.join(build_path, 'meson-private'))
 
 
-def _introspect(args):
+def _introspect(args: List[str]) -> str:
     mesonintrospect = shutil.which('mesonintrospect')
 
     if not mesonintrospect:
@@ -43,7 +45,7 @@ def _introspect(args):
     return stdout
 
 
-def dependencies(build_path):
+def dependencies(build_path: str) -> List[Dict[str, Any]]:
     json_str = _introspect(['--dependencies', build_path])
 
     try:

@@ -21,6 +21,8 @@ import itertools
 import json
 import os
 
+from typing import Dict, List, Optional
+
 from . import error
 
 
@@ -30,10 +32,10 @@ Command = collections.namedtuple('Command', ['invokation', 'work_dir', 'file'])
 
 
 class BuildPathFinder:
-    def __init__(self, project_path):
+    def __init__(self, project_path: str) -> None:
         self._project_path = project_path
 
-    def find_path(self):
+    def find_path(self) -> str:
         paths = self._find_potential_paths()
 
         if not paths:
@@ -49,7 +51,7 @@ class BuildPathFinder:
 
         return paths[0]
 
-    def _find_potential_paths(self):
+    def _find_potential_paths(self) -> List[str]:
         basename = os.path.basename(os.path.abspath(self._project_path))
 
         patterns = [os.path.join(pattern, _COMPILE_COMMANDS_JSON_PATH)
@@ -60,7 +62,7 @@ class BuildPathFinder:
         return [os.path.dirname(os.path.normpath(path)) for path in paths]
 
     @staticmethod
-    def _build_path_patterns(project_path, basename):
+    def _build_path_patterns(project_path: str, basename: str) -> List[str]:
         pattern_dir_components = [
             ['*'],
             [os.path.pardir, basename + '*'],
@@ -71,7 +73,7 @@ class BuildPathFinder:
 
 
 class CompilationDatabase:
-    def __init__(self, project_path, build_path=None):
+    def __init__(self, project_path: str, build_path: Optional[str] = None) -> None:
         if not build_path:
             build_path = BuildPathFinder(project_path).find_path()
 
@@ -79,7 +81,7 @@ class CompilationDatabase:
 
         self._commands = self._load(project_path)
 
-    def _load(self, project_path):
+    def _load(self, project_path: str) -> Dict[str, Command]:
         try:
             with open(self.path) as file:
                 entries = json.load(file)
@@ -89,7 +91,8 @@ class CompilationDatabase:
         return self._json_entries_to_commands(entries, project_path)
 
     @staticmethod
-    def _json_entries_to_commands(entries, project_path):
+    def _json_entries_to_commands(entries: List[Dict[str, str]],
+                                  project_path: str) -> Dict[str, Command]:
         commands = {}
 
         for entry in entries:
@@ -100,5 +103,5 @@ class CompilationDatabase:
 
         return commands
 
-    def get_command(self, path):
+    def get_command(self, path: str) -> Optional[Command]:
         return self._commands.get(path)

@@ -19,8 +19,8 @@ import argparse
 import os
 
 from . import commands
-from . import environment
 from . import error
+from .environment import Environment
 
 
 _COMMANDS = [
@@ -30,14 +30,14 @@ _COMMANDS = [
 ]
 
 
-def _int_argument_greater_than_zero(string):
+def _int_argument_greater_than_zero(string: str) -> int:
     value = int(string)
     if value <= 0:
         raise argparse.ArgumentTypeError('invalid value {}, must be > 0'.format(value))
     return value
 
 
-def _create_arg_parser():
+def _create_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-bp',
@@ -61,7 +61,7 @@ def _create_arg_parser():
                                        help='-h or --help after <command> for more help',
                                        metavar='<command>')
     # Fix for bug introduced in 3.3.5. See http://bugs.python.org/issue9253#msg186387 .
-    subparsers.required = True
+    subparsers.required = True  # type: ignore
 
     for cmd in _COMMANDS:
         cmd.add_argparse_subparser(subparsers)
@@ -69,21 +69,23 @@ def _create_arg_parser():
     return parser
 
 
-def _path_in_project(args):
+def _path_in_project(args: argparse.Namespace) -> str:
     source_paths = args.source_paths if hasattr(args, 'source_paths') else None
     return source_paths[0] if source_paths else os.path.curdir
 
 
-def _create_environment(arg_parser, args):
+def _create_environment(arg_parser: argparse.ArgumentParser,
+                        args: argparse.Namespace) -> Environment:
     try:
-        return environment.Environment(_path_in_project(args), build_path=args.build_path)
+        env = Environment(_path_in_project(args), build_path=args.build_path)
     except error.Error as exception:
         print('{}\n'.format(exception))
         arg_parser.print_help()
         arg_parser.exit(1)
+    return env
 
 
-def _run_command(args, env):
+def _run_command(args: argparse.Namespace, env: Environment):
     try:
         args.run_command(args, env)
     except KeyboardInterrupt:

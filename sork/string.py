@@ -17,8 +17,10 @@
 
 import string
 
+from typing import Tuple
 
-def index_to_line_and_column(text, index):
+
+def index_to_line_and_column(text: str, index: int) -> Tuple[int, int]:
     if index < 0 or index >= len(text):
         raise ValueError('index must be >= 0 and < len(text)')
 
@@ -35,5 +37,5 @@ def index_to_line_and_column(text, index):
     return (line, column)
 
 
-def rstrip_single_char(to_strip, chars=string.whitespace):
+def rstrip_single_char(to_strip: str, chars: str = string.whitespace):
     return to_strip[:-1] if to_strip.endswith(tuple(chars)) else to_strip

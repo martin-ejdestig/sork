@@ -18,7 +18,7 @@ $
 
 ## Dependencies
 
-- Python (version 3.5 or later)
+- Python (version 3.6 or later)
 - Clang (clang-format, clang-tidy and static analyzer)
 
 

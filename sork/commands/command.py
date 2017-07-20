@@ -16,10 +16,18 @@
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
 import abc
+import argparse
+
+from typing import List, Optional
+
+from ..environment import Environment
 
 
 class Command(abc.ABC):
-    def __init__(self, name, aliases=None, arg_help=None):
+    def __init__(self,
+                 name,
+                 aliases: Optional[List[str]] = None,
+                 arg_help: Optional[str] = None) -> None:
         self._name = name
         self._aliases = aliases
         self._arg_help = arg_help
@@ -34,9 +42,9 @@ class Command(abc.ABC):
         self._add_argparse_arguments(parser)
 
     @abc.abstractmethod
-    def _add_argparse_arguments(self, parser):
+    def _add_argparse_arguments(self, parser: argparse.ArgumentParser):
         pass
 
     @abc.abstractmethod
-    def _run(self, args, environment):
+    def _run(self, args: argparse.Namespace, environment: Environment):
         pass

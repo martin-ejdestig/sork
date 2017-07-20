@@ -17,29 +17,33 @@
 
 import re
 
-from . import clang_format
-from . import clang_tidy
-from . import include_guard
-from . import license_header
+from typing import List, Type, Set
+
+from .check import Check
+from .clang_format import ClangFormatCheck
+from .clang_tidy import ClangTidyCheck
+from .include_guard import IncludeGuardCheck
+from .license_header import LicenseHeaderCheck
 
 from .. import error
+from ..environment import Environment
 
 
-_CLASSES = [
-    clang_format.ClangFormatCheck,
-    clang_tidy.ClangTidyCheck,
-    include_guard.IncludeGuardCheck,
-    license_header.LicenseHeaderCheck
+_CLASSES: List[Type[Check]] = [
+    ClangFormatCheck,
+    ClangTidyCheck,
+    IncludeGuardCheck,
+    LicenseHeaderCheck
 ]
 
 _NAMES = [c.NAME for c in _CLASSES]
 
 
 class ChecksCreator:
-    def __init__(self, environment):
+    def __init__(self, environment: Environment) -> None:
         self._environment = environment
 
-    def create(self, check_strings, allow_none=True):
+    def create(self, check_strings: List[str], allow_none: bool = True) -> List[Check]:
         names = self._strings_to_names(check_strings)
 
         if not names and not allow_none:
@@ -48,7 +52,7 @@ class ChecksCreator:
         return [c(self._environment) for c in _CLASSES if c.NAME in names]
 
     @staticmethod
-    def _strings_to_names(check_strings):
+    def _strings_to_names(check_strings: List[str]) -> Set[str]:
         names_set = set()
 
         if not check_strings or check_strings[0].startswith('-'):

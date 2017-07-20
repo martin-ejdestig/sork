@@ -21,9 +21,13 @@ import os
 import re
 import string
 
+from typing import Any, Dict, List, Optional, Pattern, Sequence
+
 from . import check
 
 from .. import error
+from ..environment import Environment
+from ..source import SourceFile
 
 
 # TODO: Make it possible to set allowed start/end year in config (default to start year <= current
@@ -46,7 +50,7 @@ from .. import error
 # TODO: Be less strict about line breaking in headers?
 
 
-_LICENSES = {
+_LICENSES: Dict[str, Dict[str, Any]] = {
     'apache2': {
         'content_pattern': r"\s*Apache License\s*\n"
                            r"\s*Version 2.0, January 2004",
@@ -181,7 +185,7 @@ _LICENSES = {
 _LICENSE_BASE_FILE_NAMES = ['COPYING', 'LICENSE']
 
 
-def _escape_regex_chars(unescaped):
+def _escape_regex_chars(unescaped: str) -> str:
     escaped = unescaped
     escaped = re.sub(r'\*', r'\*', escaped)
     escaped = re.sub(r'([()])', r'\\\1', escaped)
@@ -192,7 +196,7 @@ class LicenseDetector:
     def __init__(self, environment):
         self._environment = environment
 
-    def detect_license(self):
+    def detect_license(self) -> str:
         paths = self._find_license_paths()
         if not paths:
             raise error.Error('Unable to find any license file(s) in \'{}\'.'.
@@ -209,7 +213,7 @@ class LicenseDetector:
         raise error.Error('Unable to automatically determine license in \'{}\'.'.
                           format(self._environment.project_path))
 
-    def _find_license_paths(self):
+    def _find_license_paths(self) -> List[str]:
         patterns = [os.path.join(self._environment.project_path, self._pattern_ignore_case(n + '*'))
                     for n in _LICENSE_BASE_FILE_NAMES]
 
@@ -218,14 +222,14 @@ class LicenseDetector:
         return list(paths)
 
     @staticmethod
-    def _pattern_ignore_case(pattern):
+    def _pattern_ignore_case(pattern: str) -> str:
         def ignore_case_if_alpha(char):
             return '[{}{}]'.format(char.upper(), char.lower()) if char.isalpha() else char
 
         return ''.join([ignore_case_if_alpha(char) for char in pattern])
 
     @staticmethod
-    def _determine_license_in_file(path):
+    def _determine_license_in_file(path: str) -> str:
         try:
             with open(path) as file:
                 content = file.read()
@@ -242,11 +246,11 @@ class LicenseDetector:
 class LicenseHeaderCheck(check.Check):
     NAME = 'license_header'
 
-    def __init__(self, environment):
+    def __init__(self, environment: Environment) -> None:
         super().__init__(environment)
         self._license_regex = self._compile_license_regex()
 
-    def _compile_license_regex(self):
+    def _compile_license_regex(self) -> Pattern:
         template_str = self._join_header_lines(self._get_header_lines())
 
         template = string.Template(_escape_regex_chars(template_str))
@@ -259,7 +263,7 @@ class LicenseHeaderCheck(check.Check):
         except re.error:
             raise error.Error('Failed to compile regular expression for license header')
 
-    def _get_header_lines(self):
+    def _get_header_lines(self) -> Sequence[str]:
         license_key = self._config['license']
 
         if license_key:
@@ -271,7 +275,7 @@ class LicenseHeaderCheck(check.Check):
 
         return _LICENSES[license_key]['header_lines']
 
-    def _join_header_lines(self, lines):
+    def _join_header_lines(self, lines: Sequence[str]) -> str:
         prefix = self._config['prefix']
         line_prefix = self._config['line_prefix']
         suffix = self._config['suffix']
@@ -281,8 +285,8 @@ class LicenseHeaderCheck(check.Check):
 
         return ''.join([prefix, '\n'.join(prepend_prefix(l) for l in lines), suffix])
 
-    def check(self, source_file):
+    def check(self, source_file: SourceFile) -> Optional[str]:
         if not self._license_regex.match(source_file.content):
             return '{}: error: invalid license header'.format(source_file.path)
 
-        return ''
+        return None

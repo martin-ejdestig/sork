@@ -21,7 +21,10 @@ import os
 import re
 import threading
 
+from typing import Iterator, List, Optional
+
 from . import error
+from .environment import Environment
 
 
 _IN_EXTENSION = '.in'
@@ -33,35 +36,35 @@ _EXTENSIONS = _C_EXTENSIONS + _CPP_EXTENSIONS + _HEADER_EXTENSIONS + \
 
 
 class SourceFile:
-    def __init__(self, path, environment):
+    def __init__(self, path: str, environment: Environment) -> None:
         self.path = path
         self.compile_command = environment.compilation_database.get_command(path)
 
-        self._environment = environment
+        self.environment = environment
 
-        self._content = None
+        self._content: str = None
         self._content_lock = threading.Lock()
 
     @property
-    def content(self):
+    def content(self) -> str:
         with self._content_lock:
-            if not self._content:
+            if self._content is None:
                 self._content = self._read_content()
             return self._content
 
-    def _read_content(self):
-        with open(os.path.join(self._environment.project_path, self.path)) as file:
+    def _read_content(self) -> str:
+        with open(os.path.join(self.environment.project_path, self.path)) as file:
             return file.read()
 
     @property
-    def is_header(self):
+    def is_header(self) -> bool:
         stem, extension = os.path.splitext(self.path)
         if extension == _IN_EXTENSION:
             _, extension = os.path.splitext(stem)
         return extension in _HEADER_EXTENSIONS
 
     @property
-    def stem(self):
+    def stem(self) -> str:
         stem, extension = os.path.splitext(self.path)
         if extension == _IN_EXTENSION:
             stem, _ = os.path.splitext(stem)
@@ -69,14 +72,14 @@ class SourceFile:
 
 
 class SourceFinder:
-    def __init__(self, environment):
+    def __init__(self, environment: Environment) -> None:
         self._environment = environment
         self._normalized_project_path = environment.normalize_path(environment.project_path)
         self._normalized_build_path = environment.normalize_path(environment.build_path)
         self._exclude_regex = self._compile_exclude_regex(environment)
 
     @staticmethod
-    def _compile_exclude_regex(environment):
+    def _compile_exclude_regex(environment: Environment):
         pattern = environment.config['source_exclude']
         if not pattern:
             return None
@@ -86,13 +89,13 @@ class SourceFinder:
             raise error.Error('Failed to compile \'source_exclude\' regex (\'{}\') in '
                               'configuration.'.format(pattern))
 
-    def find_files(self, source_paths=None):
+    def find_files(self, source_paths: Optional[List[str]] = None) -> List[SourceFile]:
         if source_paths:
             source_paths = self._environment.normalize_paths(source_paths, filter_project_path=True)
 
         return [SourceFile(path, self._environment) for path in self._find_file_paths(source_paths)]
 
-    def find_file(self, path):
+    def find_file(self, path: str) -> SourceFile:
         files = self.find_files([path])
 
         if len(files) != 1:
@@ -100,10 +103,10 @@ class SourceFinder:
 
         return files[0]
 
-    def find_buildable_files(self, source_paths=None):
+    def find_buildable_files(self, source_paths: Optional[List[str]] = None) -> List[SourceFile]:
         return [sf for sf in self.find_files(source_paths) if sf.compile_command]
 
-    def _find_file_paths(self, source_paths=None):
+    def _find_file_paths(self, source_paths: Optional[List[str]] = None) -> List[str]:
         if not source_paths:
             source_paths = self._environment.config['source_paths'] or \
                            [self._normalized_project_path]
@@ -125,7 +128,7 @@ class SourceFinder:
 
         return sorted(paths)
 
-    def _verify_source_paths(self, source_paths):
+    def _verify_source_paths(self, source_paths: List[str]):
         if not source_paths:
             raise error.Error('No source paths specified.')
 
@@ -136,7 +139,7 @@ class SourceFinder:
             raise error.Error('The following source paths do not exist:\n{}'.
                               format('\n'.join(does_not_exist)))
 
-    def _should_be_included(self, path):
+    def _should_be_included(self, path: str) -> bool:
         if self._exclude_regex:
             if self._exclude_regex.match(path):
                 return False
@@ -147,7 +150,7 @@ class SourceFinder:
 
         return True
 
-    def _find_paths_in_dir(self, dir_path):
+    def _find_paths_in_dir(self, dir_path: str) -> Iterator[str]:
         patterns = [os.path.join(self._environment.project_path, dir_path, '**', '*' + extension)
                     for extension in _EXTENSIONS]
 

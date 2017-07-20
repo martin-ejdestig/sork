@@ -18,15 +18,19 @@
 import os
 import re
 
+from typing import Optional
+
 from . import check
 
 from .. import string
+from ..environment import Environment
+from ..source import SourceFile
 
 
 class IncludeGuardCheck(check.Check):
     NAME = 'include_guard'
 
-    def __init__(self, environment):
+    def __init__(self, environment: Environment) -> None:
         super().__init__(environment)
 
         self._prefix = self._config['prefix']
@@ -38,9 +42,9 @@ class IncludeGuardCheck(check.Check):
                                  r"#endif(?:\s+//\s+(?P<endif_comment>\S*))?\s*$",
                                  flags=re.DOTALL)
 
-    def check(self, source_file):
+    def check(self, source_file: SourceFile) -> Optional[str]:
         if not source_file.is_header:
-            return
+            return None
 
         match = self._regex.match(source_file.content)
 
@@ -64,7 +68,7 @@ class IncludeGuardCheck(check.Check):
 
         return '\n'.join(output)
 
-    def _include_guard_for_source_file(self, source_file):
+    def _include_guard_for_source_file(self, source_file: SourceFile) -> str:
         stripped_path = self._strip_path(source_file.stem)
         path_part = re.sub(r"[ /\\-]", '_', stripped_path).upper()
 
@@ -73,7 +77,7 @@ class IncludeGuardCheck(check.Check):
 
         return ''.join([self._prefix, path_part, self._suffix])
 
-    def _strip_path(self, path):
+    def _strip_path(self, path: str) -> str:
         for strip_path in self._config['strip_paths']:
             if os.path.commonpath([path, strip_path]):
                 return os.path.relpath(path, start=strip_path)

@@ -18,16 +18,18 @@
 import os
 import re
 
+from typing import Dict
 
-def _cmake_cache_path(build_path):
+
+def _cmake_cache_path(build_path: str) -> str:
     return os.path.join(build_path, 'CMakeCache.txt')
 
 
-def is_cmake_build_path(build_path):
+def is_cmake_build_path(build_path: str) -> bool:
     return os.path.exists(_cmake_cache_path(build_path))
 
 
-def internal_cache_variables(build_path):
+def internal_cache_variables(build_path: str) -> Dict[str, str]:
     variables = {}
 
     with open(_cmake_cache_path(build_path)) as file:

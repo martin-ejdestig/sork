@@ -17,8 +17,13 @@
 
 import concurrent.futures
 
+from typing import Callable, Optional, Sequence, TypeVar
 
-def for_each(func, values, num_threads=None):
+
+T = TypeVar('T')
+
+
+def for_each(func: Callable[[T], None], values: Sequence[T], num_threads: Optional[int] = None):
     aborted = False
 
     def wrapped_func(value):

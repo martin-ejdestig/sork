@@ -17,7 +17,12 @@
 
 import json
 
+from typing import Any, Dict
+
 from . import error
+
+
+Config = Dict[str, Any]
 
 
 _DEFAULT_CONFIG = {
@@ -40,7 +45,7 @@ _DEFAULT_CONFIG = {
 }
 
 
-def _verify_config(config, default_config, parent_path=None):
+def _verify_config(config: Config, default_config: Config, parent_path: str = None):
     def full_path(key):
         return '{}.{}'.format(parent_path, key) if parent_path else key
 
@@ -62,7 +67,7 @@ def _verify_config(config, default_config, parent_path=None):
                                       format(full_path(key)))
 
 
-def _merge_configs(default_config, override_config):
+def _merge_configs(default_config: Config, override_config: Config) -> Config:
     config = {}
 
     for key, value in override_config.items():
@@ -74,8 +79,8 @@ def _merge_configs(default_config, override_config):
     return {**default_config, **config}
 
 
-def load_config(path):
-    config = {}
+def load_config(path: str) -> Config:
+    config: Config = {}
 
     try:
         with open(path) as file:

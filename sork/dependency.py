@@ -18,22 +18,24 @@
 import re
 import sys
 
+from typing import List, TextIO
+
 from .build_systems import cmake
 from .build_systems import meson
 
 
 class Dependency:
-    def __init__(self, name, include_paths):
+    def __init__(self, name: str, include_paths: List[str]) -> None:
         self.name = name
         self.include_paths = include_paths
 
 
 class DependencyFinder:
-    def __init__(self, build_path, error_output=sys.stderr):
+    def __init__(self, build_path: str, error_output: TextIO = sys.stderr) -> None:
         self._build_path = build_path
         self._error_output = error_output
 
-    def find(self):
+    def find(self) -> List[Dependency]:
         if meson.is_meson_build_path(self._build_path):
             return self._meson_dependencies()
 
@@ -44,13 +46,13 @@ class DependencyFinder:
 
         return []
 
-    def _meson_dependencies(self):
+    def _meson_dependencies(self) -> List[Dependency]:
         deps = meson.dependencies(self._build_path)
 
         return [Dependency(dep['name'], self._include_paths_from_args(dep['compile_args']))
                 for dep in deps]
 
-    def _cmake_dependencies(self):
+    def _cmake_dependencies(self) -> List[Dependency]:
         deps = []
 
         # Currently only catches pkg-config dependencies for sure. Other CMake modules may do
@@ -67,11 +69,11 @@ class DependencyFinder:
 
         return deps
 
-    def _log_warning(self, message):
+    def _log_warning(self, message: str):
         print('Warning: {}'.format(message), file=self._error_output)
 
     @staticmethod
-    def _include_paths_from_args(args):
+    def _include_paths_from_args(args: List[str]) -> List[str]:
         paths = []
 
         for arg in args:

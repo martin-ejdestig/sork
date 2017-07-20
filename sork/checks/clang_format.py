@@ -18,24 +18,32 @@
 import difflib
 import subprocess
 
+from typing import Optional
+
 from . import check
 
 from .. import string
+from ..source import SourceFile
 
 
-def _custom_diff(path, content, formatted):
+_DIFF_CONTEXT = 1
+
+
+def _custom_diff(path: str, content: str, formatted: str) -> str:
     content_lines = content.splitlines(True)
     formatted_lines = formatted.splitlines(True)
     diff_lines = []
-    context = 1
 
     for group in difflib.SequenceMatcher(None,
                                          content_lines,
-                                         formatted_lines).get_grouped_opcodes(context):
-        first_line = group[0][1] + 1
+                                         formatted_lines).get_grouped_opcodes(_DIFF_CONTEXT):
+        first_line = int(group[0][1]) + 1  # difflib confuses mypy, unconfuse with int().
         diff_lines.append('{}:{}: error: wrong format:\n'.format(path, first_line))
 
-        for tag, content_start, content_end, formatted_start, formatted_end in group:
+        for opcode in group:
+            # mypy issues 'builtins.object' object is not iterable here. Not sure if it is a mypy
+            # bug or if it is not possible to deduce type from difflib. Ignore for now.
+            tag, content_start, content_end, formatted_start, formatted_end = opcode  # type: ignore
             if tag == 'equal':
                 for line in content_lines[content_start:content_end]:
                     diff_lines.append(' ' + line)
@@ -46,13 +54,13 @@ def _custom_diff(path, content, formatted):
                 for line in formatted_lines[formatted_start:formatted_end]:
                     diff_lines.append('+' + line)
 
-    return diff_lines
+    return ''.join(diff_lines)
 
 
 class ClangFormatCheck(check.Check):
     NAME = 'clang-format'
 
-    def check(self, source_file):
+    def check(self, source_file: SourceFile) -> Optional[str]:
         with subprocess.Popen('clang-format',
                               stdin=subprocess.PIPE,
                               stdout=subprocess.PIPE,
@@ -63,6 +71,6 @@ class ClangFormatCheck(check.Check):
             if process.returncode != 0:
                 return stderr
 
-        diff_lines = _custom_diff(source_file.path, source_file.content, stdout)
+        diff_str = _custom_diff(source_file.path, source_file.content, stdout)
 
-        return string.rstrip_single_char(''.join(diff_lines), '\n')
+        return string.rstrip_single_char(diff_str, '\n')

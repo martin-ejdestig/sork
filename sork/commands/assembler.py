@@ -15,16 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
+import argparse
 import re
 import subprocess
+
+from typing import Dict, List, Tuple
 
 from . import command
 
 from .. import error
-from .. import source
+from ..environment import Environment
+from ..source import SourceFile, SourceFinder
 
 
-def _assembler_for_source_file(source_file, environment, verbose=False):
+def _assembler_for_source_file(source_file: SourceFile, verbose: bool = False) -> str:
     if not source_file.compile_command:
         raise error.Error('Do not know how to compile "{}".'.format(source_file.path))
 
@@ -41,7 +45,7 @@ def _assembler_for_source_file(source_file, environment, verbose=False):
     with subprocess.Popen(command_args,
                           stdout=subprocess.PIPE,
                           cwd=source_file.compile_command.work_dir,
-                          env=environment.command_env_vars(),
+                          env=source_file.environment.command_env_vars(),
                           shell=True,
                           universal_newlines=True) as process:
         stdout, _ = process.communicate()
@@ -52,12 +56,12 @@ def _assembler_for_source_file(source_file, environment, verbose=False):
 
 
 class OpcodeCounter:
-    def __init__(self):
-        self._total = {}
-        self._current = self._total
-        self._per_label = []
+    def __init__(self) -> None:
+        self._total: Dict[str, int] = {}
+        self._current: Dict[str, int] = self._total
+        self._per_label: List[Tuple[str, Dict[str, int]]] = []
 
-    def count_in_string(self, asm):
+    def count_in_string(self, asm: str):
         label_re = r"(?P<label>[a-zA-Z_]+.*):"
         opcode_re = r"\s+(?P<opcode>[a-z]+)\s+"
         regex = re.compile('|'.join([label_re, opcode_re]))
@@ -78,13 +82,13 @@ class OpcodeCounter:
                 self._count_opcode(self._current, opcode)
 
     @staticmethod
-    def _count_opcode(counters, opcode):
+    def _count_opcode(counters: Dict[str, int], opcode: str):
         if opcode in counters:
             counters[opcode] += 1
         else:
             counters[opcode] = 1
 
-    def get_comment(self):
+    def get_comment(self) -> str:
         total_label = 'Total opcode count'
         labels_and_counters = [(total_label, self._total)] if len(self._per_label) > 1 else []
         labels_and_counters += self._per_label
@@ -107,7 +111,7 @@ class AssemblerCommand(command.Command):
                          aliases=['assembler'],
                          arg_help='output assembler for compilation unit')
 
-    def _add_argparse_arguments(self, parser):
+    def _add_argparse_arguments(self, parser: argparse.ArgumentParser):
         parser.add_argument('-c',
                             '--count',
                             action='store_true',
@@ -125,9 +129,9 @@ class AssemblerCommand(command.Command):
                             help='Source file to output assembler for.',
                             metavar='<file>')
 
-    def _run(self, args, environment):
-        source_file = source.SourceFinder(environment).find_file(args.source_paths[0])
-        asm = _assembler_for_source_file(source_file, environment, args.verbose_asm)
+    def _run(self, args: argparse.Namespace, environment: Environment):
+        source_file = SourceFinder(environment).find_file(args.source_paths[0])
+        asm = _assembler_for_source_file(source_file, args.verbose_asm)
 
         if args.count:
             counter = OpcodeCounter()
