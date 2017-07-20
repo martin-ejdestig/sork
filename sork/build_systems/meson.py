@@ -51,10 +51,4 @@ def dependencies(build_path):
     except json.JSONDecodeError as exception:
         raise error.Error('Failed to decode Meson introspection data: {}', exception)
 
-    if not isinstance(json_object, dict):
-        raise error.Error('Meson introspection JSON for dependencies is not an object.')
-
-    # dict() only needed to unconfuse pylint when using items() on return value. Thinks return
-    # value from json.loads() is a bool. Even with isinstance check above. Adding a "-> dict"
-    # type hint to function signature does not help either. *sigh*
-    return dict(json_object)
+    return json_object

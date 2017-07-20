@@ -47,8 +47,8 @@ class DependencyFinder:
     def _meson_dependencies(self):
         deps = meson.dependencies(self._build_path)
 
-        return [Dependency(name, self._include_paths_from_args(values['compile_args']))
-                for name, values in deps.items()]
+        return [Dependency(dep['name'], self._include_paths_from_args(dep['compile_args']))
+                for dep in deps]
 
     def _cmake_dependencies(self):
         deps = []
