@@ -27,7 +27,7 @@ class IncludeGuardCheck(check.Check):
     NAME = 'include_guard'
 
     def __init__(self, environment):
-        super().__init__(self.NAME, environment)
+        super().__init__(environment)
 
         self._prefix = self._config['prefix']
         self._suffix = self._config['suffix']

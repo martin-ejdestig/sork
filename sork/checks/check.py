@@ -19,10 +19,12 @@ import abc
 
 
 class Check(abc.ABC):
-    def __init__(self, name, environment):
+    NAME = ''
+
+    def __init__(self, environment):
         super().__init__()
         self._environment = environment
-        self._config = environment.config.get('checks.' + name)
+        self._config = environment.config.get('checks.' + self.NAME) if self.NAME else None
 
     @abc.abstractmethod
     def check(self, source_file):

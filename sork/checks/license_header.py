@@ -243,7 +243,7 @@ class LicenseHeaderCheck(check.Check):
     NAME = 'license_header'
 
     def __init__(self, environment):
-        super().__init__(self.NAME, environment)
+        super().__init__(environment)
         self._license_regex = self._compile_license_regex()
 
     def _compile_license_regex(self):
