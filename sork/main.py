@@ -17,6 +17,7 @@
 
 import argparse
 import os
+import sys
 
 from . import commands
 from . import error
@@ -74,14 +75,12 @@ def _path_in_project(args: argparse.Namespace) -> str:
     return source_paths[0] if source_paths else os.path.curdir
 
 
-def _create_environment(arg_parser: argparse.ArgumentParser,
-                        args: argparse.Namespace) -> Environment:
+def _create_environment(args: argparse.Namespace) -> Environment:
     try:
         env = Environment(_path_in_project(args), build_path=args.build_path)
     except error.Error as exception:
-        print('{}\n'.format(exception))
-        arg_parser.print_help()
-        arg_parser.exit(1)
+        print(exception)
+        sys.exit(1)
     return env
 
 
@@ -97,6 +96,6 @@ def _run_command(args: argparse.Namespace, env: Environment):
 def main():
     arg_parser = _create_arg_parser()
     args = arg_parser.parse_args()
-    env = _create_environment(arg_parser, args)
+    env = _create_environment(args)
 
     _run_command(args, env)
