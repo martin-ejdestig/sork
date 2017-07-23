@@ -72,7 +72,12 @@ _SCHEMA = {
             'type': 'object',
             'additionalProperties': False,
             'properties': {
-                'license': {'type': 'string'},
+                'license': {
+                    'anyOf': [
+                        {'type': 'string'},
+                        {'type': 'array', 'minItems': 1, 'items': {'type': 'string'}}
+                    ]
+                },
                 'line_prefix': {'type': 'string'},
                 'prefix': {'type': 'string'},
                 'project': {'type': 'string'},

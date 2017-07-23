@@ -37,11 +37,6 @@ from ..source import SourceFile
 #
 # TODO: More informative error output than "invalid header". (diff? just print erroneous line #?)
 #
-# TODO: Maybe make it possible to specify a custom license text. E.g. if config['license'] does
-#       not match any license in _LICENSES, see if it is a string containing $project, $year
-#       and/or $author... something along those lines... Or maybe just check for a string longer
-#       than X chars.
-#
 # TODO: Projects that contain multiple licenses are not handled. Allow for specifying list of
 #       licenses in config and also handle detecting multiple COPYING*/LICENSE* files? Use
 #       '(' + '|'.join(<list of header regexps>) + ')' when compiling regex to match against
@@ -264,16 +259,19 @@ class LicenseHeaderCheck(check.Check):
             raise error.Error('Failed to compile regular expression for license header')
 
     def _get_header_lines(self) -> Sequence[str]:
-        license_key = self._config['license']
+        key_or_lines = self._config['license']
 
-        if license_key:
-            if license_key.lower() not in _LICENSES:
-                raise error.Error('{} is an unknown license'.format(license_key))
-            license_key = license_key.lower()
+        if isinstance(key_or_lines, list):
+            return key_or_lines
+
+        if key_or_lines:
+            key = key_or_lines.lower()
+            if key not in _LICENSES:
+                raise error.Error('{} is an unknown license'.format(key_or_lines))
         else:
-            license_key = LicenseDetector(self._environment).detect_license()
+            key = LicenseDetector(self._environment).detect_license()
 
-        return _LICENSES[license_key]['header_lines']
+        return _LICENSES[key]['header_lines']
 
     def _join_header_lines(self, lines: Sequence[str]) -> str:
         prefix = self._config['prefix']
