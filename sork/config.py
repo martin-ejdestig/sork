@@ -19,6 +19,8 @@ import json
 
 from typing import Any, Dict
 
+import jsonschema
+
 from . import error
 
 
@@ -30,11 +32,13 @@ _DEFAULT_CONFIG = {
     'source_paths': ['.'],
 
     'checks': [],
+
     'checks.include_guard': {
         'prefix': '',
         'suffix': '_H',
         'strip_paths': ['include', 'src']
     },
+
     'checks.license_header': {
         'license': '',
         'project': '',
@@ -44,51 +48,68 @@ _DEFAULT_CONFIG = {
     }
 }
 
+_SCHEMA = {
+    '$schema': 'http://json-schema.org/draft-04/schema#',
+    'type': 'object',
+    'additionalProperties': False,
+    'properties': {
+        'source_exclude': {'type': 'string'},
+        'source_paths': {'type': 'array', 'items': {'type': 'string'}},
 
-def _verify_config(config: Config, default_config: Config, parent_path: str = None):
-    def full_path(key):
-        return '{}.{}'.format(parent_path, key) if parent_path else key
+        'checks': {'type': 'array', 'items': {'type': 'string'}},
 
-    for key, value in config.items():
-        if key not in default_config:
-            raise error.Error('Unknown configuration key "{}"'.format(full_path(key)))
+        'checks.include_guard': {
+            'type': 'object',
+            'additionalProperties': False,
+            'properties': {
+                'prefix': {'type': 'string'},
+                'strip_paths': {'type': 'array', 'items': {'type': 'string'}},
+                'suffix': {'type': 'string'}
+            },
+        },
 
-        default_value = default_config[key]
+        'checks.license_header': {
+            'type': 'object',
+            'additionalProperties': False,
+            'properties': {
+                'license': {'type': 'string'},
+                'line_prefix': {'type': 'string'},
+                'prefix': {'type': 'string'},
+                'project': {'type': 'string'},
+                'suffix': {'type': 'string'}
+            }
+        }
+    }
+}
 
-        if not isinstance(value, type(default_value)):
-            raise error.Error('Value for "{}" is of wrong type'.format(full_path(key)))
 
-        if isinstance(value, dict):
-            _verify_config(value, default_value, full_path(key))
-        elif isinstance(value, list):
-            if value and default_value:
-                if not all(isinstance(element, type(default_value[0])) for element in value):
-                    raise error.Error('List element for "{}" is of wrong type'.
-                                      format(full_path(key)))
-
-
-def _merge_configs(default_config: Config, override_config: Config) -> Config:
+def _merge(default_config: Config, override_config: Config) -> Config:
     config = {}
 
     for key, value in override_config.items():
         if isinstance(value, dict):
-            config[key] = _merge_configs(default_config[key], value)
+            config[key] = _merge(default_config[key], value)
         else:
             config[key] = value
 
     return {**default_config, **config}
 
 
-def load_config(path: str) -> Config:
+def _load(path: str) -> Config:
+    try:
+        with open(path) as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return {}
+
+
+def create(path: str) -> Config:
     config: Config = {}
 
     try:
-        with open(path) as file:
-            config = json.load(file)
-        _verify_config(config, _DEFAULT_CONFIG)
-    except FileNotFoundError:
-        pass
+        config = _merge(_DEFAULT_CONFIG, _load(path))
+        jsonschema.validate(config, _SCHEMA)
     except Exception as exception:
         raise error.Error('{}: {}'.format(path, exception))
 
-    return _merge_configs(_DEFAULT_CONFIG, config)
+    return config

@@ -59,7 +59,7 @@ class Environment:
         self.project_path = _find_project_path(path_in_project)
         self.build_path = build_path
 
-        self.config = config.load_config(os.path.join(self.project_path, _DOT_SORK_PATH))
+        self.config = config.create(os.path.join(self.project_path, _DOT_SORK_PATH))
 
         self.compilation_database = compilation_database.CompilationDatabase(self.project_path,
                                                                              self.build_path)

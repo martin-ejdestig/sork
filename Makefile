@@ -12,7 +12,7 @@ all:
 check: mypy pycodestyle pylint
 
 mypy:
-	mypy -p sork
+	mypy --ignore-missing-imports -p sork
 
 unittest:
 	@python3 -m unittest discover
