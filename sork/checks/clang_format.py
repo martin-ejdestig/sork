@@ -41,7 +41,7 @@ def _custom_diff(path: str, content: str, formatted: str) -> str:
         diff_lines.append('{}:{}: error: wrong format:\n'.format(path, first_line))
 
         for opcode in group:
-            # mypy issues 'builtins.object' object is not iterable here. Not sure if it is a mypy
+            # mypy issues "'builtins.object' object is not iterable" here. Not sure if it is a mypy
             # bug or if it is not possible to deduce type from difflib. Ignore for now.
             tag, content_start, content_end, formatted_start, formatted_end = opcode  # type: ignore
             if tag == 'equal':
