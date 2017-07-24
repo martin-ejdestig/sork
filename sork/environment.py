@@ -22,8 +22,8 @@ from typing import Dict, List, Optional
 
 from . import compilation_database
 from . import config
-from . import dependency
 from . import error
+from .build_systems import dependency
 
 
 _NORMALIZED_PROJECT_PATH = os.path.curdir

@@ -20,8 +20,8 @@ import sys
 
 from typing import List, TextIO
 
-from .build_systems import cmake
-from .build_systems import meson
+from . import cmake
+from . import meson
 
 
 class Dependency:
