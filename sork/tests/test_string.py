@@ -20,7 +20,7 @@ import unittest
 from .. import string
 
 
-class TestString(unittest.TestCase):
+class StringTestCase(unittest.TestCase):
     def test_index_to_line_and_column(self):
         self.assertEqual(string.index_to_line_and_column('a', 0), (1, 1))
 
