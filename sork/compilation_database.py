@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-import collections
 import glob
 import itertools
 import json
@@ -28,7 +27,12 @@ from . import error
 
 _COMPILE_COMMANDS_JSON_PATH = 'compile_commands.json'
 
-Command = collections.namedtuple('Command', ['invokation', 'work_dir', 'file'])
+
+class Command:
+    def __init__(self, invokation: str, work_dir: str, file: str) -> None:
+        self.invokation = invokation
+        self.work_dir = work_dir
+        self.file = file
 
 
 class BuildPathFinder:
