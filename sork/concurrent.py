@@ -33,7 +33,9 @@ def for_each(func: Callable[[T], None], values: Sequence[T], num_threads: Option
     with concurrent.futures.ThreadPoolExecutor(num_threads) as executor:
         try:
             futures = [executor.submit(wrapped_func, value) for value in values]
-            concurrent.futures.wait(futures)
+            for future in concurrent.futures.as_completed(futures):
+                if future.exception():
+                    raise future.exception()
         except BaseException:
             aborted = True
             raise
