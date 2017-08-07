@@ -109,8 +109,6 @@ def _load(path: str) -> Config:
 
 
 def create(path: str) -> Config:
-    config: Config = {}
-
     try:
         config = _merge(_DEFAULT_CONFIG, _load(path))
         jsonschema.validate(config, _SCHEMA)
