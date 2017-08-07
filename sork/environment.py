@@ -31,6 +31,66 @@ _NORMALIZED_PROJECT_PATH = os.path.curdir
 _DOT_SORK_PATH = '.sork'
 _DOT_PATHS_IN_PROJECT_ROOT = ['.git', _DOT_SORK_PATH]
 
+_CONFIG_DEFAULT = {
+    'source_exclude': '',
+    'source_paths': ['.'],
+
+    'checks': [],
+
+    'checks.include_guard': {
+        'prefix': '',
+        'suffix': '_H',
+        'strip_paths': ['include', 'src']
+    },
+
+    'checks.license_header': {
+        'license': '',
+        'project': '',
+        'prefix': '/**\n',
+        'line_prefix': ' * ',
+        'suffix': '\n */\n'
+    }
+}
+
+_CONFIG_SCHEMA = {
+    '$schema': 'http://json-schema.org/draft-04/schema#',
+    'type': 'object',
+    'additionalProperties': False,
+    'properties': {
+        'source_exclude': {'type': 'string'},
+        'source_paths': {'type': 'array', 'items': {'type': 'string'}},
+
+        'checks': {'type': 'array', 'items': {'type': 'string'}},
+
+        'checks.include_guard': {
+            'type': 'object',
+            'additionalProperties': False,
+            'properties': {
+                'prefix': {'type': 'string'},
+                'strip_paths': {'type': 'array', 'items': {'type': 'string'}},
+                'suffix': {'type': 'string'}
+            },
+        },
+
+        'checks.license_header': {
+            'type': 'object',
+            'additionalProperties': False,
+            'properties': {
+                'license': {
+                    'anyOf': [
+                        {'type': 'string'},
+                        {'type': 'array', 'minItems': 1, 'items': {'type': 'string'}}
+                    ]
+                },
+                'line_prefix': {'type': 'string'},
+                'prefix': {'type': 'string'},
+                'project': {'type': 'string'},
+                'suffix': {'type': 'string'}
+            }
+        }
+    }
+}
+
 
 def _is_project_path(path: str) -> bool:
     return any(os.path.exists(os.path.join(path, dp))
@@ -59,7 +119,9 @@ class Environment:
         self.project_path = _find_project_path(path_in_project)
         self.build_path = build_path
 
-        self.config = config.create(os.path.join(self.project_path, _DOT_SORK_PATH))
+        self.config = config.create(os.path.join(self.project_path, _DOT_SORK_PATH),
+                                    _CONFIG_DEFAULT,
+                                    _CONFIG_SCHEMA)
 
         self.compilation_database = compilation_database.CompilationDatabase(self.project_path,
                                                                              self.build_path)
