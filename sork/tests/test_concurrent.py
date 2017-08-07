@@ -27,11 +27,11 @@ class ForEachTestCase(unittest.TestCase):
         lock = threading.Lock()
         called = [False] * 10
 
-        def add(index):
+        def set_called(index):
             with lock:
                 called[index] = True
 
-        concurrent.for_each(add, range(len(called)))
+        concurrent.for_each(set_called, range(len(called)))
 
         self.assertTrue(all(called))
 
