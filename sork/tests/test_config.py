@@ -97,13 +97,11 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(cfg['object1']['integer2'], 987)
 
     def test_unknown_property(self):
-        with self.assertRaises(error.Error) as ctx:
+        with self.assertRaisesRegex(error.Error, 'unknown1'):
             _test_config_from_content('{ "unknown1": "foo" }')
-        self.assertIn('unknown1', str(ctx.exception))
 
-        with self.assertRaises(error.Error) as ctx:
+        with self.assertRaisesRegex(error.Error, 'unknown2'):
             _test_config_from_content('{ "object1": { "unknown2": "foo" } }')
-        self.assertIn('unknown2', str(ctx.exception))
 
     def test_wrong_type(self):
         with self.assertRaises(error.Error):
