@@ -1,4 +1,4 @@
 .PHONY: mypy
 
 mypy:
-	mypy --ignore-missing-imports -p sork
+	mypy -p sork

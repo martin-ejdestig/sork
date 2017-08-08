@@ -22,55 +22,41 @@ from .. import config
 from .. import error
 
 
-_TEST_CONFIG_DEFAULT = {
-    'string1': 'abc',
-    'integer1': 123,
-    'string_array1': ['def', 'ghi'],
-    'object1': {
-        'string2': 'jkl',
-        'integer2': 456
-    }
-}
-
-_TEST_CONFIG_SCHEMA = {
-    '$schema': 'http://json-schema.org/draft-04/schema#',
-    'type': 'object',
-    'additionalProperties': False,
-    'properties': {
-        'string1': {'type': 'string'},
-        'integer1': {'type': 'integer'},
-        'string_array1': {'type': 'array', 'items': {'type': 'string'}},
-        'object1': {
-            'type': 'object',
-            'additionalProperties': False,
-            'properties': {
-                'string2': {'type': 'string'},
-                'integer2': {'type': 'integer'}
-            }
-        }
-    }
-}
-
-
-def _test_config_create(path: str) -> config.Config:
-    return config.create(path, _TEST_CONFIG_DEFAULT, _TEST_CONFIG_SCHEMA)
+_TEST_CONFIG_SCHEMA = config.Schema({
+    'string1': config.Value('abc'),
+    'integer1': config.Value(123),
+    'bool1': config.Value(False),
+    'string_list1': config.Value(['def', 'ghi']),
+    'integer_list1': config.Value([456], types=[config.ListType(int, min_length=1)]),
+    'object1': config.Value({
+        'string2': config.Value('jkl'),
+        'integer2': config.Value(789)
+    }),
+    'multiple_types': config.Value('mno',
+                                   types=[config.Type(str),
+                                          config.Type(int),
+                                          config.ListType(str)])
+})
 
 
 def _test_config_from_content(content: str) -> config.Config:
     with tempfile.NamedTemporaryFile(mode='wt') as file:
         file.write(content)
         file.flush()
-        return _test_config_create(file.name)
+        return config.create(file.name, _TEST_CONFIG_SCHEMA)
 
 
-class TestConfig(unittest.TestCase):
+class ConfigTestCase(unittest.TestCase):
     def test_does_not_exist(self):
-        cfg = _test_config_create('does_not_exist')
+        cfg = config.create('does_not_exist', _TEST_CONFIG_SCHEMA)
         self.assertEqual(cfg['string1'], 'abc')
         self.assertEqual(cfg['integer1'], 123)
-        self.assertEqual(cfg['string_array1'], ['def', 'ghi'])
+        self.assertEqual(cfg['bool1'], False)
+        self.assertEqual(cfg['string_list1'], ['def', 'ghi'])
+        self.assertEqual(cfg['integer_list1'], [456])
         self.assertEqual(cfg['object1']['string2'], 'jkl')
-        self.assertEqual(cfg['object1']['integer2'], 456)
+        self.assertEqual(cfg['object1']['integer2'], 789)
+        self.assertEqual(cfg['multiple_types'], 'mno')
 
     def test_empty(self):
         with self.assertRaises(error.Error):
@@ -84,29 +70,102 @@ class TestConfig(unittest.TestCase):
         cfg = _test_config_from_content('{}')
         self.assertEqual(cfg['string1'], 'abc')
         self.assertEqual(cfg['integer1'], 123)
-        self.assertEqual(cfg['string_array1'], ['def', 'ghi'])
+        self.assertEqual(cfg['bool1'], False)
+        self.assertEqual(cfg['string_list1'], ['def', 'ghi'])
+        self.assertEqual(cfg['integer_list1'], [456])
         self.assertEqual(cfg['object1']['string2'], 'jkl')
-        self.assertEqual(cfg['object1']['integer2'], 456)
+        self.assertEqual(cfg['object1']['integer2'], 789)
+        self.assertEqual(cfg['multiple_types'], 'mno')
 
     def test_file_overrides_default(self):
-        cfg = _test_config_from_content('{ "string1": "ZYX", "object1": { "integer2": 987 } }')
+        cfg = _test_config_from_content('{ "string1": "ZYX", '
+                                        '  "bool1": true, '
+                                        '  "object1": { "integer2": 987 } }')
         self.assertEqual(cfg['string1'], 'ZYX')
         self.assertEqual(cfg['integer1'], 123)
-        self.assertEqual(cfg['string_array1'], ['def', 'ghi'])
+        self.assertEqual(cfg['bool1'], True)
+        self.assertEqual(cfg['string_list1'], ['def', 'ghi'])
+        self.assertEqual(cfg['integer_list1'], [456])
         self.assertEqual(cfg['object1']['string2'], 'jkl')
         self.assertEqual(cfg['object1']['integer2'], 987)
+        self.assertEqual(cfg['multiple_types'], 'mno')
 
     def test_unknown_property(self):
         with self.assertRaisesRegex(error.Error, 'unknown1'):
             _test_config_from_content('{ "unknown1": "foo" }')
 
-        with self.assertRaisesRegex(error.Error, 'unknown2'):
+        with self.assertRaisesRegex(error.Error, 'object1.unknown2'):
             _test_config_from_content('{ "object1": { "unknown2": "foo" } }')
 
     def test_wrong_type(self):
-        with self.assertRaises(error.Error):
+        with self.assertRaisesRegex(error.Error, 'string1'):
             _test_config_from_content('{ "string1": 123 }')
 
-    def test_wrong_type_in_array(self):
-        with self.assertRaises(error.Error):
-            _test_config_from_content('{ "string_array1": ["abc", 123] }')
+        with self.assertRaisesRegex(error.Error, 'string_list1'):
+            _test_config_from_content('{ "string_list1": 123 }')
+
+        with self.assertRaisesRegex(error.Error, 'object1.integer2'):
+            _test_config_from_content('{ "object1": { "integer2": "foo" } }')
+
+    def test_wrong_type_in_list(self):
+        with self.assertRaisesRegex(error.Error, 'string_list1'):
+            _test_config_from_content('{ "string_list1": [123] }')
+
+        with self.assertRaisesRegex(error.Error, 'string_list1'):
+            _test_config_from_content('{ "string_list1": ["abc", 123] }')
+
+    def test_empty_list_ok(self):
+        cfg = _test_config_from_content('{ "string_list1": [] }')
+        self.assertEqual(cfg['string_list1'], [])
+
+    def test_min_list_length(self):
+        cfg = _test_config_from_content('{ "integer_list1": [9, 8] }')
+        self.assertEqual(cfg['integer_list1'], [9, 8])
+
+        with self.assertRaisesRegex(error.Error, 'integer_list1'):
+            _test_config_from_content('{ "integer_list1": [] }')
+
+    def test_bool_not_ok_as_int(self):  # Explicitly test this since isinstance(True, int) == True.
+        with self.assertRaisesRegex(error.Error, 'integer1'):
+            _test_config_from_content('{ "integer1": true }')
+
+        with self.assertRaisesRegex(error.Error, 'integer_list1'):
+            _test_config_from_content('{ "integer_list1": [true] }')
+
+    def test_multiple_types(self):
+        cfg = _test_config_from_content('{ "multiple_types": "a string" }')
+        self.assertEqual(cfg['multiple_types'], 'a string')
+
+        cfg = _test_config_from_content('{ "multiple_types": 123456 }')
+        self.assertEqual(cfg['multiple_types'], 123456)
+
+        cfg = _test_config_from_content('{ "multiple_types": ["a", "list", "of", "strings"] }')
+        self.assertEqual(cfg['multiple_types'], ['a', 'list', 'of', 'strings'])
+
+        with self.assertRaisesRegex(error.Error, 'multiple_types'):
+            _test_config_from_content('{ "multiple_types": true }')
+
+        with self.assertRaisesRegex(error.Error, 'multiple_types'):
+            _test_config_from_content('{ "multiple_types": [123, 456] }')
+
+
+class ConfigSchemaValueConstructorTestCase(unittest.TestCase):
+    def test_dict_must_be_str_value(self):
+        self.assertRaises(ValueError, config.Value, {1: '2'})
+        self.assertRaises(ValueError, config.Value, {1: config.Value('2')})
+        self.assertRaises(ValueError, config.Value, {'1': 2})
+        _ = config.Value({'1': config.Value(2)})
+
+        self.assertRaises(ValueError, config.Value, {'1': config.Value(2), 3: config.Value(4)})
+        self.assertRaises(ValueError, config.Value, {'1': config.Value(2), '3': 4})
+        _ = config.Value({'1': config.Value(2), '3': config.Value(4)})
+
+    def test_empty_list_must_have_type(self):
+        self.assertRaises(ValueError, config.Value, [])
+        _ = config.Value([], types=[config.ListType(int)])
+        _ = config.Value([1])
+
+    def test_default_type_check(self):
+        self.assertRaises(ValueError, config.Value, 1, types=[config.Type(str)])
+        self.assertRaises(ValueError, config.Value, 1, types=[config.Type(str), config.Type(bool)])
+        _ = config.Value(1, types=[config.Type(str), config.Type(bool), config.Type(int)])

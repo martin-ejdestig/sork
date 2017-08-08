@@ -17,14 +17,102 @@
 
 import json
 
-from typing import Any, Dict
-
-import jsonschema
+from typing import Any, Dict, List, Optional
 
 from . import error
 
 
 Config = Dict[str, Any]
+
+
+# Need to explicitly check type with type() instead of using isinstance() since
+# isinstance(True, int) is True. Bool values as integers should not be ok.
+def _value_is(value: Any, type_: type) -> bool:
+    return type(value) == type_  # pylint: disable=unidiomatic-typecheck
+
+
+class Type:
+    def __init__(self, type_: type) -> None:
+        self._type = type_
+
+    def verify(self, value: Any) -> bool:
+        return _value_is(value, self._type)
+
+
+class ListType(Type):
+    def __init__(self, element_type, min_length: int = 0) -> None:
+        super().__init__(list)
+        self._element_type = element_type
+        self._min_length = min_length
+
+    def verify(self, value: Any) -> bool:
+        return (super().verify(value) and
+                len(value) >= self._min_length and
+                all(_value_is(v, self._element_type) for v in value))
+
+
+class Value:
+    def __init__(self, default: Any, types: Optional[List[Type]] = None) -> None:
+        if isinstance(default, dict):
+            if not all(isinstance(k, str) and isinstance(v, Value) for k, v in default.items()):
+                raise ValueError('Dictionary must have string as keys and Value as values.')
+
+        if not types:
+            if isinstance(default, list):
+                if not default:
+                    raise ValueError('List with no elements must explicitly set types.')
+                types = [ListType(type(default[0]))]
+            else:
+                types = [Type(type(default))]
+
+        self.default = default
+        self.types = types
+
+        if not self.verify(self.default):
+            raise ValueError('Default does not match allowed types.')
+
+    def verify(self, value: Any) -> bool:
+        return any(t.verify(value) for t in self.types)
+
+
+class Schema:
+    def __init__(self, values: Dict[str, Value]) -> None:
+        self._values = values
+
+    def get_default(self) -> Config:
+        def from_values(values: Dict[str, Value]) -> Config:
+            default = {}
+
+            for key, value in values.items():
+                if isinstance(value.default, dict):
+                    default[key] = from_values(value.default)
+                else:
+                    default[key] = value.default
+
+            return default
+
+        return from_values(self._values)
+
+    def verify(self, config: Config):
+        def verify_values(schema_values: Dict[str, Value],
+                          config: Config,
+                          parent_path: str) -> bool:
+            def full_path(key):
+                return '{}.{}'.format(parent_path, key) if parent_path else key
+
+            for key, value in config.items():
+                if key not in schema_values:
+                    raise error.Error('Unknown configuration key "{}"'.format(full_path(key)))
+
+                schema_value = schema_values[key]
+
+                if not schema_value.verify(value):
+                    raise error.Error('Value for "{}" is not valid'.format(full_path(key)))
+
+                if isinstance(schema_value.default, dict):
+                    verify_values(schema_value.default, value, full_path(key))
+
+        verify_values(self._values, config, None)
 
 
 def _merge(default_config: Config, override_config: Config) -> Config:
@@ -47,12 +135,10 @@ def _load(path: str) -> Config:
         return {}
 
 
-def create(path: str, default: Config, schema: Dict) -> Config:
+def create(path: str, schema: Schema) -> Config:
     try:
-        config = _merge(default, _load(path))
-        jsonschema.validate(config, schema)
-    except jsonschema.ValidationError as exception:
-        raise error.Error('{}: {}'.format(path, exception.message))
+        config = _merge(schema.get_default(), _load(path))
+        schema.verify(config)
     except Exception as exception:
         raise error.Error('{}: {}'.format(path, exception))
 
