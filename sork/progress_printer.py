@@ -62,11 +62,11 @@ class ProgressPrinter:
                 self._item = item
             self._print_status()
 
-    def result(self, result: Any):
+    def done_with_item(self, output: Any):
         with self._lock:
             self._count += 1
-            if result:
-                self._print(str(result) + '\n')
+            if output:
+                self._print(str(output) + '\n')
             self._print_status()
 
     def _print_status(self):

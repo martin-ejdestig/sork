@@ -68,7 +68,8 @@ class AnalyzeCommand(command.Command):
 
         def analyze(source_file: SourceFile):
             printer.start_with_item(source_file.path)
-            printer.result(_analyze_source_file(source_file))
+            output = _analyze_source_file(source_file)
+            printer.done_with_item(output)
 
         try:
             concurrent.for_each(analyze, source_files, num_threads=args.jobs)

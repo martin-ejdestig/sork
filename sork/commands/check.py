@@ -60,7 +60,7 @@ class CheckCommand(command.Command):
         def check_source_file(source_file: SourceFile):
             printer.start_with_item(source_file.path)
             outputs = (c.check(source_file) for c in enabled_checks)
-            printer.result('\n'.join(o for o in outputs if o))
+            printer.done_with_item('\n'.join(o for o in outputs if o))
 
         try:
             concurrent.for_each(check_source_file, source_files, num_threads=args.jobs)
