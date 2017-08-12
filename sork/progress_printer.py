@@ -23,6 +23,9 @@ from typing import Any, Optional, TextIO
 
 _CLEAR_ENTIRE_LINE = '\x1b[2K'
 
+ABORTED_STR = 'Aborted'
+DONE_STR = 'Done'
+
 
 class ProgressPrinter:
     def __init__(self, output: Optional[TextIO] = None, verbose: bool = False) -> None:
@@ -68,9 +71,9 @@ class ProgressPrinter:
 
     def _print_status(self):
         if self._count == self._done_count:
-            trailing_str = '. Done.\n'
+            trailing_str = '. ' + DONE_STR + '.\n'
         elif self._aborted:
-            trailing_str = '. Aborted.\n'
+            trailing_str = '. ' + ABORTED_STR + '.\n'
         elif self._item:
             trailing_str = ': ' + self._item
         else:
