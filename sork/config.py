@@ -96,7 +96,7 @@ class Schema:
     def verify(self, config: Config):
         def verify_values(schema_values: Dict[str, Value],
                           config: Config,
-                          parent_path: str) -> bool:
+                          parent_path: str):
             def full_path(key):
                 return '{}.{}'.format(parent_path, key) if parent_path else key
 
