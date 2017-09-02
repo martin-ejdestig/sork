@@ -50,7 +50,8 @@ def _create_arg_parser() -> argparse.ArgumentParser:
                         '--jobs',
                         default=os.cpu_count() or 1,
                         type=_int_argument_greater_than_zero,
-                        help='Run N jobs in parallel (default: %(default)s).',
+                        help='Run N jobs in parallel. Defaults to number of logical cores '
+                             '(%(default)s detected).',
                         metavar='N')
 
     parser.add_argument('-v',

@@ -107,7 +107,8 @@ optional arguments:
   -bp <path>, --build-path <path>
                         Path to build directory, automatically detected if
                         possible.
-  -j N, --jobs N        Run N jobs in parallel (default: 8).
+  -j N, --jobs N        Run N jobs in parallel. Defaults to number of logical
+                        cores (8 detected).
   -v, --verbose         More verbose output.
 ```
 
