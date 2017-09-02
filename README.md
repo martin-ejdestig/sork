@@ -270,6 +270,8 @@ You must make sure CMake is invoked with `-DCMAKE_EXPORT_COMPILE_COMMANDS=1` for
 
 ## TODO
 
+- Add a --revision/-r &lt;git range/rev&gt; flag for only checking/analyzing files/lines changed in
+  range/rev.
 - Implement --fix flag for check that fixes found errors if possible.
 - More robust project root detection (check for more VCS dot directories, ... other ideas?)
 - Add user specific configuration in $HOME/.config/ that lets user add search paths for how to find
