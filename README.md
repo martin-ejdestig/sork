@@ -60,9 +60,13 @@ By default Sork looks for a compilation database in build directories matching:
 For example, if a project is located in `~/Source/foo` all of the following build directories will
 be detected automatically:
 - `~/Source/foo/build`
+- `~/Source/foo/build_release`
 - `~/Source/foo-build`
+- `~/Source/foo-build_release`
 - `~/Source/build/foo`
+- `~/Source/build/foo_release`
 - `~/Source/build-foo`
+- `~/Source/build-foo_release`
 
 Sork requires the path to be passed manually on the command line if no or more than one database is
 found. See [Build system targets examples](#build-system-targets-examples) for how to add build
