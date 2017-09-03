@@ -15,17 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-import glob
-import itertools
 import json
 import os
 
 from typing import Dict, List, Optional
 
 from . import error
-
-
-_COMPILE_COMMANDS_JSON_PATH = 'compile_commands.json'
+from . import paths
 
 
 class Command:
@@ -35,53 +31,12 @@ class Command:
         self.file = file
 
 
-class BuildPathFinder:
-    def __init__(self, project_path: str) -> None:
-        self._project_path = project_path
-
-    def find_path(self) -> str:
-        paths = self._find_potential_paths()
-
-        if not paths:
-            standard_locations = self._build_path_patterns('path_to_project',
-                                                           'name_of_project_directory')
-            raise error.Error('Unable to determine build path. Specify a path manually or '
-                              'use one of the standard locations:\n{}'
-                              .format('\n'.join(standard_locations)))
-
-        if len(paths) > 1:
-            raise error.Error('Multiple build paths found, specify a path manually:\n{}'
-                              .format('\n'.join(sorted(paths))))
-
-        return paths[0]
-
-    def _find_potential_paths(self) -> List[str]:
-        basename = os.path.basename(os.path.abspath(self._project_path))
-
-        patterns = [os.path.join(pattern, _COMPILE_COMMANDS_JSON_PATH)
-                    for pattern in self._build_path_patterns(self._project_path, basename)]
-
-        paths = itertools.chain.from_iterable([glob.glob(p) for p in patterns])
-
-        return [os.path.dirname(os.path.normpath(path)) for path in paths]
-
-    @staticmethod
-    def _build_path_patterns(project_path: str, basename: str) -> List[str]:
-        pattern_dir_components = [
-            ['*'],
-            [os.path.pardir, basename + '*'],
-            [os.path.pardir, 'build*', basename + '*'],
-            [os.path.pardir, 'build-' + basename + '*']
-        ]
-        return [os.path.join(project_path, *cs) for cs in pattern_dir_components]
-
-
 class CompilationDatabase:
     def __init__(self, project_path: str, build_path: Optional[str] = None) -> None:
         if not build_path:
-            build_path = BuildPathFinder(project_path).find_path()
+            build_path = paths.find_build_path(project_path)
 
-        self.path = os.path.join(build_path, _COMPILE_COMMANDS_JSON_PATH)
+        self.path = os.path.join(build_path, paths.COMPILE_COMMANDS_JSON_PATH)
 
         self._commands = self._load(project_path)
 

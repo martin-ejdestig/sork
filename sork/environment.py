@@ -22,14 +22,12 @@ from typing import Dict, List, Optional
 
 from . import compilation_database
 from . import config
-from . import error
+from . import paths
 from .build_systems import dependency
 
 
 _NORMALIZED_PROJECT_PATH = os.path.curdir
 
-_DOT_SORK_PATH = '.sork'
-_DOT_PATHS_IN_PROJECT_ROOT = ['.git', _DOT_SORK_PATH]
 
 _CONFIG_SCHEMA = config.Schema({
     'source_exclude': config.Value(''),
@@ -53,34 +51,14 @@ _CONFIG_SCHEMA = config.Schema({
 })
 
 
-def _is_project_path(path: str) -> bool:
-    return any(os.path.exists(os.path.join(path, dp))
-               for dp in _DOT_PATHS_IN_PROJECT_ROOT)
-
-
-def _find_project_path(path: str) -> str:
-    if os.path.isfile(path):
-        path = os.path.dirname(path)
-
-    while not _is_project_path(path):
-        parent_path = os.path.relpath(os.path.join(path, os.path.pardir))
-
-        if path == parent_path:
-            raise error.Error('Unable to determine project root path. '
-                              'Currently looking for: {}'
-                              .format(', '.join(_DOT_PATHS_IN_PROJECT_ROOT)))
-
-        path = parent_path
-
-    return path
-
-
 class Environment:
     def __init__(self, path_in_project: str, build_path: Optional[str] = None) -> None:
-        self.project_path = _find_project_path(path_in_project)
+        self.project_path = paths.find_project_path(path_in_project)
         self.build_path = build_path
 
-        self.config = config.create(os.path.join(self.project_path, _DOT_SORK_PATH), _CONFIG_SCHEMA)
+        self.config = config.create(os.path.join(self.project_path,
+                                                 paths.DOT_SORK_PATH),
+                                    _CONFIG_SCHEMA)
 
         self.compilation_database = compilation_database.CompilationDatabase(self.project_path,
                                                                              self.build_path)
@@ -89,11 +67,13 @@ class Environment:
 
         self.dependencies = dependency.DependencyFinder(self.build_path).find()
 
-    def normalize_path(self, path: str) -> str:
-        return os.path.normpath(os.path.relpath(path, start=self.project_path))
+    def normalize_path(self, unnormalized_path: str) -> str:
+        return os.path.normpath(os.path.relpath(unnormalized_path, start=self.project_path))
 
-    def normalize_paths(self, paths: List[str], filter_project_path: bool = False) -> List[str]:
-        normalized_paths = [self.normalize_path(path) for path in paths]
+    def normalize_paths(self,
+                        unnormalized_paths: List[str],
+                        filter_project_path: bool = False) -> List[str]:
+        normalized_paths = [self.normalize_path(path) for path in unnormalized_paths]
         if filter_project_path:
             normalized_paths = [path for path in normalized_paths
                                 if path != _NORMALIZED_PROJECT_PATH]
@@ -110,10 +90,11 @@ class Environment:
         return env
 
     def _dependency_include_paths(self) -> List[str]:
-        paths = itertools.chain.from_iterable([dep.include_paths for dep in self.dependencies])
-        return sorted(set(paths))
+        include_paths = itertools.chain.from_iterable([dep.include_paths
+                                                       for dep in self.dependencies])
+        return sorted(set(include_paths))
 
     @staticmethod
-    def _env_append_paths(env: Dict[str, str], name: str, paths: List[str]):
+    def _env_append_paths(env: Dict[str, str], name: str, paths_to_append: List[str]):
         orig_value = env.get(name)
-        env[name] = os.pathsep.join(([orig_value] if orig_value else []) + paths)
+        env[name] = os.pathsep.join(([orig_value] if orig_value else []) + paths_to_append)
