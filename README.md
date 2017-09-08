@@ -16,6 +16,24 @@ $
 ```
 
 
+## Table of contents
+
+- [Dependencies](#dependencies)
+- [Installing from source](#installing-from-source)
+- [Project root path detection](#project-root-path-detection)
+- [Build directory and the compilation database](#build-directory-and-the-compilation-database)
+- [Project configuration](#project-configuration)
+- [Command line usage](#command-line-usage)
+- [Commands](#commands)
+  - [analyze](#analyze)
+  - [asm](#asm)
+  - [check](#check)
+- [Build system targets examples](#build-system-targets-examples)
+  - [Meson](#meson)
+  - [CMake](#cmake)
+- [TODO](#todo)
+
+
 ## Dependencies
 
 - Python (version 3.6 or later)
