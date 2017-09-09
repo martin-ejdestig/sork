@@ -33,18 +33,15 @@ class Command:
 
 class CompilationDatabase:
     def __init__(self, project_path: str, build_path: str) -> None:
-        self.path = os.path.join(build_path, paths.COMPILE_COMMANDS_JSON_PATH)
+        path = os.path.join(build_path, paths.COMPILE_COMMANDS_JSON_PATH)
 
-        self._commands = self._load(project_path)
-
-    def _load(self, project_path: str) -> Dict[str, Command]:
         try:
-            with open(self.path) as file:
+            with open(path) as file:
                 entries = json.load(file)
         except Exception as exception:
-            raise error.Error('{}: {}'.format(self.path, exception))
+            raise error.Error('{}: {}'.format(path, exception))
 
-        return self._json_entries_to_commands(entries, project_path)
+        self._commands = self._json_entries_to_commands(entries, project_path)
 
     @staticmethod
     def _json_entries_to_commands(entries: List[Dict[str, str]],
