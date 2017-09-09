@@ -32,10 +32,7 @@ class Command:
 
 
 class CompilationDatabase:
-    def __init__(self, project_path: str, build_path: Optional[str] = None) -> None:
-        if not build_path:
-            build_path = paths.find_build_path(project_path)
-
+    def __init__(self, project_path: str, build_path: str) -> None:
         self.path = os.path.join(build_path, paths.COMPILE_COMMANDS_JSON_PATH)
 
         self._commands = self._load(project_path)

@@ -18,7 +18,7 @@
 import itertools
 import os
 
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from . import compilation_database
 from . import config
@@ -52,7 +52,7 @@ _CONFIG_SCHEMA = config.Schema({
 
 
 class Environment:
-    def __init__(self, project_path: str, build_path: Optional[str] = None) -> None:
+    def __init__(self, project_path: str, build_path: str) -> None:
         self.project_path = project_path
         self.build_path = build_path
 
@@ -62,8 +62,6 @@ class Environment:
 
         self.compilation_database = compilation_database.CompilationDatabase(self.project_path,
                                                                              self.build_path)
-        if not self.build_path:
-            self.build_path = os.path.dirname(self.compilation_database.path)
 
         self.dependencies = dependency.DependencyFinder(self.build_path).find()
 
