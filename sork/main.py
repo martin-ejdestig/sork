@@ -21,6 +21,7 @@ import sys
 
 from . import commands
 from . import error
+from . import paths
 from .environment import Environment
 
 
@@ -78,7 +79,8 @@ def _path_in_project(args: argparse.Namespace) -> str:
 
 def _create_environment(args: argparse.Namespace) -> Environment:
     try:
-        env = Environment(_path_in_project(args), build_path=args.build_path)
+        project_path = paths.find_project_path(_path_in_project(args))
+        env = Environment(project_path, build_path=args.build_path)
     except error.Error as exception:
         print(exception)
         sys.exit(1)

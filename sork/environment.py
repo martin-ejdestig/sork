@@ -52,8 +52,8 @@ _CONFIG_SCHEMA = config.Schema({
 
 
 class Environment:
-    def __init__(self, path_in_project: str, build_path: Optional[str] = None) -> None:
-        self.project_path = paths.find_project_path(path_in_project)
+    def __init__(self, project_path: str, build_path: Optional[str] = None) -> None:
+        self.project_path = project_path
         self.build_path = build_path
 
         self.config = config.create(os.path.join(self.project_path,
