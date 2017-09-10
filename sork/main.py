@@ -78,28 +78,20 @@ def _path_in_project(args: argparse.Namespace) -> str:
 
 
 def _create_environment(args: argparse.Namespace) -> Environment:
-    try:
-        project_path = paths.find_project_path(_path_in_project(args))
-        build_path = args.build_path or paths.find_build_path(project_path)
-        env = Environment(project_path, build_path)
-    except error.Error as exception:
-        print(exception)
-        sys.exit(1)
-    return env
-
-
-def _run_command(args: argparse.Namespace, env: Environment):
-    try:
-        args.run_command(args, env)
-    except KeyboardInterrupt:
-        pass
-    except error.Error as exception:
-        print(exception)
+    project_path = paths.find_project_path(_path_in_project(args))
+    build_path = args.build_path or paths.find_build_path(project_path)
+    return Environment(project_path, build_path)
 
 
 def main():
     arg_parser = _create_arg_parser()
     args = arg_parser.parse_args()
-    env = _create_environment(args)
 
-    _run_command(args, env)
+    try:
+        env = _create_environment(args)
+        args.run_command(args, env)
+    except KeyboardInterrupt:
+        pass
+    except error.Error as exception:
+        print(exception)
+        sys.exit(1)
