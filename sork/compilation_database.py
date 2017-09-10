@@ -34,14 +34,32 @@ class Command:
 class CompilationDatabase:
     def __init__(self, project_path: str, build_path: str) -> None:
         path = os.path.join(build_path, paths.COMPILE_COMMANDS_JSON_PATH)
+        entries = self._load_json(path)
+        self._commands = self._json_entries_to_commands(entries, project_path)
 
+    @staticmethod
+    def _load_json(path: str) -> List[Dict[str, str]]:
         try:
             with open(path) as file:
                 entries = json.load(file)
         except Exception as exception:
             raise error.Error('{}: {}'.format(path, exception))
 
-        self._commands = self._json_entries_to_commands(entries, project_path)
+        if not isinstance(entries, list):
+            raise error.Error('{}: expected top element to be a list.'.format(path))
+
+        for entry in entries:
+            if not isinstance(entry, dict):
+                raise error.Error('{}: all entries in top list must be objects.'.format(path))
+
+            if not all(key in entry.keys() for key in ['command', 'directory', 'file']):
+                raise error.Error('{}: all entries must contain command, directory and '
+                                  'file keys.'.format(path))
+
+            if not all(isinstance(value, str) for value in entry.values()):
+                raise error.Error('{}: all values in entries must be strings.'.format(path))
+
+        return entries
 
     @staticmethod
     def _json_entries_to_commands(entries: List[Dict[str, str]],
