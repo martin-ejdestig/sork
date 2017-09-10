@@ -16,6 +16,7 @@
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
+import logging
 import os
 import sys
 
@@ -84,6 +85,8 @@ def _create_environment(args: argparse.Namespace) -> Environment:
 
 
 def main():
+    logging.basicConfig(format='%(message)s')
+
     arg_parser = _create_arg_parser()
     args = arg_parser.parse_args()
 

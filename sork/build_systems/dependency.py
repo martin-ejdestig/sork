@@ -15,10 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import re
-import sys
 
-from typing import List, TextIO
+from typing import List
 
 from . import cmake
 from . import meson
@@ -31,9 +31,8 @@ class Dependency:
 
 
 class DependencyFinder:
-    def __init__(self, build_path: str, error_output: TextIO = sys.stderr) -> None:
+    def __init__(self, build_path: str) -> None:
         self._build_path = build_path
-        self._error_output = error_output
 
     def find(self) -> List[Dependency]:
         if meson.is_meson_build_path(self._build_path):
@@ -42,7 +41,7 @@ class DependencyFinder:
         if cmake.is_cmake_build_path(self._build_path):
             return self._cmake_dependencies()
 
-        self._log_warning('Unable to extract dependencies from build system.')
+        logging.warning('Unable to extract dependencies from build system.')
 
         return []
 
@@ -68,9 +67,6 @@ class DependencyFinder:
                 deps.append(Dependency(dep_name, include_paths))
 
         return deps
-
-    def _log_warning(self, message: str):
-        print('Warning: {}'.format(message), file=self._error_output)
 
     @staticmethod
     def _include_paths_from_args(args: List[str]) -> List[str]:
