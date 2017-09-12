@@ -1,7 +1,5 @@
 .DEFAULT_GOAL := all
 
-PYTHON_SRC := $(shell find . -name "*.py" -printf "%P\n")
-
 include makeinc/mypy.mk
 include makeinc/pycodestyle.mk
 include makeinc/pylint.mk
