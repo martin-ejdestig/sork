@@ -17,10 +17,13 @@
 
 import json
 import os
+import re
 import shutil
 import subprocess
 
-from typing import Any, Dict, List
+from typing import Any, List
+
+from .dependency import Dependency
 
 from .. import error
 
@@ -29,7 +32,7 @@ def is_meson_build_path(build_path: str) -> bool:
     return os.path.exists(os.path.join(build_path, 'meson-private'))
 
 
-def _introspect(args: List[str]) -> str:
+def _introspect(args: List[str]) -> Any:
     mesonintrospect = shutil.which('mesonintrospect')
 
     if not mesonintrospect:
@@ -42,15 +45,25 @@ def _introspect(args: List[str]) -> str:
         if process.returncode != 0:
             raise error.Error('mesonintrospect failed: {}'.format(stderr))
 
-    return stdout
-
-
-def dependencies(build_path: str) -> List[Dict[str, Any]]:
-    json_str = _introspect(['--dependencies', build_path])
-
     try:
-        json_object = json.loads(json_str)
+        return json.loads(stdout)
     except json.JSONDecodeError as exception:
         raise error.Error('Failed to decode Meson introspection data: {}', exception)
 
-    return json_object
+
+def _include_paths_from_args(args: List[str]) -> List[str]:
+    paths = []
+
+    for arg in args:
+        match = re.match('^(-I|-isystem|-iquote)(.+)', arg)
+        if match:
+            paths.append(match.group(2))
+
+    return paths
+
+
+def dependencies(build_path: str) -> List[Dependency]:
+    deps = _introspect(['--dependencies', build_path])
+
+    return [Dependency(dep['name'], _include_paths_from_args(dep['compile_args']))
+            for dep in deps]

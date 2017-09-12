@@ -16,12 +16,8 @@
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import re
 
 from typing import List
-
-from . import cmake
-from . import meson
 
 
 class Dependency:
@@ -30,48 +26,17 @@ class Dependency:
         self.include_paths = include_paths
 
 
-def _include_paths_from_args(args: List[str]) -> List[str]:
-    paths = []
-
-    for arg in args:
-        match = re.match('^(-I|-isystem|-iquote)(.+)', arg)
-        if match:
-            paths.append(match.group(2))
-
-    return paths
-
-
-def _meson_dependencies(build_path: str) -> List[Dependency]:
-    deps = meson.dependencies(build_path)
-
-    return [Dependency(dep['name'], _include_paths_from_args(dep['compile_args']))
-            for dep in deps]
-
-
-def _cmake_dependencies(build_path: str) -> List[Dependency]:
-    deps = []
-
-    # Currently only catches pkg-config dependencies for sure. Other CMake modules may do
-    # whatever they want, not possible to catch them all. If a more structured way to query
-    # CMake ever materializes (CMake 3.7 does not have any AFAIK), use that instead.
-    cache_vars = cmake.internal_cache_variables(build_path)
-
-    for name, value in cache_vars.items():
-        if name.endswith('_FOUND') and value == '1':
-            dep_name = name[:-len('_FOUND')]
-            include_dirs_value = cache_vars.get(dep_name + '_INCLUDE_DIRS')
-            include_paths = include_dirs_value.split(';') if include_dirs_value else []
-            deps.append(Dependency(dep_name, include_paths))
-
-    return deps
-
-
 def find_dependencies(build_path: str) -> List[Dependency]:
+    # Importing here since Python cannot cope with "-> List[Dependency]" annotation at top level in
+    # cmake and meson modules if they are placed before class Dependency above.
+    from . import cmake
+    from . import meson
+
     if meson.is_meson_build_path(build_path):
-        return _meson_dependencies(build_path)
+        return meson.dependencies(build_path)
 
     if cmake.is_cmake_build_path(build_path):
-        return _cmake_dependencies(build_path)
+        return cmake.dependencies(build_path)
 
     logging.warning('Unable to extract dependencies from build system.')
 

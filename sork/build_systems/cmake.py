@@ -18,7 +18,9 @@
 import os
 import re
 
-from typing import Dict
+from typing import Dict, List
+
+from .dependency import Dependency
 
 
 def _cmake_cache_path(build_path: str) -> str:
@@ -29,7 +31,7 @@ def is_cmake_build_path(build_path: str) -> bool:
     return os.path.exists(_cmake_cache_path(build_path))
 
 
-def internal_cache_variables(build_path: str) -> Dict[str, str]:
+def _internal_cache_variables(build_path: str) -> Dict[str, str]:
     variables = {}
 
     with open(_cmake_cache_path(build_path)) as file:
@@ -40,3 +42,21 @@ def internal_cache_variables(build_path: str) -> Dict[str, str]:
                 variables[split[0]] = split[1]
 
     return variables
+
+
+def dependencies(build_path: str) -> List[Dependency]:
+    deps = []
+
+    # Currently only catches pkg-config dependencies for sure. Other CMake modules may do
+    # whatever they want, not possible to catch them all. If a more structured way to query
+    # CMake ever materializes (CMake 3.7 does not have any AFAIK), use that instead.
+    cache_vars = _internal_cache_variables(build_path)
+
+    for name, value in cache_vars.items():
+        if name.endswith('_FOUND') and value == '1':
+            dep_name = name[:-len('_FOUND')]
+            include_dirs_value = cache_vars.get(dep_name + '_INCLUDE_DIRS')
+            include_paths = include_dirs_value.split(';') if include_dirs_value else []
+            deps.append(Dependency(dep_name, include_paths))
+
+    return deps
