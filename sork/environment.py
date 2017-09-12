@@ -63,7 +63,7 @@ class Environment:
         self.compilation_database = compilation_database.CompilationDatabase(self.project_path,
                                                                              self.build_path)
 
-        self.dependencies = dependency.DependencyFinder(self.build_path).find()
+        self.dependencies = dependency.find_dependencies(self.build_path)
 
     def normalize_path(self, unnormalized_path: str) -> str:
         return os.path.normpath(os.path.relpath(unnormalized_path, start=self.project_path))
