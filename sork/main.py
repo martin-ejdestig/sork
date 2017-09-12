@@ -85,7 +85,7 @@ def _create_environment(args: argparse.Namespace) -> Environment:
 
 
 def main():
-    logging.basicConfig(format='%(message)s')
+    logging.basicConfig(format='%(levelname)s: %(message)s')
 
     arg_parser = _create_arg_parser()
     args = arg_parser.parse_args()
