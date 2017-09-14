@@ -18,7 +18,6 @@
 import json
 import os
 import re
-import shutil
 import subprocess
 
 from typing import Any, List
@@ -33,12 +32,7 @@ def is_meson_build_path(build_path: str) -> bool:
 
 
 def _introspect(args: List[str]) -> Any:
-    mesonintrospect = shutil.which('mesonintrospect')
-
-    if not mesonintrospect:
-        raise error.Error('Unable to locate mesonintrospect')
-
-    with subprocess.Popen([mesonintrospect] + args,
+    with subprocess.Popen(['mesonintrospect'] + args,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE) as process:
         stdout, stderr = process.communicate()
