@@ -74,3 +74,11 @@ class CMakeDependenciesTestCase(TestCaseWithTmpDir):
 
         self.assertEqual('QUX', deps[2].name)
         self.assertEqual([], deps[2].include_paths)
+
+    def test_no_deps(self):
+        self.create_tmp_file('build/CMakeCache.txt', 'LIBFOO_FOUND:INTERNAL=0\n')
+
+        with self.cd_tmp_dir():
+            deps = cmake.dependencies('build')
+
+        self.assertEqual(0, len(deps))
