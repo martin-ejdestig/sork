@@ -8,5 +8,5 @@ PYLINT_EXE := $(firstword $(foreach c,pylint3 pylint-3 pylint,\
 .PHONY: pylint
 
 pylint:
-	@echo pylint sork
+	@echo $(PYLINT_EXE) sork
 	@$(PYLINT_EXE) $(PYLINT_FLAGS) sork
