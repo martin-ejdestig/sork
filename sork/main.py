@@ -20,57 +20,10 @@ import logging
 import os
 import sys
 
-from . import commands
+from . import arguments
 from . import error
 from . import paths
 from .project import Project
-
-
-_COMMANDS = [
-    commands.analyze.AnalyzeCommand(),
-    commands.assembler.AssemblerCommand(),
-    commands.check.CheckCommand()
-]
-
-
-def _int_argument_greater_than_zero(string: str) -> int:
-    value = int(string)
-    if value <= 0:
-        raise argparse.ArgumentTypeError('invalid value {}, must be > 0'.format(value))
-    return value
-
-
-def _create_arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('-bp',
-                        '--build-path',
-                        help='Path to build directory, automatically detected if possible.',
-                        metavar='<path>')
-
-    parser.add_argument('-j',
-                        '--jobs',
-                        default=os.cpu_count() or 1,
-                        type=_int_argument_greater_than_zero,
-                        help='Run N jobs in parallel. Defaults to number of logical cores '
-                             '(%(default)s detected).',
-                        metavar='N')
-
-    parser.add_argument('-v',
-                        '--verbose',
-                        action='store_true',
-                        help='More verbose output.')
-
-    subparsers = parser.add_subparsers(dest='command',
-                                       help='-h or --help after <command> for more help',
-                                       metavar='<command>')
-    # Fix for bug introduced in 3.3.5. See http://bugs.python.org/issue9253#msg186387 .
-    subparsers.required = True  # type: ignore
-
-    for cmd in _COMMANDS:
-        cmd.add_argparse_subparser(subparsers)
-
-    return parser
 
 
 def _path_in_project(args: argparse.Namespace) -> str:
@@ -87,7 +40,7 @@ def _create_project(args: argparse.Namespace) -> Project:
 def main():
     logging.basicConfig(format='%(levelname)s: %(message)s')
 
-    arg_parser = _create_arg_parser()
+    arg_parser = arguments.Parser()
     args = arg_parser.parse_args()
 
     try:
