@@ -22,7 +22,7 @@ import subprocess
 from . import command
 
 from .. import concurrent
-from ..environment import Environment
+from ..project import Project
 from ..progress_printer import ProgressPrinter
 from ..source import SourceFile, SourceFinder
 
@@ -42,7 +42,7 @@ def _analyze_source_file(source_file: SourceFile) -> str:
                           stderr=subprocess.STDOUT,
                           shell=True,
                           cwd=source_file.compile_command.work_dir,
-                          env=source_file.environment.command_env_vars(),
+                          env=source_file.project.command_env_vars(),
                           universal_newlines=True) as process:
         return process.communicate()[0]
 
@@ -60,8 +60,8 @@ class AnalyzeCommand(command.Command):
                                  'project\'s root.',
                             metavar='<path>')
 
-    def _run(self, args: argparse.Namespace, environment: Environment):
-        source_files = SourceFinder(environment).find_buildable_files(args.source_paths)
+    def _run(self, args: argparse.Namespace, project: Project):
+        source_files = SourceFinder(project).find_buildable_files(args.source_paths)
 
         printer = ProgressPrinter(verbose=args.verbose)
         printer.start('Analyzing source', len(source_files))

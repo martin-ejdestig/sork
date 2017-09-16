@@ -65,7 +65,7 @@ class ClangFormatCheck(check.Check):
                               stdin=subprocess.PIPE,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE,
-                              cwd=self._environment.project_path,
+                              cwd=self._project.project_path,
                               universal_newlines=True) as process:
             stdout, stderr = process.communicate(input=source_file.content)
             if process.returncode != 0:

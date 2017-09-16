@@ -26,7 +26,7 @@ from .include_guard import IncludeGuardCheck
 from .license_header import LicenseHeaderCheck
 
 from .. import error
-from ..environment import Environment
+from ..project import Project
 
 
 _CLASSES: List[Type[Check]] = [
@@ -44,8 +44,8 @@ class Error(error.Error):
 
 
 class ChecksCreator:
-    def __init__(self, environment: Environment) -> None:
-        self._environment = environment
+    def __init__(self, project: Project) -> None:
+        self._project = project
 
     def create(self, check_strings: List[str], allow_none: bool = True) -> List[Check]:
         names = self._strings_to_names(check_strings)
@@ -53,7 +53,7 @@ class ChecksCreator:
         if not names and not allow_none:
             raise Error('{} results in no checks.'.format(check_strings))
 
-        return [c(self._environment) for c in _CLASSES if c.NAME in names]
+        return [c(self._project) for c in _CLASSES if c.NAME in names]
 
     @staticmethod
     def _strings_to_names(check_strings: List[str]) -> Set[str]:

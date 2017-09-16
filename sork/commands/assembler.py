@@ -24,7 +24,7 @@ from typing import Dict, List, Tuple
 from . import command
 
 from .. import error
-from ..environment import Environment
+from ..project import Project
 from ..source import SourceFile, SourceFinder
 
 
@@ -49,7 +49,7 @@ def _assembler_for_source_file(source_file: SourceFile, verbose: bool = False) -
     with subprocess.Popen(command_args,
                           stdout=subprocess.PIPE,
                           cwd=source_file.compile_command.work_dir,
-                          env=source_file.environment.command_env_vars(),
+                          env=source_file.project.command_env_vars(),
                           shell=True,
                           universal_newlines=True) as process:
         stdout, _ = process.communicate()
@@ -133,8 +133,8 @@ class AssemblerCommand(command.Command):
                             help='Source file to output assembler for.',
                             metavar='<file>')
 
-    def _run(self, args: argparse.Namespace, environment: Environment):
-        source_file = SourceFinder(environment).find_file(args.source_paths[0])
+    def _run(self, args: argparse.Namespace, project: Project):
+        source_file = SourceFinder(project).find_file(args.source_paths[0])
         asm = _assembler_for_source_file(source_file, args.verbose_asm)
 
         if args.count:

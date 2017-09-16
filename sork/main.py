@@ -23,7 +23,7 @@ import sys
 from . import commands
 from . import error
 from . import paths
-from .environment import Environment
+from .project import Project
 
 
 _COMMANDS = [
@@ -78,10 +78,10 @@ def _path_in_project(args: argparse.Namespace) -> str:
     return source_paths[0] if source_paths else os.path.curdir
 
 
-def _create_environment(args: argparse.Namespace) -> Environment:
+def _create_project(args: argparse.Namespace) -> Project:
     project_path = paths.find_project_path(_path_in_project(args))
     build_path = args.build_path or paths.find_build_path(project_path)
-    return Environment(project_path, build_path)
+    return Project(project_path, build_path)
 
 
 def main():
@@ -91,8 +91,8 @@ def main():
     args = arg_parser.parse_args()
 
     try:
-        env = _create_environment(args)
-        args.run_command(args, env)
+        project = _create_project(args)
+        args.run_command(args, project)
     except KeyboardInterrupt:
         pass
     except error.Error as exception:

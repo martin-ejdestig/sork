@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional, Pattern, Sequence
 from . import check
 
 from .. import error
-from ..environment import Environment
+from ..project import Project
 from ..source import SourceFile
 
 
@@ -192,14 +192,14 @@ class Error(error.Error):
 
 
 class LicenseDetector:
-    def __init__(self, environment):
-        self._environment = environment
+    def __init__(self, project):
+        self._project = project
 
     def detect_license(self) -> str:
         paths = self._find_license_paths()
         if not paths:
             raise Error('Unable to find any license file(s) in \'{}\'.'.
-                        format(self._environment.project_path))
+                        format(self._project.project_path))
 
         licenses = [self._determine_license_in_file(path) for path in paths]
 
@@ -210,10 +210,10 @@ class LicenseDetector:
             return 'lgplv3'
 
         raise Error('Unable to automatically determine license in \'{}\'.'.
-                    format(self._environment.project_path))
+                    format(self._project.project_path))
 
     def _find_license_paths(self) -> List[str]:
-        patterns = [os.path.join(self._environment.project_path, self._pattern_ignore_case(n + '*'))
+        patterns = [os.path.join(self._project.project_path, self._pattern_ignore_case(n + '*'))
                     for n in _LICENSE_BASE_FILE_NAMES]
 
         paths = itertools.chain.from_iterable(glob.glob(p) for p in patterns)
@@ -245,8 +245,8 @@ class LicenseDetector:
 class LicenseHeaderCheck(check.Check):
     NAME = 'license_header'
 
-    def __init__(self, environment: Environment) -> None:
-        super().__init__(environment)
+    def __init__(self, project: Project) -> None:
+        super().__init__(project)
         self._license_regex = self._compile_license_regex()
 
     def _compile_license_regex(self) -> Pattern:
@@ -273,7 +273,7 @@ class LicenseHeaderCheck(check.Check):
             if key not in _LICENSES:
                 raise Error('{} is an unknown license'.format(key_or_lines))
         else:
-            key = LicenseDetector(self._environment).detect_license()
+            key = LicenseDetector(self._project).detect_license()
 
         return _LICENSES[key]['header_lines']
 

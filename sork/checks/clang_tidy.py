@@ -53,7 +53,7 @@ class ClangTidyCheck(check.Check):
                               stderr=subprocess.STDOUT,
                               shell=True,
                               cwd=source_file.compile_command.work_dir,
-                              env=self._environment.command_env_vars(),
+                              env=self._project.command_env_vars(),
                               universal_newlines=True) as process:
             output = process.communicate()[0]
 

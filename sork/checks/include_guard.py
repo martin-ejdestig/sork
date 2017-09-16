@@ -23,15 +23,15 @@ from typing import Optional
 from . import check
 
 from .. import string
-from ..environment import Environment
+from ..project import Project
 from ..source import SourceFile
 
 
 class IncludeGuardCheck(check.Check):
     NAME = 'include_guard'
 
-    def __init__(self, environment: Environment) -> None:
-        super().__init__(environment)
+    def __init__(self, project: Project) -> None:
+        super().__init__(project)
 
         self._prefix = self._config['prefix']
         self._suffix = self._config['suffix']

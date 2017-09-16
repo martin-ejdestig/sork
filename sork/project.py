@@ -51,7 +51,7 @@ _CONFIG_SCHEMA = config.Schema({
 })
 
 
-class Environment:
+class Project:
     def __init__(self, project_path: str, build_path: str) -> None:
         self.project_path = project_path
         self.build_path = build_path

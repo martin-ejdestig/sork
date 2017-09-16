@@ -20,7 +20,7 @@ import argparse
 
 from typing import List, Optional
 
-from ..environment import Environment
+from ..project import Project
 
 
 class Command(abc.ABC):
@@ -46,5 +46,5 @@ class Command(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def _run(self, args: argparse.Namespace, environment: Environment):
+    def _run(self, args: argparse.Namespace, project: Project):
         pass

@@ -21,7 +21,7 @@ from . import command
 
 from .. import concurrent
 from ..checks import ChecksCreator
-from ..environment import Environment
+from ..project import Project
 from ..progress_printer import ProgressPrinter
 from ..source import SourceFile, SourceFinder
 
@@ -48,11 +48,11 @@ class CheckCommand(command.Command):
                                  'project\'s root.',
                             metavar='<path>')
 
-    def _run(self, args: argparse.Namespace, environment: Environment):
-        check_strings = args.checks.split(',') if args.checks else environment.config['checks']
-        enabled_checks = ChecksCreator(environment).create(check_strings, allow_none=False)
+    def _run(self, args: argparse.Namespace, project: Project):
+        check_strings = args.checks.split(',') if args.checks else project.config['checks']
+        enabled_checks = ChecksCreator(project).create(check_strings, allow_none=False)
 
-        source_files = SourceFinder(environment).find_files(args.source_paths)
+        source_files = SourceFinder(project).find_files(args.source_paths)
 
         printer = ProgressPrinter(verbose=args.verbose)
         printer.start('Checking source', len(source_files))
