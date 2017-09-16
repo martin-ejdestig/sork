@@ -45,7 +45,7 @@ def main():
 
     try:
         project = _create_project(args)
-        args.run_command(args, project)
+        args.command.run(args, project)
     except KeyboardInterrupt:
         pass
     except error.Error as exception:

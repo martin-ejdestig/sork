@@ -37,7 +37,7 @@ class Command(abc.ABC):
                                        aliases=self._aliases if self._aliases else [],
                                        help=self._arg_help)
 
-        parser.set_defaults(run_command=self._run)
+        parser.set_defaults(command=self)
 
         self._add_argparse_arguments(parser)
 
@@ -46,5 +46,5 @@ class Command(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def _run(self, args: argparse.Namespace, project: Project):
+    def run(self, args: argparse.Namespace, project: Project):
         pass

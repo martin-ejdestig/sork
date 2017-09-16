@@ -133,7 +133,7 @@ class AssemblerCommand(command.Command):
                             help='Source file to output assembler for.',
                             metavar='<file>')
 
-    def _run(self, args: argparse.Namespace, project: Project):
+    def run(self, args: argparse.Namespace, project: Project):
         source_file = SourceFinder(project).find_file(args.source_paths[0])
         asm = _assembler_for_source_file(source_file, args.verbose_asm)
 

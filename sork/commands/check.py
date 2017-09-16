@@ -48,7 +48,7 @@ class CheckCommand(command.Command):
                                  'project\'s root.',
                             metavar='<path>')
 
-    def _run(self, args: argparse.Namespace, project: Project):
+    def run(self, args: argparse.Namespace, project: Project):
         check_strings = args.checks.split(',') if args.checks else project.config['checks']
         enabled_checks = ChecksCreator(project).create(check_strings, allow_none=False)
 

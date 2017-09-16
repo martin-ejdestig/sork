@@ -60,7 +60,7 @@ class AnalyzeCommand(command.Command):
                                  'project\'s root.',
                             metavar='<path>')
 
-    def _run(self, args: argparse.Namespace, project: Project):
+    def run(self, args: argparse.Namespace, project: Project):
         source_files = SourceFinder(project).find_buildable_files(args.source_paths)
 
         printer = ProgressPrinter(verbose=args.verbose)
