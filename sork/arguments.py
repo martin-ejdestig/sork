@@ -66,3 +66,8 @@ class Parser(argparse.ArgumentParser):
 
         for cmd in _COMMANDS:
             cmd.add_argparse_subparser(subparsers)
+
+
+def path_in_project(args: argparse.Namespace) -> str:
+    source_paths = args.source_paths if hasattr(args, 'source_paths') else None
+    return source_paths[0] if source_paths else os.path.curdir
