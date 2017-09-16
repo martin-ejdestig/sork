@@ -39,6 +39,10 @@ _CLASSES: List[Type[Check]] = [
 _NAMES = [c.NAME for c in _CLASSES]
 
 
+class Error(error.Error):
+    pass
+
+
 class ChecksCreator:
     def __init__(self, environment: Environment) -> None:
         self._environment = environment
@@ -47,7 +51,7 @@ class ChecksCreator:
         names = self._strings_to_names(check_strings)
 
         if not names and not allow_none:
-            raise error.Error('{} results in no checks.'.format(check_strings))
+            raise Error('{} results in no checks.'.format(check_strings))
 
         return [c(self._environment) for c in _CLASSES if c.NAME in names]
 

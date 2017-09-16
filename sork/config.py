@@ -22,6 +22,10 @@ from typing import Any, Dict, List, Optional
 from . import error
 
 
+class Error(error.Error):
+    pass
+
+
 Config = Dict[str, Any]
 
 
@@ -102,12 +106,12 @@ class Schema:
 
             for key, value in config.items():
                 if key not in schema_values:
-                    raise error.Error('Unknown configuration key "{}"'.format(full_path(key)))
+                    raise Error('Unknown configuration key "{}"'.format(full_path(key)))
 
                 schema_value = schema_values[key]
 
                 if not schema_value.verify(value):
-                    raise error.Error('Value for "{}" is not valid'.format(full_path(key)))
+                    raise Error('Value for "{}" is not valid'.format(full_path(key)))
 
                 if isinstance(schema_value.default, dict):
                     verify_values(schema_value.default, value, full_path(key))
@@ -140,6 +144,6 @@ def create(path: str, schema: Schema) -> Config:
         config = _merge(schema.get_default(), _load(path))
         schema.verify(config)
     except Exception as exception:
-        raise error.Error('{}: {}'.format(path, exception))
+        raise Error('{}: {}'.format(path, exception))
 
     return config

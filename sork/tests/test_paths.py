@@ -19,7 +19,6 @@ import os
 
 from .test_case_with_tmp_dir import TestCaseWithTmpDir
 
-from .. import error
 from .. import paths
 
 
@@ -28,17 +27,17 @@ class FindProjectPathTestCase(TestCaseWithTmpDir):
         self.create_tmp_dir('foo')
 
         with self.cd_tmp_dir():
-            with self.assertRaises(error.Error):
+            with self.assertRaises(paths.Error):
                 paths.find_project_path('does_not_exist')
 
-            with self.assertRaises(error.Error):
+            with self.assertRaises(paths.Error):
                 paths.find_project_path('foo/does_not_exist')
 
     def test_empty_dir(self):
         self.create_tmp_dir('empty')
 
         with self.cd_tmp_dir():
-            with self.assertRaises(error.Error):
+            with self.assertRaises(paths.Error):
                 paths.find_project_path('empty')
 
     def test_relative_outside(self):
@@ -89,7 +88,7 @@ class FindBuildPathTestCase(TestCaseWithTmpDir):
         self.create_tmp_file('foo/bar/baz.cpp')
 
         with self.cd_tmp_dir():
-            with self.assertRaises(error.Error):
+            with self.assertRaises(paths.Error):
                 paths.find_build_path('foo')
 
     def test_in_project_root(self):
@@ -190,5 +189,5 @@ class FindBuildPathTestCase(TestCaseWithTmpDir):
         self._create_build_dir('foo/build_release')
 
         with self.cd_tmp_dir():
-            with self.assertRaisesRegex(error.Error, 'foo/build_'):
+            with self.assertRaisesRegex(paths.Error, 'foo/build_'):
                 paths.find_build_path('foo')

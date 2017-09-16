@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-from sork import error
 from sork.tests import popen_mock
 from sork.tests.test_case_with_tmp_dir import TestCaseWithTmpDir
 
@@ -66,12 +65,12 @@ class MesonDependenciesTestCase(TestCaseWithTmpDir):
 
     def test_invalid_json(self):
         with popen_mock.patch(stdout='garbage'):
-            with self.assertRaises(error.Error):
+            with self.assertRaises(meson.Error):
                 _ = meson.dependencies('build')
 
     def test_error_return_code(self):
         with popen_mock.patch(stdout=[], stderr='foo', returncode=1):
-            with self.assertRaisesRegex(error.Error, 'mesonintrospect.*foo'):
+            with self.assertRaisesRegex(meson.Error, 'mesonintrospect.*foo'):
                 _ = meson.dependencies('build')
 
     def test_no_deps(self):

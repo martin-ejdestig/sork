@@ -24,6 +24,10 @@ from . import error
 from . import paths
 
 
+class Error(error.Error):
+    pass
+
+
 class Command:
     def __init__(self, invokation: str, work_dir: str, file: str) -> None:
         self.invokation = invokation
@@ -43,21 +47,21 @@ class CompilationDatabase:
             with open(path) as file:
                 entries = json.load(file)
         except Exception as exception:
-            raise error.Error('{}: {}'.format(path, exception))
+            raise Error('{}: {}'.format(path, exception))
 
         if not isinstance(entries, list):
-            raise error.Error('{}: expected top element to be a list.'.format(path))
+            raise Error('{}: expected top element to be a list.'.format(path))
 
         for entry in entries:
             if not isinstance(entry, dict):
-                raise error.Error('{}: all entries in top list must be objects.'.format(path))
+                raise Error('{}: all entries in top list must be objects.'.format(path))
 
             if not all(key in entry.keys() for key in ['command', 'directory', 'file']):
-                raise error.Error('{}: all entries must contain command, directory and '
-                                  'file keys.'.format(path))
+                raise Error('{}: all entries must contain command, directory and '
+                            'file keys.'.format(path))
 
             if not all(isinstance(value, str) for value in entry.values()):
-                raise error.Error('{}: all values in entries must be strings.'.format(path))
+                raise Error('{}: all values in entries must be strings.'.format(path))
 
         return entries
 

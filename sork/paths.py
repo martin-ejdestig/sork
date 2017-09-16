@@ -31,6 +31,10 @@ _DOT_PATHS_IN_PROJECT_ROOT = ['.git', DOT_SORK_PATH]
 COMPILE_COMMANDS_JSON_PATH = 'compile_commands.json'
 
 
+class Error(error.Error):
+    pass
+
+
 def _is_project_path(path: str) -> bool:
     return any(os.path.exists(os.path.join(path, dp))
                for dp in _DOT_PATHS_IN_PROJECT_ROOT)
@@ -43,9 +47,9 @@ def find_project_path(path_in_project: str) -> str:
         parent_path = os.path.relpath(os.path.join(path, os.path.pardir))
 
         if path == parent_path:
-            raise error.Error('Unable to determine project root path. '
-                              'Currently looking for: {}'
-                              .format(', '.join(_DOT_PATHS_IN_PROJECT_ROOT)))
+            raise Error('Unable to determine project root path. '
+                        'Currently looking for: {}'
+                        .format(', '.join(_DOT_PATHS_IN_PROJECT_ROOT)))
 
         path = parent_path
 
@@ -79,12 +83,12 @@ def find_build_path(project_path: str) -> str:
     if not paths:
         standard_locations = _build_path_patterns('path_to_project',
                                                   'name_of_project_directory')
-        raise error.Error('Unable to determine build path. Specify a path manually or '
-                          'use one of the standard locations:\n{}'
-                          .format('\n'.join(standard_locations)))
+        raise Error('Unable to determine build path. Specify a path manually or '
+                    'use one of the standard locations:\n{}'
+                    .format('\n'.join(standard_locations)))
 
     if len(paths) > 1:
-        raise error.Error('Multiple build paths found, specify a path manually:\n{}'
-                          .format('\n'.join(sorted(paths))))
+        raise Error('Multiple build paths found, specify a path manually:\n{}'
+                    .format('\n'.join(sorted(paths))))
 
     return paths[0]

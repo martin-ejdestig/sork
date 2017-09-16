@@ -27,6 +27,10 @@ from .dependency import Dependency
 from .. import error
 
 
+class Error(error.Error):
+    pass
+
+
 def is_meson_build_path(build_path: str) -> bool:
     return os.path.exists(os.path.join(build_path, 'meson-private'))
 
@@ -37,12 +41,12 @@ def _introspect(args: List[str]) -> Any:
                           stderr=subprocess.PIPE) as process:
         stdout, stderr = process.communicate()
         if process.returncode != 0:
-            raise error.Error('mesonintrospect failed: {}'.format(stderr))
+            raise Error('mesonintrospect failed: {}'.format(stderr))
 
     try:
         return json.loads(stdout)
     except json.JSONDecodeError as exception:
-        raise error.Error('Failed to decode Meson introspection data: {}', exception)
+        raise Error('Failed to decode Meson introspection data: {}', exception)
 
 
 def _include_paths_from_args(args: List[str]) -> List[str]:

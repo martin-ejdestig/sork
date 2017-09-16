@@ -19,7 +19,6 @@ import tempfile
 import unittest
 
 from .. import config
-from .. import error
 
 
 _TEST_CONFIG_SCHEMA = config.Schema({
@@ -59,11 +58,11 @@ class ConfigTestCase(unittest.TestCase):
         self.assertEqual(cfg['multiple_types'], 'mno')
 
     def test_empty(self):
-        with self.assertRaises(error.Error):
+        with self.assertRaises(config.Error):
             _test_config_from_content('')
 
     def test_invalid_content(self):
-        with self.assertRaises(error.Error):
+        with self.assertRaises(config.Error):
             _test_config_from_content('gaRbAge')
 
     def test_no_values(self):
@@ -91,27 +90,27 @@ class ConfigTestCase(unittest.TestCase):
         self.assertEqual(cfg['multiple_types'], 'mno')
 
     def test_unknown_property(self):
-        with self.assertRaisesRegex(error.Error, 'unknown1'):
+        with self.assertRaisesRegex(config.Error, 'unknown1'):
             _test_config_from_content('{ "unknown1": "foo" }')
 
-        with self.assertRaisesRegex(error.Error, 'object1.unknown2'):
+        with self.assertRaisesRegex(config.Error, 'object1.unknown2'):
             _test_config_from_content('{ "object1": { "unknown2": "foo" } }')
 
     def test_wrong_type(self):
-        with self.assertRaisesRegex(error.Error, 'string1'):
+        with self.assertRaisesRegex(config.Error, 'string1'):
             _test_config_from_content('{ "string1": 123 }')
 
-        with self.assertRaisesRegex(error.Error, 'string_list1'):
+        with self.assertRaisesRegex(config.Error, 'string_list1'):
             _test_config_from_content('{ "string_list1": 123 }')
 
-        with self.assertRaisesRegex(error.Error, 'object1.integer2'):
+        with self.assertRaisesRegex(config.Error, 'object1.integer2'):
             _test_config_from_content('{ "object1": { "integer2": "foo" } }')
 
     def test_wrong_type_in_list(self):
-        with self.assertRaisesRegex(error.Error, 'string_list1'):
+        with self.assertRaisesRegex(config.Error, 'string_list1'):
             _test_config_from_content('{ "string_list1": [123] }')
 
-        with self.assertRaisesRegex(error.Error, 'string_list1'):
+        with self.assertRaisesRegex(config.Error, 'string_list1'):
             _test_config_from_content('{ "string_list1": ["abc", 123] }')
 
     def test_empty_list_ok(self):
@@ -122,14 +121,14 @@ class ConfigTestCase(unittest.TestCase):
         cfg = _test_config_from_content('{ "integer_list1": [9, 8] }')
         self.assertEqual(cfg['integer_list1'], [9, 8])
 
-        with self.assertRaisesRegex(error.Error, 'integer_list1'):
+        with self.assertRaisesRegex(config.Error, 'integer_list1'):
             _test_config_from_content('{ "integer_list1": [] }')
 
     def test_bool_not_ok_as_int(self):  # Explicitly test this since isinstance(True, int) == True.
-        with self.assertRaisesRegex(error.Error, 'integer1'):
+        with self.assertRaisesRegex(config.Error, 'integer1'):
             _test_config_from_content('{ "integer1": true }')
 
-        with self.assertRaisesRegex(error.Error, 'integer_list1'):
+        with self.assertRaisesRegex(config.Error, 'integer_list1'):
             _test_config_from_content('{ "integer_list1": [true] }')
 
     def test_multiple_types(self):
@@ -142,10 +141,10 @@ class ConfigTestCase(unittest.TestCase):
         cfg = _test_config_from_content('{ "multiple_types": ["a", "list", "of", "strings"] }')
         self.assertEqual(cfg['multiple_types'], ['a', 'list', 'of', 'strings'])
 
-        with self.assertRaisesRegex(error.Error, 'multiple_types'):
+        with self.assertRaisesRegex(config.Error, 'multiple_types'):
             _test_config_from_content('{ "multiple_types": true }')
 
-        with self.assertRaisesRegex(error.Error, 'multiple_types'):
+        with self.assertRaisesRegex(config.Error, 'multiple_types'):
             _test_config_from_content('{ "multiple_types": [123, 456] }')
 
 

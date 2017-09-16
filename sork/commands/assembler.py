@@ -28,9 +28,13 @@ from ..environment import Environment
 from ..source import SourceFile, SourceFinder
 
 
+class Error(error.Error):
+    pass
+
+
 def _assembler_for_source_file(source_file: SourceFile, verbose: bool = False) -> str:
     if not source_file.compile_command:
-        raise error.Error('Do not know how to compile "{}".'.format(source_file.path))
+        raise Error('Do not know how to compile "{}".'.format(source_file.path))
 
     output_asm_args = '-S'
     if verbose:
@@ -50,7 +54,7 @@ def _assembler_for_source_file(source_file: SourceFile, verbose: bool = False) -
                           universal_newlines=True) as process:
         stdout, _ = process.communicate()
         if process.returncode != 0:
-            raise error.Error('Failed to run compiler command for outputting assembler.')
+            raise Error('Failed to run compiler command for outputting assembler.')
 
     return stdout
 

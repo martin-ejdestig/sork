@@ -35,6 +35,10 @@ _EXTENSIONS = _C_EXTENSIONS + _CPP_EXTENSIONS + _HEADER_EXTENSIONS + \
               [e + _IN_EXTENSION for e in _HEADER_EXTENSIONS]
 
 
+class Error(error.Error):
+    pass
+
+
 class SourceFile:
     def __init__(self, path: str, environment: Environment) -> None:
         self.path = path
@@ -86,8 +90,8 @@ class SourceFinder:
         try:
             return re.compile(pattern)
         except re.error:
-            raise error.Error('Failed to compile \'source_exclude\' regex (\'{}\') in '
-                              'configuration.'.format(pattern))
+            raise Error('Failed to compile \'source_exclude\' regex (\'{}\') in '
+                        'configuration.'.format(pattern))
 
     def find_files(self, source_paths: Optional[List[str]] = None) -> List[SourceFile]:
         if source_paths:
@@ -99,7 +103,7 @@ class SourceFinder:
         files = self.find_files([path])
 
         if len(files) != 1:
-            raise error.Error('Unable to find source file {}.'.format(path))
+            raise Error('Unable to find source file {}.'.format(path))
 
         return files[0]
 
@@ -130,14 +134,14 @@ class SourceFinder:
 
     def _verify_source_paths(self, source_paths: List[str]):
         if not source_paths:
-            raise error.Error('No source paths specified.')
+            raise Error('No source paths specified.')
 
         does_not_exist = [path for path in source_paths
                           if not os.path.exists(os.path.join(self._environment.project_path, path))]
 
         if does_not_exist:
-            raise error.Error('The following source paths do not exist:\n{}'.
-                              format('\n'.join(does_not_exist)))
+            raise Error('The following source paths do not exist:\n{}'.
+                        format('\n'.join(does_not_exist)))
 
     def _should_be_included(self, path: str) -> bool:
         if self._exclude_regex:

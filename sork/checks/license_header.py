@@ -187,6 +187,10 @@ def _escape_regex_chars(unescaped: str) -> str:
     return escaped
 
 
+class Error(error.Error):
+    pass
+
+
 class LicenseDetector:
     def __init__(self, environment):
         self._environment = environment
@@ -194,8 +198,8 @@ class LicenseDetector:
     def detect_license(self) -> str:
         paths = self._find_license_paths()
         if not paths:
-            raise error.Error('Unable to find any license file(s) in \'{}\'.'.
-                              format(self._environment.project_path))
+            raise Error('Unable to find any license file(s) in \'{}\'.'.
+                        format(self._environment.project_path))
 
         licenses = [self._determine_license_in_file(path) for path in paths]
 
@@ -205,8 +209,8 @@ class LicenseDetector:
         if len(paths) == 2 and 'gplv3' in licenses and 'lgplv3' in licenses:
             return 'lgplv3'
 
-        raise error.Error('Unable to automatically determine license in \'{}\'.'.
-                          format(self._environment.project_path))
+        raise Error('Unable to automatically determine license in \'{}\'.'.
+                    format(self._environment.project_path))
 
     def _find_license_paths(self) -> List[str]:
         patterns = [os.path.join(self._environment.project_path, self._pattern_ignore_case(n + '*'))
@@ -229,13 +233,13 @@ class LicenseDetector:
             with open(path) as file:
                 content = file.read()
         except OSError as exception:
-            raise error.Error(exception)
+            raise Error(exception)
 
         for key, value in _LICENSES.items():
             if re.match(value['content_pattern'], content):
                 return key
 
-        raise error.Error('Unknown license in {}.'.format(path))
+        raise Error('Unknown license in {}.'.format(path))
 
 
 class LicenseHeaderCheck(check.Check):
@@ -256,7 +260,7 @@ class LicenseHeaderCheck(check.Check):
         try:
             return re.compile(regex_str, flags=re.DOTALL)
         except re.error:
-            raise error.Error('Failed to compile regular expression for license header')
+            raise Error('Failed to compile regular expression for license header')
 
     def _get_header_lines(self) -> Sequence[str]:
         key_or_lines = self._config['license']
@@ -267,7 +271,7 @@ class LicenseHeaderCheck(check.Check):
         if key_or_lines:
             key = key_or_lines.lower()
             if key not in _LICENSES:
-                raise error.Error('{} is an unknown license'.format(key_or_lines))
+                raise Error('{} is an unknown license'.format(key_or_lines))
         else:
             key = LicenseDetector(self._environment).detect_license()
 

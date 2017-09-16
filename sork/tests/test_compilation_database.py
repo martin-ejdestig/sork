@@ -22,9 +22,8 @@ from typing import Any, Dict, List, Union
 
 from .test_case_with_tmp_dir import TestCaseWithTmpDir
 
-from .. import error
 from .. import paths
-from ..compilation_database import CompilationDatabase
+from ..compilation_database import CompilationDatabase, Error
 
 
 def _db_path(build_path: str):
@@ -83,21 +82,21 @@ class CompilationDatabaseTestCase(TestCaseWithTmpDir):
         self.create_tmp_dir('foo/build')
 
         with self.cd_tmp_dir():
-            with self.assertRaisesRegex(error.Error, _db_path('foo/build')):
+            with self.assertRaisesRegex(Error, _db_path('foo/build')):
                 _ = CompilationDatabase('foo', 'foo/build')
 
     def test_top_level_dict(self):
         self._create_db('foo/build', '{}')
 
         with self.cd_tmp_dir():
-            with self.assertRaisesRegex(error.Error, _db_path('foo/build')):
+            with self.assertRaisesRegex(Error, _db_path('foo/build')):
                 _ = CompilationDatabase('foo', 'foo/build')
 
     def test_garbage(self):
         self._create_db('foo/build', 'garbage')
 
         with self.cd_tmp_dir():
-            with self.assertRaisesRegex(error.Error, _db_path('foo/build')):
+            with self.assertRaisesRegex(Error, _db_path('foo/build')):
                 _ = CompilationDatabase('foo', 'foo/build')
 
     def test_invalid_entries(self):
@@ -126,5 +125,5 @@ class CompilationDatabaseTestCase(TestCaseWithTmpDir):
         with self.cd_tmp_dir():
             for dir_path, _ in dir_paths_and_db_lists:
                 build_path = os.path.join(dir_path, 'build')
-                with self.assertRaisesRegex(error.Error, _db_path(build_path), msg=dir_path):
+                with self.assertRaisesRegex(Error, _db_path(build_path), msg=dir_path):
                     _ = CompilationDatabase(dir_path, build_path)
