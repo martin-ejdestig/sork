@@ -51,6 +51,10 @@ _CONFIG_SCHEMA = config.Schema({
 })
 
 
+ENV_C_INCLUDE_PATH = 'C_INCLUDE_PATH'
+ENV_CPLUS_INCLUDE_PATH = 'CPLUS_INCLUDE_PATH'
+
+
 class Project:
     def __init__(self, project_path: str, build_path: str) -> None:
         self.project_path = project_path
@@ -82,8 +86,8 @@ class Project:
 
         include_paths = self._dependency_include_paths()
         if include_paths:
-            self._env_append_paths(env, 'C_INCLUDE_PATH', include_paths)
-            self._env_append_paths(env, 'CPLUS_INCLUDE_PATH', include_paths)
+            self._env_append_paths(env, ENV_C_INCLUDE_PATH, include_paths)
+            self._env_append_paths(env, ENV_CPLUS_INCLUDE_PATH, include_paths)
 
         return env
 
