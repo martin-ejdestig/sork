@@ -55,6 +55,21 @@ ENV_C_INCLUDE_PATH = 'C_INCLUDE_PATH'
 ENV_CPLUS_INCLUDE_PATH = 'CPLUS_INCLUDE_PATH'
 
 
+def _env_append_paths(env: Dict[str, str], name: str, paths_to_append: List[str]):
+    orig_value = env.get(name)
+    env[name] = os.pathsep.join(([orig_value] if orig_value else []) + paths_to_append)
+
+
+def _create_environment(dependency_include_paths: List[str]) -> Dict[str, str]:
+    env = os.environ.copy()
+
+    if dependency_include_paths:
+        _env_append_paths(env, ENV_C_INCLUDE_PATH, dependency_include_paths)
+        _env_append_paths(env, ENV_CPLUS_INCLUDE_PATH, dependency_include_paths)
+
+    return env
+
+
 class Project:
     def __init__(self, project_path: str, build_path: str) -> None:
         self.project_path = project_path
@@ -69,6 +84,11 @@ class Project:
 
         self.dependencies = dependency.find_dependencies(self.build_path)
 
+        dependency_include_paths = sorted(set(itertools.chain.from_iterable(
+            [dep.include_paths for dep in self.dependencies])))
+
+        self.environment = _create_environment(dependency_include_paths)
+
     def normalize_path(self, unnormalized_path: str) -> str:
         return os.path.normpath(os.path.relpath(unnormalized_path, start=self.project_path))
 
@@ -80,23 +100,3 @@ class Project:
             normalized_paths = [path for path in normalized_paths
                                 if path != _NORMALIZED_PROJECT_PATH]
         return normalized_paths
-
-    def command_env_vars(self) -> Dict[str, str]:
-        env = os.environ.copy()
-
-        include_paths = self._dependency_include_paths()
-        if include_paths:
-            self._env_append_paths(env, ENV_C_INCLUDE_PATH, include_paths)
-            self._env_append_paths(env, ENV_CPLUS_INCLUDE_PATH, include_paths)
-
-        return env
-
-    def _dependency_include_paths(self) -> List[str]:
-        include_paths = itertools.chain.from_iterable([dep.include_paths
-                                                       for dep in self.dependencies])
-        return sorted(set(include_paths))
-
-    @staticmethod
-    def _env_append_paths(env: Dict[str, str], name: str, paths_to_append: List[str]):
-        orig_value = env.get(name)
-        env[name] = os.pathsep.join(([orig_value] if orig_value else []) + paths_to_append)
