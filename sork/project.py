@@ -22,6 +22,7 @@ from typing import Dict, List
 
 from . import compilation_database
 from . import config
+from . import environment
 from . import paths
 from .build_systems import dependency
 
@@ -55,17 +56,11 @@ ENV_C_INCLUDE_PATH = 'C_INCLUDE_PATH'
 ENV_CPLUS_INCLUDE_PATH = 'CPLUS_INCLUDE_PATH'
 
 
-def _env_append_paths(env: Dict[str, str], name: str, paths_to_append: List[str]):
-    orig_value = env.get(name)
-    env[name] = os.pathsep.join(([orig_value] if orig_value else []) + paths_to_append)
-
-
 def _create_environment(dependency_include_paths: List[str]) -> Dict[str, str]:
     env = os.environ.copy()
 
-    if dependency_include_paths:
-        _env_append_paths(env, ENV_C_INCLUDE_PATH, dependency_include_paths)
-        _env_append_paths(env, ENV_CPLUS_INCLUDE_PATH, dependency_include_paths)
+    environment.append_paths(env, ENV_C_INCLUDE_PATH, dependency_include_paths)
+    environment.append_paths(env, ENV_CPLUS_INCLUDE_PATH, dependency_include_paths)
 
     return env
 
