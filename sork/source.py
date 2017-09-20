@@ -21,7 +21,7 @@ import os
 import re
 import threading
 
-from typing import Iterator, List, Optional
+from typing import Iterator, List, Optional, Pattern
 
 from . import error
 from .project import Project
@@ -83,7 +83,7 @@ class SourceFinder:
         self._exclude_regex = self._compile_exclude_regex(project)
 
     @staticmethod
-    def _compile_exclude_regex(project: Project):
+    def _compile_exclude_regex(project: Project) -> Pattern:
         pattern = project.config['source_exclude']
         if not pattern:
             return None
