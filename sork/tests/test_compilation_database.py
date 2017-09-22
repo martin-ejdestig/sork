@@ -15,32 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-import json
 import os
-
-from typing import Any, Dict, List, Union
 
 from .test_case_with_tmp_dir import TestCaseWithTmpDir
 
-from .. import paths
 from ..compilation_database import CompilationDatabase, Error
 
 
-def _db_path(build_path: str):
-    return os.path.join(build_path, paths.COMPILE_COMMANDS_JSON_PATH)
-
-
 class CompilationDatabaseTestCase(TestCaseWithTmpDir):
-    def _create_db(self, path: str, content: Union[List[Dict[str, Any]], str]):
-        if not isinstance(content, str):
-            content = json.dumps(content)
-        self.create_tmp_file(_db_path(path), content)
-
     def test_load_success(self):
         self.create_tmp_file('foo/src/bar.cpp')
         self.create_tmp_file('foo/src/baz.cpp')
         self.create_tmp_dir('qux')
-        self._create_db('foo/build', [
+        self.create_tmp_comp_db('foo/build', [
             {
                 'directory': self.tmp_path('foo/build'),
                 'command': 'c++ -o src/bar.o -c ../src/bar.cpp',
@@ -73,7 +60,7 @@ class CompilationDatabaseTestCase(TestCaseWithTmpDir):
                 self.assertIsNone(database.get_command('does_not_exist.cpp'))
 
     def test_no_entries(self):
-        self._create_db('foo/build', [])
+        self.create_tmp_comp_db('foo/build', [])
 
         with self.cd_tmp_dir():
             _ = CompilationDatabase('foo', 'foo/build')
@@ -82,21 +69,21 @@ class CompilationDatabaseTestCase(TestCaseWithTmpDir):
         self.create_tmp_dir('foo/build')
 
         with self.cd_tmp_dir():
-            with self.assertRaisesRegex(Error, _db_path('foo/build')):
+            with self.assertRaisesRegex(Error, self.comp_db_path('foo/build')):
                 _ = CompilationDatabase('foo', 'foo/build')
 
     def test_top_level_dict(self):
-        self._create_db('foo/build', '{}')
+        self.create_tmp_comp_db('foo/build', '{}')
 
         with self.cd_tmp_dir():
-            with self.assertRaisesRegex(Error, _db_path('foo/build')):
+            with self.assertRaisesRegex(Error, self.comp_db_path('foo/build')):
                 _ = CompilationDatabase('foo', 'foo/build')
 
     def test_garbage(self):
-        self._create_db('foo/build', 'garbage')
+        self.create_tmp_comp_db('foo/build', 'garbage')
 
         with self.cd_tmp_dir():
-            with self.assertRaisesRegex(Error, _db_path('foo/build')):
+            with self.assertRaisesRegex(Error, self.comp_db_path('foo/build')):
                 _ = CompilationDatabase('foo', 'foo/build')
 
     def test_invalid_entries(self):
@@ -120,10 +107,10 @@ class CompilationDatabaseTestCase(TestCaseWithTmpDir):
 
         for dir_path, db_list in dir_paths_and_db_lists:
             self.create_tmp_file(os.path.join(dir_path, 'src/bar.cpp'))
-            self._create_db(os.path.join(dir_path, 'build'), db_list)
+            self.create_tmp_comp_db(os.path.join(dir_path, 'build'), db_list)
 
         with self.cd_tmp_dir():
             for dir_path, _ in dir_paths_and_db_lists:
                 build_path = os.path.join(dir_path, 'build')
-                with self.assertRaisesRegex(Error, _db_path(build_path), msg=dir_path):
+                with self.assertRaisesRegex(Error, self.comp_db_path(build_path), msg=dir_path):
                     _ = CompilationDatabase(dir_path, build_path)

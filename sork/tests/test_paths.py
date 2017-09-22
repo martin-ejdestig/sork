@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-
 from .test_case_with_tmp_dir import TestCaseWithTmpDir
 
 from .. import paths
@@ -81,9 +79,6 @@ class FindProjectPathTestCase(TestCaseWithTmpDir):
 
 
 class FindBuildPathTestCase(TestCaseWithTmpDir):
-    def _create_build_dir(self, path: str):
-        self.create_tmp_file(os.path.join(path, paths.COMPILE_COMMANDS_JSON_PATH))
-
     def test_no_build_dir_exists(self):
         self.create_tmp_file('foo/bar/baz.cpp')
 
@@ -93,10 +88,10 @@ class FindBuildPathTestCase(TestCaseWithTmpDir):
 
     def test_in_project_root(self):
         self.create_tmp_file('foo/bar/baz.cpp')
-        self._create_build_dir('foo/build')
+        self.create_tmp_build_dir('foo/build')
 
         self.create_tmp_file('qux/bar/baz.cpp')
-        self._create_build_dir('qux/build_release')
+        self.create_tmp_build_dir('qux/build_release')
 
         with self.cd_tmp_dir():
             self.assertEqual('foo/build', paths.find_build_path('foo'))
@@ -116,10 +111,10 @@ class FindBuildPathTestCase(TestCaseWithTmpDir):
 
     def test_in_same_dir_as_project_dir(self):
         self.create_tmp_file('foo/bar/baz.cpp')
-        self._create_build_dir('foo-build')
+        self.create_tmp_build_dir('foo-build')
 
         self.create_tmp_file('qux/bar/baz.cpp')
-        self._create_build_dir('qux-build_release')
+        self.create_tmp_build_dir('qux-build_release')
 
         with self.cd_tmp_dir():
             self.assertEqual('foo-build', paths.find_build_path('foo'))
@@ -139,10 +134,10 @@ class FindBuildPathTestCase(TestCaseWithTmpDir):
 
     def test_build_subdir_in_same_dir_as_project(self):
         self.create_tmp_file('foo/bar/baz.cpp')
-        self._create_build_dir('build/foo')
+        self.create_tmp_build_dir('build/foo')
 
         self.create_tmp_file('qux/bar/baz.cpp')
-        self._create_build_dir('build/qux_release')
+        self.create_tmp_build_dir('build/qux_release')
 
         with self.cd_tmp_dir():
             self.assertEqual('build/foo', paths.find_build_path('foo'))
@@ -162,10 +157,10 @@ class FindBuildPathTestCase(TestCaseWithTmpDir):
 
     def test_build_dash_dir_in_same_dir_as_project(self):
         self.create_tmp_file('foo/bar/baz.cpp')
-        self._create_build_dir('build-foo')
+        self.create_tmp_build_dir('build-foo')
 
         self.create_tmp_file('qux/bar/baz.cpp')
-        self._create_build_dir('build-qux_release')
+        self.create_tmp_build_dir('build-qux_release')
 
         with self.cd_tmp_dir():
             self.assertEqual('build-foo', paths.find_build_path('foo'))
@@ -185,8 +180,8 @@ class FindBuildPathTestCase(TestCaseWithTmpDir):
 
     def test_multiple_build_paths(self):
         self.create_tmp_file('foo/bar/baz.cpp')
-        self._create_build_dir('foo/build_debug')
-        self._create_build_dir('foo/build_release')
+        self.create_tmp_build_dir('foo/build_debug')
+        self.create_tmp_build_dir('foo/build_release')
 
         with self.cd_tmp_dir():
             with self.assertRaisesRegex(paths.Error, 'foo/build_'):

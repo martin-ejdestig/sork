@@ -15,31 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-
 from .test_case_with_tmp_dir import TestCaseWithTmpDir
 
-from .. import paths
 from ..project import Project
 
 
 class ProjectTestCase(TestCaseWithTmpDir):
-    def _create_project(self, path: str, build_path: str):
-        self.create_tmp_dir(path)
-
-        self.create_tmp_file(os.path.join(build_path, paths.COMPILE_COMMANDS_JSON_PATH), '[]')
-
-        # Create a CMakeCache.txt since CMake currently is the easiest supported
-        # build system to simulate without mocking.
-        self.create_tmp_file(os.path.join(build_path, 'CMakeCache.txt'))
-
     def test_environment(self):
         # TODO
         pass
 
     def test_normalize_path(self):
-        self._create_project('foo', 'foo-build')
         self.create_tmp_file('foo/src/bar.cpp')
+        self.create_tmp_build_dir('foo-build')
 
         with self.cd_tmp_dir():
             project = Project('foo', 'foo-build')
@@ -70,8 +58,8 @@ class ProjectTestCase(TestCaseWithTmpDir):
             self.assertEqual('../foo-build', project.normalize_path('../../foo-build'))
 
     def test_normalize_path_absolute(self):
-        self._create_project('foo', 'foo-build')
         self.create_tmp_file('foo/src/bar.cpp')
+        self.create_tmp_build_dir('foo-build')
 
         project = Project(self.tmp_path('foo'), self.tmp_path('foo-build'))
         self.assertEqual('.', project.normalize_path(self.tmp_path('foo')))
@@ -80,9 +68,9 @@ class ProjectTestCase(TestCaseWithTmpDir):
         self.assertEqual('../foo-build', project.normalize_path(self.tmp_path('foo-build')))
 
     def test_normalize_paths(self):
-        self._create_project('foo', 'foo-build')
         self.create_tmp_file('foo/include/bar.h')
         self.create_tmp_file('foo/src/bar.cpp')
+        self.create_tmp_build_dir('foo-build')
 
         norm_paths = ['.', 'include', 'include/bar.h', 'src', 'src/bar.cpp']
         norm_filter_proj_paths = ['include', 'include/bar.h', 'src', 'src/bar.cpp']
@@ -117,8 +105,8 @@ class ProjectTestCase(TestCaseWithTmpDir):
                              project.normalize_paths(test_paths, filter_project_path=True))
 
     def test_normalize_paths_absolute(self):
-        self._create_project('foo', 'foo-build')
         self.create_tmp_file('foo/src/bar.cpp')
+        self.create_tmp_build_dir('foo-build')
 
         project = Project(self.tmp_path('foo'), self.tmp_path('foo-build'))
         test_paths = [self.tmp_path(p) for p in ['foo', 'foo/src', 'foo/src/bar.cpp']]

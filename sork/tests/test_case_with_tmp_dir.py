@@ -16,11 +16,14 @@
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
 import contextlib
+import json
 import os
 import tempfile
 import unittest
 
-from typing import Optional
+from typing import Any, Dict, List, Optional, Union
+
+from .. import paths
 
 
 class TestCaseWithTmpDir(unittest.TestCase):
@@ -41,6 +44,26 @@ class TestCaseWithTmpDir(unittest.TestCase):
 
         with open(self.tmp_path(file_path), 'w') as file:
             file.write(content if content else '')
+
+    @staticmethod
+    def comp_db_path(build_path: str) -> str:
+        return os.path.join(build_path, paths.COMPILE_COMMANDS_JSON_PATH)
+
+    def create_tmp_comp_db(self, build_path: str,
+                           content: Union[None, str, List[Dict[str, Any]]] = None):
+        if content is None:
+            content = ''
+        elif not isinstance(content, str):
+            content = json.dumps(content)
+
+        self.create_tmp_file(self.comp_db_path(build_path), content)
+
+    def create_tmp_build_dir(self, build_path: str):
+        self.create_tmp_comp_db(build_path, [])
+
+        # Create a CMakeCache.txt since CMake currently is the easiest supported
+        # build system to simulate without mocking.
+        self.create_tmp_file(os.path.join(build_path, 'CMakeCache.txt'))
 
     @contextlib.contextmanager
     def cd_tmp_dir(self, sub_dir: Optional[str] = None):
