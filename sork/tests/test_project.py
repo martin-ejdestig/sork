@@ -15,15 +15,29 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-from .test_case_with_tmp_dir import TestCaseWithTmpDir
+from .test_case_with_tmp_dir import TestCaseWithTmpDir, TmpDependency
 
-from ..project import Project
+from ..project import ENV_C_INCLUDE_PATH, ENV_CPLUS_INCLUDE_PATH, Project
 
 
 class ProjectTestCase(TestCaseWithTmpDir):
-    def test_environment(self):
-        # TODO
-        pass
+    def test_environment_dependency_include_paths(self):
+        self.create_tmp_build_dir('build',
+                                  [TmpDependency('dep1', ['/foo/include']),
+                                   TmpDependency('dep2', ['/bar/include', '/baz/include']),
+                                   TmpDependency('dep3', [])])
+
+        with self.cd_tmp_dir():
+            project = Project('.', 'build')
+            c_inc_paths = project.environment[ENV_C_INCLUDE_PATH]
+            cplus_inc_paths = project.environment[ENV_CPLUS_INCLUDE_PATH]
+
+        self.assertIn('/foo/include', c_inc_paths)
+        self.assertIn('/foo/include', cplus_inc_paths)
+        self.assertIn('/bar/include', c_inc_paths)
+        self.assertIn('/bar/include', cplus_inc_paths)
+        self.assertIn('/baz/include', c_inc_paths)
+        self.assertIn('/baz/include', cplus_inc_paths)
 
     def test_normalize_path(self):
         self.create_tmp_file('foo/src/bar.cpp')
