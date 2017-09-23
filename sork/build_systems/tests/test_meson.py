@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
+import unittest
+
 from sork.tests import popen_mock
 from sork.tests.test_case_with_tmp_dir import TestCaseWithTmpDir
 
@@ -38,7 +40,7 @@ class IsMesonBuildPathTestCase(TestCaseWithTmpDir):
             self.assertFalse(meson.is_meson_build_path('does_not_exist'))
 
 
-class MesonDependenciesTestCase(TestCaseWithTmpDir):
+class MesonDependenciesTestCase(unittest.TestCase):
     def test_valid_json(self):
         with popen_mock.patch(stdout=[
             {'name': 'libfoo',
