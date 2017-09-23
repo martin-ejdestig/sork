@@ -67,7 +67,8 @@ class TestCaseWithTmpDir(unittest.TestCase):
     def comp_db_path(build_path: str) -> str:
         return os.path.join(build_path, paths.COMPILE_COMMANDS_JSON_PATH)
 
-    def create_tmp_comp_db(self, build_path: str,
+    def create_tmp_comp_db(self,
+                           build_path: str,
                            content: Union[None, str, List[Dict[str, Any]]] = None):
         if content is None:
             content = ''
