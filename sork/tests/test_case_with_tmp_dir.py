@@ -69,10 +69,8 @@ class TestCaseWithTmpDir(unittest.TestCase):
 
     def create_tmp_comp_db(self,
                            build_path: str,
-                           content: Union[None, str, List[Dict[str, Any]]] = None):
-        if content is None:
-            content = ''
-        elif not isinstance(content, str):
+                           content: Union[str, List[Dict[str, Any]]]):
+        if not isinstance(content, str):
             content = json.dumps(content)
 
         self.create_tmp_file(self.comp_db_path(build_path), content)
