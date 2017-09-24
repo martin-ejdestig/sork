@@ -22,10 +22,10 @@ from ..project import ENV_C_INCLUDE_PATH, ENV_CPLUS_INCLUDE_PATH, Project
 
 class ProjectTestCase(TestCaseWithTmpDir):
     def test_environment_dependency_include_paths(self):
-        self.create_tmp_build_dir('build',
-                                  [TmpDependency('dep1', ['/foo/include']),
-                                   TmpDependency('dep2', ['/bar/include', '/baz/include']),
-                                   TmpDependency('dep3', [])])
+        self.create_tmp_build_dir('build', dependencies=[TmpDependency('dep1', ['/foo/include']),
+                                                         TmpDependency('dep2', ['/bar/include',
+                                                                                '/baz/include']),
+                                                         TmpDependency('dep3', [])])
 
         with self.cd_tmp_dir():
             project = Project('.', 'build')

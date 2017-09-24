@@ -77,8 +77,9 @@ class TestCaseWithTmpDir(unittest.TestCase):
 
     def create_tmp_build_dir(self,
                              build_path: str,
+                             comp_db: Optional[List[Dict[str, Any]]] = None,
                              dependencies: Optional[List[TmpDependency]] = None):
-        self.create_tmp_comp_db(build_path, [])
+        self.create_tmp_comp_db(build_path, comp_db or '[]')
 
         self.create_tmp_file(os.path.join(build_path, 'CMakeCache.txt'),
                              _cmake_cache_content(dependencies) if dependencies else None)
