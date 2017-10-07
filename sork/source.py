@@ -30,7 +30,7 @@ from .project import Project
 _IN_EXTENSION = '.in'
 _C_EXTENSIONS = ['.c']
 _CPP_EXTENSIONS = ['.cpp', '.cxx', '.cc', '.C', '.c++']
-_HEADER_EXTENSIONS = ['.h', '.hh' '.hp', '.hpp', '.h++', '.hxx']
+_HEADER_EXTENSIONS = ['.h', '.hh', '.hp', '.hpp', '.h++', '.hxx']
 _EXTENSIONS = _C_EXTENSIONS + _CPP_EXTENSIONS + _HEADER_EXTENSIONS + \
               [e + _IN_EXTENSION for e in _HEADER_EXTENSIONS]
 
