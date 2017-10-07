@@ -24,6 +24,7 @@ import unittest
 from typing import Any, Dict, List, Optional, Union
 
 from .. import paths
+from ..config import Config
 
 
 class TmpDependency:
@@ -62,6 +63,10 @@ class TestCaseWithTmpDir(unittest.TestCase):
 
         with open(self.tmp_path(file_path), 'w') as file:
             file.write(content if content else '')
+
+    def create_tmp_config(self, project_path: str, config: Config):
+        self.create_tmp_file(os.path.join(project_path, paths.DOT_SORK_PATH),
+                             json.dumps(config))
 
     @staticmethod
     def comp_db_path(build_path: str) -> str:

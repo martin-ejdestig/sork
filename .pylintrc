@@ -3,7 +3,7 @@ disable=fixme,missing-docstring,too-few-public-methods
 
 [BASIC]
 # Default + allow longer names for test methods so they can be more descriptive.
-method-rgx=(([a-z][a-z0-9_]{2,30})|(_[a-z0-9_]*)|(test_[a-z0-9_]{2,40}))$
+method-rgx=(([a-z][a-z0-9_]{2,30})|(_[a-z0-9_]*)|(test_[a-z0-9_]{2,50}))$
 
 [DESIGN]
 max-attributes=10
