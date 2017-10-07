@@ -73,11 +73,8 @@ class SourceFileTestCase(TestCaseWithTmpDir):
 
         project = Project(self.tmp_path('.'), self.tmp_path('build'))
         src_file = SourceFile('src/foo.cpp', project)
-        does_not_exist = SourceFile('src/does_not_exist.cpp', project)
 
         self.assertEqual(content, src_file.content)
-        with self.assertRaisesRegex(FileNotFoundError, 'src/does_not_exist.cpp'):
-            _ = does_not_exist.content
 
     def test_is_header(self):
         self.create_tmp_build_dir('build')
