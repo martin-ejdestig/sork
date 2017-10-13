@@ -18,13 +18,15 @@
 import argparse
 import os
 
-from . import commands
+from .commands.analyze import AnalyzeCommand
+from .commands.assembler import AssemblerCommand
+from .commands.check import CheckCommand
 
 
 _COMMANDS = [
-    commands.analyze.AnalyzeCommand(),
-    commands.assembler.AssemblerCommand(),
-    commands.check.CheckCommand()
+    AnalyzeCommand(),
+    AssemblerCommand(),
+    CheckCommand()
 ]
 
 
