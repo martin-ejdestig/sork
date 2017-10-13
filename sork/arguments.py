@@ -21,6 +21,7 @@ import os
 from .commands.analyze import AnalyzeCommand
 from .commands.assembler import AssemblerCommand
 from .commands.check import CheckCommand
+from .commands.command import Command
 
 
 _COMMANDS = [
@@ -71,5 +72,5 @@ class Parser(argparse.ArgumentParser):
 
 
 def path_in_project(args: argparse.Namespace) -> str:
-    source_paths = getattr(args, 'source_paths', None)
+    source_paths = getattr(args, Command.SOURCE_PATHS_ARG_NAME, None)
     return source_paths[0] if source_paths else os.path.curdir

@@ -128,7 +128,7 @@ class AssemblerCommand(command.Command):
                             action='store_true',
                             help='Tell compiler to output verbose assembler.')
 
-        parser.add_argument('source_paths',
+        parser.add_argument(self.SOURCE_PATHS_ARG_NAME,
                             nargs=1,
                             help='Source file to output assembler for.',
                             metavar='<file>')

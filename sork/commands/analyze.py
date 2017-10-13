@@ -52,7 +52,7 @@ class AnalyzeCommand(command.Command):
         super().__init__('analyze', arg_help='run static analyzer')
 
     def _add_argparse_arguments(self, parser: argparse.ArgumentParser):
-        parser.add_argument('source_paths',
+        parser.add_argument(self.SOURCE_PATHS_ARG_NAME,
                             nargs='*',
                             help='Analyze path(s). Directories are recursed. All source code in '
                                  'project, subject to configuration in .sork, is analyzed if no '

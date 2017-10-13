@@ -40,7 +40,7 @@ class CheckCommand(command.Command):
                             'Checks starting with clang-: --checks=clang-.* .',
                             metavar='<checks>')
 
-        parser.add_argument('source_paths',
+        parser.add_argument(self.SOURCE_PATHS_ARG_NAME,
                             nargs='*',
                             help='Check path(s). Directories are recursed. All source code in '
                                  'project, subject to configuration in .sork, is checked if no '

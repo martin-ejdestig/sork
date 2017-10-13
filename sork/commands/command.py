@@ -24,6 +24,8 @@ from ..project import Project
 
 
 class Command(abc.ABC):
+    SOURCE_PATHS_ARG_NAME = 'source_paths'
+
     def __init__(self,
                  name,
                  aliases: Optional[List[str]] = None,
