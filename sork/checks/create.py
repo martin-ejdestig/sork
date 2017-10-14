@@ -60,12 +60,10 @@ def _strings_to_names(check_strings: List[str]) -> Set[str]:
     return names_set
 
 
-def from_strings(project: Project,
-                 check_strings: List[str],
-                 allow_none: bool = True) -> List[Check]:
+def from_strings(project: Project, check_strings: List[str]) -> List[Check]:
     names = _strings_to_names(check_strings)
 
-    if not names and not allow_none:
+    if not names:
         raise Error('{} results in no checks.'.format(check_strings))
 
     return [c(project) for c in _CLASSES if c.NAME in names]

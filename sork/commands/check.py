@@ -50,7 +50,7 @@ class CheckCommand(command.Command):
 
     def run(self, args: argparse.Namespace, project: Project):
         check_strings = args.checks.split(',') if args.checks else project.config['checks']
-        enabled_checks = checks.create.from_strings(project, check_strings, allow_none=False)
+        enabled_checks = checks.create.from_strings(project, check_strings)
 
         source_files = SourceFinder(project).find_files(args.source_paths)
 
