@@ -1,1 +1,1 @@
-from .checks_creator import ChecksCreator
+from . import create

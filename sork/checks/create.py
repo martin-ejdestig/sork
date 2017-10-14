@@ -43,31 +43,29 @@ class Error(error.Error):
     pass
 
 
-class ChecksCreator:
-    def __init__(self, project: Project) -> None:
-        self._project = project
+def _strings_to_names(check_strings: List[str]) -> Set[str]:
+    names_set = set()
 
-    def create(self, check_strings: List[str], allow_none: bool = True) -> List[Check]:
-        names = self._strings_to_names(check_strings)
+    if not check_strings or check_strings[0].startswith('-'):
+        names_set.update(_NAMES)
 
-        if not names and not allow_none:
-            raise Error('{} results in no checks.'.format(check_strings))
+    for check_string in check_strings:
+        disable = check_string.startswith('-')
+        names = [n for n in _NAMES if re.match(check_string.lstrip('-'), n)]
+        if disable:
+            names_set.difference_update(names)
+        else:
+            names_set.update(names)
 
-        return [c(self._project) for c in _CLASSES if c.NAME in names]
+    return names_set
 
-    @staticmethod
-    def _strings_to_names(check_strings: List[str]) -> Set[str]:
-        names_set = set()
 
-        if not check_strings or check_strings[0].startswith('-'):
-            names_set.update(_NAMES)
+def from_strings(project: Project,
+                 check_strings: List[str],
+                 allow_none: bool = True) -> List[Check]:
+    names = _strings_to_names(check_strings)
 
-        for check_string in check_strings:
-            disable = check_string.startswith('-')
-            names = [n for n in _NAMES if re.match(check_string.lstrip('-'), n)]
-            if disable:
-                names_set.difference_update(names)
-            else:
-                names_set.update(names)
+    if not names and not allow_none:
+        raise Error('{} results in no checks.'.format(check_strings))
 
-        return names_set
+    return [c(project) for c in _CLASSES if c.NAME in names]

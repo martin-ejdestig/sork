@@ -19,8 +19,8 @@ import argparse
 
 from . import command
 
+from .. import checks
 from .. import concurrent
-from ..checks import ChecksCreator
 from ..project import Project
 from ..progress_printer import ProgressPrinter
 from ..source import SourceFile, SourceFinder
@@ -50,7 +50,7 @@ class CheckCommand(command.Command):
 
     def run(self, args: argparse.Namespace, project: Project):
         check_strings = args.checks.split(',') if args.checks else project.config['checks']
-        enabled_checks = ChecksCreator(project).create(check_strings, allow_none=False)
+        enabled_checks = checks.create.from_strings(project, check_strings, allow_none=False)
 
         source_files = SourceFinder(project).find_files(args.source_paths)
 
