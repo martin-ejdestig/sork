@@ -51,7 +51,13 @@ def _strings_to_names(check_strings: List[str]) -> Set[str]:
 
     for check_string in check_strings:
         disable = check_string.startswith('-')
-        names = [n for n in _NAMES if re.match(check_string.lstrip('-'), n)]
+        match_str = check_string.lstrip('-')
+        names = [n for n in _NAMES if re.match(match_str, n)]
+
+        if not names:
+            raise Error('{} does not match any of the available checks ({}).'.
+                        format(match_str, ', '.join(_NAMES)))
+
         if disable:
             names_set.difference_update(names)
         else:
