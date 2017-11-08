@@ -48,11 +48,11 @@ class SourceFileTestCase(TestCaseWithTmpDir):
             no_compile_command_src = SourceFile('has_no_compile_command.cpp', project)
 
             self.assertEqual(self.tmp_path('build'), foo_src.compile_command.work_dir)
-            self.assertEqual('c++ -o foo.o -c ../foo.cpp', foo_src.compile_command.invokation)
+            self.assertEqual('c++ -o foo.o -c ../foo.cpp', foo_src.compile_command.invocation)
             self.assertEqual('../foo.cpp', foo_src.compile_command.file)
 
             self.assertEqual(self.tmp_path('build'), bar_src.compile_command.work_dir)
-            self.assertEqual('c++ -o bar.o -c ../bar.cpp', bar_src.compile_command.invokation)
+            self.assertEqual('c++ -o bar.o -c ../bar.cpp', bar_src.compile_command.invocation)
             self.assertEqual('../bar.cpp', bar_src.compile_command.file)
 
             self.assertIsNone(no_compile_command_src.compile_command)

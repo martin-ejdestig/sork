@@ -45,7 +45,7 @@ class ClangTidyCheck(check.Check):
             return None
 
         args = re.sub(r"^\S+ ", 'clang-tidy {} -- '.format(source_file.compile_command.file),
-                      source_file.compile_command.invokation)
+                      source_file.compile_command.invocation)
         args = re.sub(r" '?-W[a-z0-9-=]+'?", '', args)
 
         with subprocess.Popen(args,

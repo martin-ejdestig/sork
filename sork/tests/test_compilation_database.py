@@ -48,12 +48,12 @@ class CompilationDatabaseTestCase(TestCaseWithTmpDir):
                 database = CompilationDatabase(project_dir, build_dir)
 
                 command = database.get_command('src/bar.cpp')
-                self.assertEqual('c++ -o src/bar.o -c ../src/bar.cpp', command.invokation)
+                self.assertEqual('c++ -o src/bar.o -c ../src/bar.cpp', command.invocation)
                 self.assertEqual(self.tmp_path('foo/build'), command.work_dir)
                 self.assertEqual('../src/bar.cpp', command.file)
 
                 command = database.get_command('src/baz.cpp')
-                self.assertEqual('c++ -o src/baz.o -c ../src/baz.cpp', command.invokation)
+                self.assertEqual('c++ -o src/baz.o -c ../src/baz.cpp', command.invocation)
                 self.assertEqual(self.tmp_path('foo/build'), command.work_dir)
                 self.assertEqual('../src/baz.cpp', command.file)
 

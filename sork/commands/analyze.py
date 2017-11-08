@@ -28,7 +28,7 @@ from ..source import SourceFile, SourceFinder
 
 
 def _analyze_source_file(source_file: SourceFile) -> str:
-    args = source_file.compile_command.invokation
+    args = source_file.compile_command.invocation
     args = re.sub(r"^.*?\+\+", 'clang++ --analyze -Xanalyzer -analyzer-output=text', args)
     args = re.sub(r" -c", '', args)
     args = re.sub(r" -o '?.*\.o'?", '', args)

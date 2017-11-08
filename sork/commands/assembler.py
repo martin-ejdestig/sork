@@ -40,7 +40,7 @@ def _assembler_for_source_file(source_file: SourceFile, verbose: bool = False) -
     if verbose:
         output_asm_args += ' -fverbose-asm'
 
-    command_args = source_file.compile_command.invokation
+    command_args = source_file.compile_command.invocation
     command_args = re.sub(r" -c ", ' ' + output_asm_args + ' ', command_args)
     command_args = re.sub(r" -o '?.*\.o'? ", ' -o- ', command_args)
     command_args = re.sub(r" '?-M(?:[MGPD]|MD)?'?(?= )", '', command_args)

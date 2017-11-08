@@ -29,8 +29,8 @@ class Error(error.Error):
 
 
 class Command:
-    def __init__(self, invokation: str, work_dir: str, file: str) -> None:
-        self.invokation = invokation
+    def __init__(self, invocation: str, work_dir: str, file: str) -> None:
+        self.invocation = invocation
         self.work_dir = work_dir
         self.file = file
 
