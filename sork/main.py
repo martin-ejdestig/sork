@@ -27,8 +27,7 @@ from .project import Project
 def main():
     logging.basicConfig(format='%(levelname)s: %(message)s')
 
-    arg_parser = arguments.Parser()
-    args = arg_parser.parse_args()
+    args = arguments.parse()
 
     try:
         project_path = paths.find_project_path(arguments.path_in_project(args))
