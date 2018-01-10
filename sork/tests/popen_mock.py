@@ -26,10 +26,10 @@ from typing import Any
 
 class PopenMock(unittest.mock.MagicMock):
     def __init__(self,
+                 *args,
                  stdout: Any = '',
                  stderr: str = '',
                  returncode: int = 0,
-                 *args,
                  **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
