@@ -46,7 +46,7 @@ def _introspect(args: List[str]) -> Any:
     try:
         return json.loads(stdout)
     except json.JSONDecodeError as exception:
-        raise Error('Failed to decode Meson introspection data: {}', exception)
+        raise Error('Failed to decode Meson introspection data: {}'.format(exception))
 
 
 def _include_paths_from_args(args: List[str]) -> List[str]:
