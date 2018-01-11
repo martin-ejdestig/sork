@@ -36,7 +36,7 @@ def is_meson_build_path(build_path: str) -> bool:
 
 
 def _introspect(args: List[str]) -> Any:
-    with subprocess.Popen(['mesonintrospect'] + args,
+    with subprocess.Popen(['meson', 'introspect'] + args,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE) as process:
         stdout, stderr = process.communicate()
