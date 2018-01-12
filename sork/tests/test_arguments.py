@@ -44,6 +44,9 @@ class ArgumentsTestCase(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 _ = arguments.parse(args(-1))
 
+    def test_jobs_greater_than_zero_by_default(self):
+        self.assertGreater(arguments.parse([_VALID_COMMAND]).jobs, 0)
+
     def test_path_in_project_defaults_to_curdir(self):
         args = arguments.parse([_VALID_COMMAND])
         self.assertEqual(os.path.curdir, arguments.path_in_project(args))
