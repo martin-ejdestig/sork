@@ -17,8 +17,8 @@
 
 from typing import List
 
-from sork.project import Project
-from sork.tests.test_case_with_tmp_dir import TestCaseWithTmpDir
+from ...project import Project
+from ...tests.test_case_with_tmp_dir import TestCaseWithTmpDir
 
 from .. import create
 

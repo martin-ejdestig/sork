@@ -17,8 +17,8 @@
 
 import unittest
 
-from sork.tests import popen_mock
-from sork.tests.test_case_with_tmp_dir import TestCaseWithTmpDir
+from ...tests import popen_mock
+from ...tests.test_case_with_tmp_dir import TestCaseWithTmpDir
 
 from .. import meson
 

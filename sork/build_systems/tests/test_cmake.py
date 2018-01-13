@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-from sork.tests.test_case_with_tmp_dir import TestCaseWithTmpDir
+from ...tests.test_case_with_tmp_dir import TestCaseWithTmpDir
 
 from .. import cmake
 
