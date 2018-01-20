@@ -20,11 +20,11 @@ import os
 
 from typing import Dict, List
 
+from . import build_systems
 from . import compilation_database
 from . import config
 from . import environment
 from . import paths
-from .build_systems import dependency
 
 
 _NORMALIZED_PROJECT_PATH = os.path.curdir
@@ -77,7 +77,7 @@ class Project:
         self.compilation_database = compilation_database.CompilationDatabase(self.project_path,
                                                                              self.build_path)
 
-        self.dependencies = dependency.find_dependencies(self.build_path)
+        self.dependencies = build_systems.find_dependencies(self.build_path)
 
         dependency_include_paths = sorted(set(itertools.chain.from_iterable(
             [dep.include_paths for dep in self.dependencies])))

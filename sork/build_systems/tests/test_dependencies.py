@@ -20,10 +20,10 @@ import logging
 from ...tests import popen_mock
 from ...tests.test_case_with_tmp_dir import TestCaseWithTmpDir
 
-from .. import dependency
+from .. import dependencies
 
 
-class FindDependenciesTestCase(TestCaseWithTmpDir):
+class DependenciesFindTestCase(TestCaseWithTmpDir):
     def test_meson(self):
         self.create_tmp_dir('build/meson-private')
 
@@ -32,7 +32,7 @@ class FindDependenciesTestCase(TestCaseWithTmpDir):
                 {'name': 'libfoo',
                  'compile_args': ['-I/usr/include/foo'],
                  'link_args': []}]):
-                deps = dependency.find_dependencies('build')
+                deps = dependencies.find('build')
 
         self.assertEqual(1, len(deps))
         self.assertEqual('libfoo', deps[0].name)
@@ -44,7 +44,7 @@ class FindDependenciesTestCase(TestCaseWithTmpDir):
                              'LIBFOO_INCLUDE_DIRS:INTERNAL=/usr/include/foo\n')
 
         with self.cd_tmp_dir():
-            deps = dependency.find_dependencies('build')
+            deps = dependencies.find('build')
 
         self.assertEqual(1, len(deps))
         self.assertEqual('LIBFOO', deps[0].name)
@@ -55,6 +55,6 @@ class FindDependenciesTestCase(TestCaseWithTmpDir):
 
         with self.cd_tmp_dir():
             with self.assertLogs(level=logging.WARNING):
-                deps = dependency.find_dependencies('build')
+                deps = dependencies.find('build')
 
         self.assertEqual([], deps)

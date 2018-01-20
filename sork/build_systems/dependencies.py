@@ -15,11 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+
 from typing import List
 
+from . import cmake
+from . import meson
+from .dependency import Dependency
 
-# Extracted from dependencies.py to avoid cyclic imports.
-class Dependency:
-    def __init__(self, name: str, include_paths: List[str]) -> None:
-        self.name = name
-        self.include_paths = include_paths
+
+def find(build_path: str) -> List[Dependency]:
+
+    if meson.is_meson_build_path(build_path):
+        return meson.dependencies(build_path)
+
+    if cmake.is_cmake_build_path(build_path):
+        return cmake.dependencies(build_path)
+
+    logging.warning('Unable to extract dependencies from build system.')
+
+    return []
