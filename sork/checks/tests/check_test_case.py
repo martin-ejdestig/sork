@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-from typing import ClassVar, Type
+from typing import Type
 
 from ...project import Project
 from ...source import SourceFile
@@ -25,7 +25,7 @@ from ..check import Check
 
 
 class CheckTestCase(TestCaseWithTmpDir):
-    CHECK_CLASS: ClassVar[Type[Check]]
+    CHECK_CLASS: Type[Check]
 
     def setUp(self):
         super().setUp()
