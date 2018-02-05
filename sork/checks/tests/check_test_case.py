@@ -27,12 +27,19 @@ from ..check import Check
 class CheckTestCase(TestCaseWithTmpDir):
     CHECK_CLASS: Type[Check]
 
-    def setUp(self):
-        super().setUp()
+    _project: Project = None  # A bit ugly with "state" like this, but in the name of convenience...
+
+    def create_check(self) -> Check:
+        assert not self._project
+
         self.create_tmp_build_dir('build')
         self._project = Project(self.tmp_path('.'), self.tmp_path('build'))
-        self._check = self.CHECK_CLASS(self._project)
+
+        return self.CHECK_CLASS(self._project)
 
     def create_source(self, path: str, content: str) -> SourceFile:
+        assert self._project
+
         self.create_tmp_file(path, content)
+
         return SourceFile(path, self._project)

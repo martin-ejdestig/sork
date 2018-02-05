@@ -24,6 +24,7 @@ class ClangFormatTestCase(CheckTestCase):
     CHECK_CLASS = ClangFormatCheck
 
     def test_no_output_when_correctly_formatted(self):
+        check = self.create_check()
         src = self.create_source('src/correct.cpp',
                                  'void foo() {}\n'
                                  '\n'
@@ -31,9 +32,11 @@ class ClangFormatTestCase(CheckTestCase):
                                  '  int j = i + 1;\n'
                                  '  return j;\n'
                                  '}\n')
-        self.assertEqual('', self._check.check(src))
+
+        self.assertEqual('', check.check(src))
 
     def test_remove_and_add_lines(self):
+        check = self.create_check()
         src = self.create_source('src/wrong.cpp',
                                  'void foo()\n'
                                  '{\n'
@@ -44,7 +47,7 @@ class ClangFormatTestCase(CheckTestCase):
                                  '  int j = i+1;\n'
                                  '  return j;\n'
                                  '}\n')
-        output = self._check.check(src)
+        output = check.check(src)
 
         self.assertIn('-void foo()\n', output)
         self.assertIn('-{\n', output)
@@ -57,8 +60,10 @@ class ClangFormatTestCase(CheckTestCase):
         self.assertIn('+  int j = i + 1;\n', output)
 
     def test_source_path(self):
+        check = self.create_check()
         src = self.create_source('src/wrong.cpp', 'void foo () {  }\n')
-        self.assertIn('src/wrong.cpp', self._check.check(src))
+
+        self.assertIn('src/wrong.cpp', check.check(src))
 
     def test_line_numbers_for_hunks(self):
         # TODO: Verify that line numbers hunks are correct. Make clang_format._DIFF_CONTEXT
