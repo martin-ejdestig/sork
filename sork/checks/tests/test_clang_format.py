@@ -24,26 +24,26 @@ class ClangFormatTestCase(CheckTestCase):
     CHECK_CLASS = ClangFormatCheck
 
     def test_no_output_when_correctly_formatted(self):
-        src = self._create_source('src/correct.cpp',
-                                  'void foo() {}\n'
-                                  '\n'
-                                  'int bar(int i) {\n'
-                                  '  int j = i + 1;\n'
-                                  '  return j;\n'
-                                  '}\n')
+        src = self.create_source('src/correct.cpp',
+                                 'void foo() {}\n'
+                                 '\n'
+                                 'int bar(int i) {\n'
+                                 '  int j = i + 1;\n'
+                                 '  return j;\n'
+                                 '}\n')
         self.assertEqual('', self._check.check(src))
 
     def test_remove_and_add_lines(self):
-        src = self._create_source('src/wrong.cpp',
-                                  'void foo()\n'
-                                  '{\n'
-                                  '}\n'
-                                  '\n'
-                                  'int bar( int  i)\n'
-                                  ' { \n'
-                                  '  int j = i+1;\n'
-                                  '  return j;\n'
-                                  '}\n')
+        src = self.create_source('src/wrong.cpp',
+                                 'void foo()\n'
+                                 '{\n'
+                                 '}\n'
+                                 '\n'
+                                 'int bar( int  i)\n'
+                                 ' { \n'
+                                 '  int j = i+1;\n'
+                                 '  return j;\n'
+                                 '}\n')
         output = self._check.check(src)
 
         self.assertIn('-void foo()\n', output)
@@ -57,7 +57,7 @@ class ClangFormatTestCase(CheckTestCase):
         self.assertIn('+  int j = i + 1;\n', output)
 
     def test_source_path(self):
-        src = self._create_source('src/wrong.cpp', 'void foo () {  }\n')
+        src = self.create_source('src/wrong.cpp', 'void foo () {  }\n')
         self.assertIn('src/wrong.cpp', self._check.check(src))
 
     def test_line_numbers_for_hunks(self):

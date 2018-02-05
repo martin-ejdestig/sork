@@ -33,6 +33,6 @@ class CheckTestCase(TestCaseWithTmpDir):
         self._project = Project(self.tmp_path('.'), self.tmp_path('build'))
         self._check = self.CHECK_CLASS(self._project)
 
-    def _create_source(self, path: str, content: str) -> SourceFile:
+    def create_source(self, path: str, content: str) -> SourceFile:
         self.create_tmp_file(path, content)
         return SourceFile(path, self._project)
