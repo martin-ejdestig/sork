@@ -15,11 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-from typing import Type
+from typing import Any, Dict, List, Optional, Type
 
+from ...config import Config
 from ...project import Project
 from ...source import SourceFile
-from ...tests.test_case_with_tmp_dir import TestCaseWithTmpDir
+from ...tests.test_case_with_tmp_dir import TestCaseWithTmpDir, TmpDependency
 
 from ..check import Check
 
@@ -29,10 +30,17 @@ class CheckTestCase(TestCaseWithTmpDir):
 
     _project: Project = None  # A bit ugly with "state" like this, but in the name of convenience...
 
-    def create_check(self) -> Check:
+    def create_check(self,
+                     config: Optional[Config] = None,
+                     comp_db: Optional[List[Dict[str, Any]]] = None,
+                     dependencies: Optional[List[TmpDependency]] = None) -> Check:
         assert not self._project
 
-        self.create_tmp_build_dir('build')
+        if config:
+            self.create_tmp_config('.', config)
+
+        self.create_tmp_build_dir('build', comp_db=comp_db, dependencies=dependencies)
+
         self._project = Project(self.tmp_path('.'), self.tmp_path('build'))
 
         return self.CHECK_CLASS(self._project)
