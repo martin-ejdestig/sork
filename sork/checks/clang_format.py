@@ -73,4 +73,4 @@ class ClangFormatCheck(check.Check):
 
         diff_str = _custom_diff(source_file.path, source_file.content, stdout)
 
-        return string.rstrip_single_char(diff_str, '\n')
+        return string.rstrip_single_char(diff_str, '\n') or None

@@ -33,7 +33,7 @@ class ClangFormatTestCase(CheckTestCase):
                                  '  return j;\n'
                                  '}\n')
 
-        self.assertEqual('', check.check(src))
+        self.assertIsNone(check.check(src))
 
     def test_remove_and_add_lines(self):
         check = self.create_check()
