@@ -41,7 +41,7 @@ def _introspect(args: List[str]) -> Any:
                           stderr=subprocess.PIPE) as process:
         stdout, stderr = process.communicate()
         if process.returncode != 0:
-            raise Error('mesonintrospect failed: {}'.format(stderr))
+            raise Error('meson introspect failed: {}'.format(stderr))
 
     try:
         return json.loads(stdout)

@@ -72,7 +72,7 @@ class MesonDependenciesTestCase(unittest.TestCase):
 
     def test_error_return_code(self):
         with popen_mock.patch(stdout=[], stderr='foo', returncode=1):
-            with self.assertRaisesRegex(meson.Error, 'mesonintrospect.*foo'):
+            with self.assertRaisesRegex(meson.Error, 'meson introspect.*foo'):
                 _ = meson.dependencies('build')
 
     def test_no_deps(self):
