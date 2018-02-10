@@ -26,6 +26,7 @@ class CompilationDatabaseTestCase(TestCaseWithTmpDir):
     def test_load_success(self):
         self.create_tmp_file('foo/src/bar.cpp')
         self.create_tmp_file('foo/src/baz.cpp')
+        self.create_tmp_file('foo/src/absolute.cpp')
         self.create_tmp_dir('qux')
         self.create_tmp_comp_db('foo/build', [
             {
@@ -37,6 +38,12 @@ class CompilationDatabaseTestCase(TestCaseWithTmpDir):
                 'directory': self.tmp_path('foo/build'),
                 'command': 'c++ -o src/baz.o -c ../src/baz.cpp',
                 'file': '../src/baz.cpp'
+            },
+            {
+                'directory': self.tmp_path('foo/build'),
+                'command': '/usr/bin/c++ -o src/absolute.o -c ' +
+                           self.tmp_path('foo/src/absolute.cpp'),
+                'file': self.tmp_path('foo/src/absolute.cpp')
             }
         ])
 
@@ -56,6 +63,13 @@ class CompilationDatabaseTestCase(TestCaseWithTmpDir):
                 self.assertEqual('c++ -o src/baz.o -c ../src/baz.cpp', command.invocation)
                 self.assertEqual(self.tmp_path('foo/build'), command.work_dir)
                 self.assertEqual('../src/baz.cpp', command.file)
+
+                command = database.get_command('src/absolute.cpp')
+                self.assertEqual('/usr/bin/c++ -o src/absolute.o -c ' +
+                                 self.tmp_path('foo/src/absolute.cpp'), command.invocation)
+                self.assertEqual(self.tmp_path('foo/build'), command.work_dir)
+                self.assertTrue(os.path.isabs(command.file))
+                self.assertEqual(self.tmp_path('foo/src/absolute.cpp'), command.file)
 
                 self.assertIsNone(database.get_command('does_not_exist.cpp'))
 
