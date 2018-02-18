@@ -306,5 +306,4 @@ You must make sure CMake is invoked with `-DCMAKE_EXPORT_COMPILE_COMMANDS=1` for
 - More robust project root detection (check for more VCS dot directories, ... other ideas?)
 - Add user specific configuration in $HOME/.config/ that lets user add search paths for how to find
   build directories. Want to avoid -bp/--build-path flag as much as possible.
-- More tests.
 - Add a setup.py. https://docs.python.org/3.5/distutils/setupscript.html
