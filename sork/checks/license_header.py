@@ -30,19 +30,10 @@ from ..project import Project
 from ..source import SourceFile
 
 
-# TODO: Make it possible to set allowed start/end year in config (default to start year <= current
-#       year and end year = current year).
-#
-# TODO: Make it possible to specify list of allowed authors in config.
-#
 # TODO: More informative error output than "invalid header". (diff? just print erroneous line #?)
 #
-# TODO: Projects that contain multiple licenses are not handled. Allow for specifying list of
-#       licenses in config and also handle detecting multiple COPYING*/LICENSE* files? Use
-#       '(' + '|'.join(<list of header regexps>) + ')' when compiling regex to match against
-#       multiple headers when/if implementing.
-#
-# TODO: Be less strict about line breaking in headers?
+# TODO: Add License class and License.Type enum... or something... more structured, more type safe
+#       and will be easier to test.
 
 
 _LICENSES: Dict[str, Dict[str, Any]] = {
