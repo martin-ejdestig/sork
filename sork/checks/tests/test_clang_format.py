@@ -69,9 +69,3 @@ class ClangFormatTestCase(CheckTestCase):
         # TODO: Verify that line numbers hunks are correct. Make clang_format._DIFF_CONTEXT
         #       public to match exactly. (Line must be first error line - DIFF_CONTEXT.)
         pass
-
-    def test_dot_clang_format_detected(self):
-        # TODO: Write something to .clang_format in project root and make sure it affects
-        #       formatting. Basically verifies that cwd is set to project root when running
-        #       clang-format command.
-        pass
