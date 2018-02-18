@@ -294,16 +294,4 @@ You must make sure CMake is invoked with `-DCMAKE_EXPORT_COMPILE_COMMANDS=1` for
 
 - Add a --revision/-r &lt;git range/rev&gt; flag for only checking/analyzing files/lines changed in
   range/rev.
-- Implement --fix flag for check that fixes found errors if possible. Or maybe skip this? After
-  experimenting a bit with clang-tidy it seems it does not work well with headers included in
-  multiple files (first come first serve, breaks following compilation units?). Flag for fixing
-  compilation errors to potentially cope with this seems quite dangerous. It replaces unrelated
-  variables if names match closely enough, replaces variables with types and functions, etc.
-  clang-tidy is only one check but it would be a large reason for doing this. Maybe more suitable to
-  have this integrated in IDEs/editors where user is given explicit notice and has to take action to
-  fix each separate error? Probably out of scope for Sork and up to editors to integrate clang-tidy
-  support in a nice way.
-- More robust project root detection (check for more VCS dot directories, ... other ideas?)
-- Add user specific configuration in $HOME/.config/ that lets user add search paths for how to find
-  build directories. Want to avoid -bp/--build-path flag as much as possible.
 - Add a setup.py. https://docs.python.org/3.5/distutils/setupscript.html
