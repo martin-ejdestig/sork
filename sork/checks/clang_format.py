@@ -61,7 +61,7 @@ class ClangFormatCheck(check.Check):
     NAME = 'clang-format'
 
     def check(self, source_file: SourceFile) -> Optional[str]:
-        with subprocess.Popen('clang-format',
+        with subprocess.Popen(['clang-format', '-assume-filename=' + source_file.path],
                               stdin=subprocess.PIPE,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE,
