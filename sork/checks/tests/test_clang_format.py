@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
+from typing import List
+
 from .check_test_case import CheckTestCase
 
 from ..clang_format import ClangFormatCheck
@@ -22,6 +24,9 @@ from ..clang_format import ClangFormatCheck
 
 class ClangFormatTestCase(CheckTestCase):
     CHECK_CLASS = ClangFormatCheck
+
+    def create_dot_clang_format(self, lines: List[str]):
+        self.create_tmp_file('.clang-format', '\n'.join(lines))
 
     def test_no_output_when_correctly_formatted(self):
         check = self.create_check()
@@ -66,6 +71,42 @@ class ClangFormatTestCase(CheckTestCase):
         src = self.create_source('src/wrong.cpp', ['void foo () {  }'])
 
         self.assertIn('src/wrong.cpp', check.check(src))
+
+    def test_assume_filename(self):
+        # File content is passed to clang-format through stdin which means -assume-filename argument
+        # must be used for clang-format to know name of file. Sorting of include blocks, where main
+        # header gets prio 0 (see clang-format documentation), requires this so use it to test.
+        def cfg_lines(include_blocks_value: str):
+            return ['IncludeBlocks: ' + include_blocks_value,
+                    'IncludeCategories:',
+                    '  - Regex: \'^<.*\\.h>\'',
+                    '    Priority: 1',
+                    '  - Regex: \'^<.*\'',
+                    '    Priority: 2',
+                    '  - Regex: \'.*\'',
+                    '    Priority: 3']
+
+        check = self.create_check()
+        src = self.create_source('src/baz/foo.cpp', [
+            '#include <stdio.h>',
+            '#include <stdlib.h>',
+            '',
+            '#include <algorithm>',
+            '#include <vector>',
+            '',
+            '#include "bar.h"',
+            '#include "baz/foo.h"',
+            '#include "baz/qux.h"'
+        ])
+
+        self.create_dot_clang_format(cfg_lines('Preserve'))  # Verify that formatted correctly.
+        self.assertIsNone(check.check(src))
+
+        self.create_dot_clang_format(cfg_lines('Regroup'))  # Now test that main header is moved.
+        output = check.check(src)
+        self.assertIsNotNone(output)
+        self.assertIn('+#include "baz/foo.h"\n+\n', output)
+        self.assertIn('-#include "baz/foo.h"\n', output)
 
     def test_line_numbers_for_hunks(self):
         # TODO: Verify that line numbers hunks are correct. Make clang_format._DIFF_CONTEXT
