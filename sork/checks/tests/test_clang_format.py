@@ -25,28 +25,30 @@ class ClangFormatTestCase(CheckTestCase):
 
     def test_no_output_when_correctly_formatted(self):
         check = self.create_check()
-        src = self.create_source('src/correct.cpp',
-                                 'void foo() {}\n'
-                                 '\n'
-                                 'int bar(int i) {\n'
-                                 '  int j = i + 1;\n'
-                                 '  return j;\n'
-                                 '}\n')
+        src = self.create_source('src/correct.cpp', [
+            'void foo() {}',
+            '',
+            'int bar(int i) {',
+            '  int j = i + 1;',
+            '  return j;',
+            '}'
+        ])
 
         self.assertIsNone(check.check(src))
 
     def test_remove_and_add_lines(self):
         check = self.create_check()
-        src = self.create_source('src/wrong.cpp',
-                                 'void foo()\n'
-                                 '{\n'
-                                 '}\n'
-                                 '\n'
-                                 'int bar( int  i)\n'
-                                 ' { \n'
-                                 '  int j = i+1;\n'
-                                 '  return j;\n'
-                                 '}\n')
+        src = self.create_source('src/wrong.cpp', [
+            'void foo()',
+            '{',
+            '}',
+            '',
+            'int bar( int  i)',
+            ' { ',
+            '  int j = i+1;',
+            '  return j;',
+            '}'
+        ])
         output = check.check(src)
 
         self.assertIn('-void foo()\n', output)
@@ -61,7 +63,7 @@ class ClangFormatTestCase(CheckTestCase):
 
     def test_source_path(self):
         check = self.create_check()
-        src = self.create_source('src/wrong.cpp', 'void foo () {  }\n')
+        src = self.create_source('src/wrong.cpp', ['void foo () {  }'])
 
         self.assertIn('src/wrong.cpp', check.check(src))
 

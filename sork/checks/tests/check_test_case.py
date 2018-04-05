@@ -45,9 +45,9 @@ class CheckTestCase(TestCaseWithTmpDir):
 
         return self.CHECK_CLASS(self._project)
 
-    def create_source(self, path: str, content: str) -> SourceFile:
+    def create_source(self, path: str, src_lines: List[str]) -> SourceFile:
         assert self._project
 
-        self.create_tmp_file(path, content)
+        self.create_tmp_file(path, '\n'.join(src_lines))
 
         return SourceFile(path, self._project)
