@@ -25,7 +25,7 @@ from ..clang_format import ClangFormatCheck
 class ClangFormatTestCase(CheckTestCase):
     CHECK_CLASS = ClangFormatCheck
 
-    def create_dot_clang_format(self, lines: List[str]):
+    def _create_dot_clang_format(self, lines: List[str]):
         self.create_tmp_file('.clang-format', '\n'.join(lines))
 
     def test_no_output_when_correctly_formatted(self):
@@ -99,10 +99,10 @@ class ClangFormatTestCase(CheckTestCase):
             '#include "baz/qux.h"'
         ])
 
-        self.create_dot_clang_format(cfg_lines('Preserve'))  # Verify that formatted correctly.
+        self._create_dot_clang_format(cfg_lines('Preserve'))  # Verify that formatted correctly.
         self.assertIsNone(check.check(src))
 
-        self.create_dot_clang_format(cfg_lines('Regroup'))  # Now test that main header is moved.
+        self._create_dot_clang_format(cfg_lines('Regroup'))  # Now test that main header is moved.
         output = check.check(src)
         self.assertIsNotNone(output)
         self.assertIn('+#include "baz/foo.h"\n+\n', output)
