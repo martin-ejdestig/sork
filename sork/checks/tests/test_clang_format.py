@@ -19,7 +19,7 @@ from typing import List
 
 from .check_test_case import CheckTestCase
 
-from ..clang_format import ClangFormatCheck
+from ..clang_format import ClangFormatCheck, DIFF_CONTEXT
 
 
 class ClangFormatTestCase(CheckTestCase):
@@ -108,7 +108,9 @@ class ClangFormatTestCase(CheckTestCase):
         self.assertIn('+#include "baz/foo.h"\n+\n', output)
         self.assertIn('-#include "baz/foo.h"\n', output)
 
-    def test_line_numbers_for_hunks(self):
-        # TODO: Verify that line numbers hunks are correct. Make clang_format._DIFF_CONTEXT
-        #       public to match exactly. (Line must be first error line - DIFF_CONTEXT.)
-        pass
+    def test_line_number_for_hunk(self):
+        check = self.create_check()
+        src = self.create_source('src/foo.cpp', ['// bar'] * 8 + [' int baz = 0;'] + ['// qux'] * 8)
+
+        output = check.check(src)
+        self.assertIn('src/foo.cpp:' + str(8 + 1 - DIFF_CONTEXT), output)

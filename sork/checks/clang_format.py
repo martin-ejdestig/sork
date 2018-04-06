@@ -26,7 +26,7 @@ from .. import string
 from ..source import SourceFile
 
 
-_DIFF_CONTEXT = 1
+DIFF_CONTEXT = 1
 
 
 def _custom_diff(path: str, content: str, formatted: str) -> str:
@@ -36,7 +36,7 @@ def _custom_diff(path: str, content: str, formatted: str) -> str:
 
     for group in difflib.SequenceMatcher(None,
                                          content_lines,
-                                         formatted_lines).get_grouped_opcodes(_DIFF_CONTEXT):
+                                         formatted_lines).get_grouped_opcodes(DIFF_CONTEXT):
         first_line = int(group[0][1]) + 1  # difflib confuses mypy, unconfuse with int().
         diff_lines.append('{}:{}: error: wrong format:\n'.format(path, first_line))
 
