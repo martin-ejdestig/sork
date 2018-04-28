@@ -47,11 +47,6 @@ class ClangTidyCheck(check.Check):
         args = re.sub(r"^\S+ ", 'clang-tidy {} -- '.format(source_file.compile_command.file),
                       source_file.compile_command.invocation)
         args = re.sub(r" '?-W[a-z0-9-=]+'?", '', args)
-        # clang-tidy 5.0 (and later?) outputs:
-        # 'linker' input unused [clang-diagnostic-unused-command-line-argument]
-        # if preprocessor options -MF, -MT or -MQ are used. Remove them. *sigh*
-        # Bug? Fixed in later versions?
-        args = re.sub(r" '?-M[FTQ]'? '?.*?\.[do]'?(?= )", '', args)
 
         with subprocess.Popen(args,
                               stdout=subprocess.PIPE,
