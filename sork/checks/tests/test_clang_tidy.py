@@ -26,7 +26,7 @@ class ClangTidyTestCase(CheckTestCase):
     CHECK_CLASS = ClangTidyCheck
 
     def _create_dot_clang_tidy(self, lines: List[str]):
-        self.create_tmp_file('.clang-tidy', '\n'.join(lines))
+        self.create_tmp_file('.clang-tidy', lines)
 
     def test_no_error_returns_none(self):
         check = self.create_check(comp_db=[{

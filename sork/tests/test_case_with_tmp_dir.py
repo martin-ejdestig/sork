@@ -56,10 +56,13 @@ class TestCaseWithTmpDir(unittest.TestCase):
     def create_tmp_dir(self, dir_path: str):
         os.makedirs(self.tmp_path(dir_path), exist_ok=True)
 
-    def create_tmp_file(self, file_path: str, content: Optional[str] = None):
+    def create_tmp_file(self, file_path: str, content: Optional[Union[str, List[str]]] = None):
         dir_path = os.path.dirname(file_path)
         if dir_path:
             self.create_tmp_dir(dir_path)
+
+        if isinstance(content, list):
+            content = '\n'.join(content)
 
         with open(self.tmp_path(file_path), 'w') as file:
             file.write(content if content else '')

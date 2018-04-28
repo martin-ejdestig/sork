@@ -51,15 +51,15 @@ class CMakeDependenciesTestCase(TestCaseWithTmpDir):
 
     def test_valid_cmake_cache_txt(self):
         self.create_tmp_file('build/CMakeCache.txt',
-                             '# A comment\n'
-                             '// Another comment\n'
-                             'LIBFOO_FOUND:INTERNAL=1\n'
-                             'LIBFOO_INCLUDE_DIRS:INTERNAL=/usr/include/foo\n'
-                             'LIBBAR_FOUND:INTERNAL=1\n'
-                             'LIBBAR_INCLUDE_DIRS:INTERNAL=/usr/include/bar/1;/usr/include/bar/2\n'
-                             'LIBBAZ_FOUND:INTERNAL=0\n'
-                             'QUX_FOUND:INTERNAL=1\n'
-                             'QUX_INCLUDE_DIRS:INTERNAL=\n')
+                             ['# A comment',
+                              '// Another comment',
+                              'LIBFOO_FOUND:INTERNAL=1',
+                              'LIBFOO_INCLUDE_DIRS:INTERNAL=/usr/include/foo',
+                              'LIBBAR_FOUND:INTERNAL=1',
+                              'LIBBAR_INCLUDE_DIRS:INTERNAL=/usr/include/bar/1;/usr/include/bar/2',
+                              'LIBBAZ_FOUND:INTERNAL=0',
+                              'QUX_FOUND:INTERNAL=1',
+                              'QUX_INCLUDE_DIRS:INTERNAL='])
 
         with self.cd_tmp_dir():
             deps = cmake.dependencies('build')

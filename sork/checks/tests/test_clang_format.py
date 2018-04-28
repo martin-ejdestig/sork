@@ -26,7 +26,7 @@ class ClangFormatTestCase(CheckTestCase):
     CHECK_CLASS = ClangFormatCheck
 
     def _create_dot_clang_format(self, lines: List[str]):
-        self.create_tmp_file('.clang-format', '\n'.join(lines))
+        self.create_tmp_file('.clang-format', lines)
 
     def test_no_output_when_correctly_formatted(self):
         check = self.create_check()

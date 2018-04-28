@@ -40,8 +40,8 @@ class DependenciesFindTestCase(TestCaseWithTmpDir):
 
     def test_cmake(self):
         self.create_tmp_file('build/CMakeCache.txt',
-                             'LIBFOO_FOUND:INTERNAL=1\n'
-                             'LIBFOO_INCLUDE_DIRS:INTERNAL=/usr/include/foo\n')
+                             ['LIBFOO_FOUND:INTERNAL=1',
+                              'LIBFOO_INCLUDE_DIRS:INTERNAL=/usr/include/foo'])
 
         with self.cd_tmp_dir():
             deps = dependencies.find('build')
