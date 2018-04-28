@@ -67,7 +67,7 @@ class ClangTidyTestCase(CheckTestCase):
             'command': 'g++ -Wsuggest-override -o src/foo.o -c ../src/foo.cpp',
             'file': '../src/foo.cpp'
         }])
-        src = self.create_source('src/bar.cpp', [''])
+        src = self.create_source('src/foo.cpp', [''])
 
         self.assertIsNone(check.check(src))
 
