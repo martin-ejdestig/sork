@@ -57,4 +57,4 @@ class ClangTidyCheck(check.Check):
                               universal_newlines=True) as process:
             output = process.communicate()[0]
 
-        return _CLANG_TIDY_NOISE_REGEX.sub('', output).strip()
+        return _CLANG_TIDY_NOISE_REGEX.sub('', output).strip() or None
