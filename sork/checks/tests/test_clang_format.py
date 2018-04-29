@@ -15,22 +15,33 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-from typing import List
+import os
 
-from .check_test_case import CheckTestCase
+from typing import List, Tuple
+
+from ...project import Project
+from ...source import SourceFile
+from ...tests.test_case_with_tmp_dir import TestCaseWithTmpDir
 
 from ..clang_format import ClangFormatCheck, DIFF_CONTEXT
 
 
-class ClangFormatTestCase(CheckTestCase):
-    CHECK_CLASS = ClangFormatCheck
+class ClangFormatTestCase(TestCaseWithTmpDir):
+    def _create(self) -> Tuple[Project, ClangFormatCheck]:
+        self.create_tmp_build_dir('build')
+        project = Project(self.tmp_path('.'), self.tmp_path('build'))
+        return project, ClangFormatCheck(project)
+
+    def _create_source(self, project: Project, path: str, src_lines: List[str]) -> SourceFile:
+        self.create_tmp_file(os.path.join(project.project_path, path), src_lines)
+        return SourceFile(path, project)
 
     def _create_dot_clang_format(self, lines: List[str]):
         self.create_tmp_file('.clang-format', lines)
 
     def test_no_output_when_correctly_formatted(self):
-        check = self.create_check()
-        src = self.create_source('src/correct.cpp', [
+        project, check = self._create()
+        src = self._create_source(project, 'src/correct.cpp', [
             'void foo() {}',
             '',
             'int bar(int i) {',
@@ -42,8 +53,8 @@ class ClangFormatTestCase(CheckTestCase):
         self.assertIsNone(check.check(src))
 
     def test_remove_and_add_lines(self):
-        check = self.create_check()
-        src = self.create_source('src/wrong.cpp', [
+        project, check = self._create()
+        src = self._create_source(project, 'src/wrong.cpp', [
             'void foo()',
             '{',
             '}',
@@ -67,8 +78,8 @@ class ClangFormatTestCase(CheckTestCase):
         self.assertIn('+  int j = i + 1;\n', output)
 
     def test_source_path(self):
-        check = self.create_check()
-        src = self.create_source('src/wrong.cpp', ['void foo () {  }'])
+        project, check = self._create()
+        src = self._create_source(project, 'src/wrong.cpp', ['void foo () {  }'])
 
         self.assertIn('src/wrong.cpp', check.check(src))
 
@@ -86,8 +97,8 @@ class ClangFormatTestCase(CheckTestCase):
                     '  - Regex: \'.*\'',
                     '    Priority: 3']
 
-        check = self.create_check()
-        src = self.create_source('src/baz/foo.cpp', [
+        project, check = self._create()
+        src = self._create_source(project, 'src/baz/foo.cpp', [
             '#include <stdio.h>',
             '#include <stdlib.h>',
             '',
@@ -109,13 +120,13 @@ class ClangFormatTestCase(CheckTestCase):
         self.assertIn('-#include "baz/foo.h"\n', output)
 
     def test_line_number_for_hunk(self):
-        check = self.create_check()
+        project, check = self._create()
         lines_around_error = 8
         hunk_line_number = lines_around_error + 1 - DIFF_CONTEXT
-        src = self.create_source('src/foo.cpp',
-                                 ['// bar'] * lines_around_error +
-                                 [' int baz = 0;'] +
-                                 ['// qux'] * lines_around_error)
+        src = self._create_source(project, 'src/foo.cpp',
+                                  ['// bar'] * lines_around_error +
+                                  [' int baz = 0;'] +
+                                  ['// qux'] * lines_around_error)
 
         output = check.check(src)
         self.assertIn('src/foo.cpp:' + str(hunk_line_number), output)

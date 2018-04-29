@@ -15,69 +15,83 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-from typing import List
+import os
 
-from .check_test_case import CheckTestCase
+from typing import Any, Dict, List, Tuple
+
+from ...project import Project
+from ...source import SourceFile
+from ...tests.test_case_with_tmp_dir import TestCaseWithTmpDir
 
 from ..clang_tidy import ClangTidyCheck
 
 
-class ClangTidyTestCase(CheckTestCase):
-    CHECK_CLASS = ClangTidyCheck
+class ClangTidyTestCase(TestCaseWithTmpDir):
+    def _create(self,
+                project_path: str,
+                build_path: str,
+                comp_db: List[Dict[str, Any]]) -> Tuple[Project, ClangTidyCheck]:
+        self.create_tmp_build_dir(build_path, comp_db=comp_db)
+        project = Project(self.tmp_path(project_path), self.tmp_path(build_path))
+        return project, ClangTidyCheck(project)
+
+    def _create_source(self, project: Project, path: str, src_lines: List[str]) -> SourceFile:
+        self.create_tmp_file(os.path.join(project.project_path, path), src_lines)
+        return SourceFile(path, project)
 
     def _create_dot_clang_tidy(self, lines: List[str]):
         self.create_tmp_file('.clang-tidy', lines)
 
     def test_no_error_returns_none(self):
-        check = self.create_check(comp_db=[{
+        project, check = self._create('.', 'build', comp_db=[{
             'directory': self.tmp_path('build'),
             'command': 'c++ -o src/foo.o -c ../src/foo.cpp',
             'file': '../src/foo.cpp'
         }])
-        src = self.create_source('src/foo.cpp', ['int *p = nullptr;'])
+        src = self._create_source(project, 'src/foo.cpp', ['int *p = nullptr;'])
         self._create_dot_clang_tidy(['Checks: "modernize-use-nullptr"'])
 
         self.assertIsNone(check.check(src))
 
     def test_error_position_in_output(self):
-        check = self.create_check(comp_db=[{
+        project, check = self._create('.', 'build', comp_db=[{
             'directory': self.tmp_path('build'),
             'command': 'c++ -o src/foo.o -c ../src/foo.cpp',
             'file': '../src/foo.cpp'
         }])
-        src = self.create_source('src/foo.cpp', ['int *p = 0;'])
+        src = self._create_source(project, 'src/foo.cpp', ['int *p = 0;'])
         self._create_dot_clang_tidy(['Checks: "modernize-use-nullptr"'])
 
         self.assertIn('src/foo.cpp:1:10', check.check(src))
 
     def test_source_without_compile_command_is_ignored(self):
-        check = self.create_check(comp_db=[{
+        project, check = self._create('.', 'build', comp_db=[{
             'directory': self.tmp_path('build'),
             'command': 'c++ -o src/foo.o -c ../src/foo.cpp',
             'file': '../src/foo.cpp'
         }])
-        src = self.create_source('src/bar.cpp', ['int *p = 0;'])
+        src = self._create_source(project, 'src/bar.cpp', ['int *p = 0;'])
         self._create_dot_clang_tidy(['Checks: "modernize-use-nullptr"'])
 
         self.assertIsNone(check.check(src))
 
     def test_gcc_specific_warning_flags_ignored(self):
-        check = self.create_check(comp_db=[{
+        project, check = self._create('.', 'build', comp_db=[{
             'directory': self.tmp_path('build'),
             'command': 'g++ -Wsuggest-override -o src/foo.o -c ../src/foo.cpp',
             'file': '../src/foo.cpp'
         }])
-        src = self.create_source('src/foo.cpp', [''])
+        src = self._create_source(project, 'src/foo.cpp', [''])
 
         self.assertIsNone(check.check(src))
 
     def test_absolute_compiler_path_replaced_correctly(self):
-        check = self.create_check(comp_db=[{
+        project, check = self._create('.', 'build', comp_db=[{
             'directory': self.tmp_path('build'),
             'command': '/usr/bin/c++ -o src/foo.o -c ../src/foo.cpp',
             'file': '../src/foo.cpp'
         }])
-        src = self.create_source('src/foo.cpp', ['int *p = 0;'])
+        src = self._create_source(project, 'src/foo.cpp', ['int *p = 0;'])
         self._create_dot_clang_tidy(['Checks: "modernize-use-nullptr"'])
 
         self.assertIn('src/foo.cpp:1:10', check.check(src))

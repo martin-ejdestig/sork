@@ -50,8 +50,10 @@ class TestCaseWithTmpDir(unittest.TestCase):
         self.tmp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp_dir.cleanup)
 
-    def tmp_path(self, sub_path: str) -> str:
-        return os.path.join(self.tmp_dir.name, sub_path)
+    def tmp_path(self, path: str) -> str:
+        if path.startswith(self.tmp_dir.name):
+            return path
+        return os.path.join(self.tmp_dir.name, path)
 
     def create_tmp_dir(self, dir_path: str):
         os.makedirs(self.tmp_path(dir_path), exist_ok=True)

@@ -15,11 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-from .check_test_case import CheckTestCase
+from ...tests.test_case_with_tmp_dir import TestCaseWithTmpDir
 
-from ..include_guard import IncludeGuardCheck
+# from ..include_guard import IncludeGuardCheck
 
 
-class IncludeGuardTestCase(CheckTestCase):
-    CHECK_CLASS = IncludeGuardCheck
+class IncludeGuardTestCase(TestCaseWithTmpDir):
     # TODO
+    pass
