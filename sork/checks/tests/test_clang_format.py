@@ -110,7 +110,12 @@ class ClangFormatTestCase(CheckTestCase):
 
     def test_line_number_for_hunk(self):
         check = self.create_check()
-        src = self.create_source('src/foo.cpp', ['// bar'] * 8 + [' int baz = 0;'] + ['// qux'] * 8)
+        lines_around_error = 8
+        hunk_line_number = lines_around_error + 1 - DIFF_CONTEXT
+        src = self.create_source('src/foo.cpp',
+                                 ['// bar'] * lines_around_error +
+                                 [' int baz = 0;'] +
+                                 ['// qux'] * lines_around_error)
 
         output = check.check(src)
-        self.assertIn('src/foo.cpp:' + str(8 + 1 - DIFF_CONTEXT), output)
+        self.assertIn('src/foo.cpp:' + str(hunk_line_number), output)
