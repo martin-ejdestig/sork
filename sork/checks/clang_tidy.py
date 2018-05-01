@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import re
 import subprocess
 
@@ -37,6 +38,58 @@ _CLANG_TIDY_NOISE_LINES = [
 _CLANG_TIDY_NOISE_REGEX = re.compile('(?m)^(' + '|'.join(_CLANG_TIDY_NOISE_LINES) + ')$')
 
 
+def _config_header_filter(source_file: SourceFile) -> Optional[str]:
+    config_path = os.path.join(source_file.project.project_path, '.clang-tidy')
+
+    if not os.path.exists(config_path):
+        return None
+
+    with open(config_path, 'r') as file:
+        line = next((l for l in file.readlines() if l.startswith('HeaderFilterRegex')), '')
+
+    split = line.split(':', maxsplit=1)
+
+    return split[1].strip('\n "\'') if len(split) == 2 else None
+
+
+# Current working directory matters when clang-tidy uses HeaderFilterRegex to
+# determine if errors from headers should be displayed or not.
+#
+# Need to prepend relative path from build directory to project directory if
+# relative paths are used in compilation commands (Meson). The absolute path
+# needs to be prepended if absolute paths are used in compilation commands
+# (CMake).
+#
+# TODO: Can this be removed? See https://bugs.llvm.org/show_bug.cgi?id=37281
+#       for clang-tidy bug.
+def _header_filter_override(source_file: SourceFile) -> Optional[str]:
+    if os.path.isabs(source_file.compile_command.file):
+        path = source_file.project.project_path
+    else:
+        path = os.path.relpath(source_file.project.project_path,
+                               start=source_file.compile_command.work_dir)
+        if path == os.path.curdir:
+            return None
+
+    header_filter = _config_header_filter(source_file)
+    if not header_filter:
+        return None
+
+    return re.sub(r"(\^?)([^|]*)", r"\1" + path + r"/\2", header_filter)
+
+
+def _compiler_exe_replacement(source_file: SourceFile) -> str:
+    args = ['clang-tidy']
+
+    header_filter_override = _header_filter_override(source_file)
+    if header_filter_override:
+        args += ['-header-filter=\'' + header_filter_override + '\'']
+
+    args += [source_file.compile_command.file, '--']
+
+    return ' '.join(args)
+
+
 class ClangTidyCheck(check.Check):
     NAME = 'clang-tidy'
 
@@ -44,7 +97,7 @@ class ClangTidyCheck(check.Check):
         if not source_file.compile_command:
             return None
 
-        args = re.sub(r"^\S+ ", 'clang-tidy {} -- '.format(source_file.compile_command.file),
+        args = re.sub(r"^\S+ ", _compiler_exe_replacement(source_file) + ' ',
                       source_file.compile_command.invocation)
         args = re.sub(r" '?-W[a-z0-9-=]+'?", '', args)
 
