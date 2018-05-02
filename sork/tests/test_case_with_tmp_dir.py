@@ -27,24 +27,6 @@ from .. import paths
 from ..config import Config
 
 
-class TmpDependency:
-    def __init__(self, name: str, include_paths: List[str]) -> None:
-        self.name = name
-        self.include_paths = include_paths
-
-
-# Used to create build dir with CMakeCache.txt since CMake currently is the
-# easiest supported build system to simulate without mocking.
-def _cmake_cache_content(dependencies: List[TmpDependency]) -> str:
-    content = ''
-
-    for dep in dependencies:
-        content += '{}_FOUND:INTERNAL=1\n'.format(dep.name)
-        content += '{}_INCLUDE_DIRS:INTERNAL={}\n'.format(dep.name, ';'.join(dep.include_paths))
-
-    return content
-
-
 class TestCaseWithTmpDir(unittest.TestCase):
     def setUp(self):
         self.tmp_dir = tempfile.TemporaryDirectory()
@@ -87,12 +69,8 @@ class TestCaseWithTmpDir(unittest.TestCase):
 
     def create_tmp_build_dir(self,
                              build_path: str,
-                             comp_db: Optional[List[Dict[str, Any]]] = None,
-                             dependencies: Optional[List[TmpDependency]] = None):
+                             comp_db: Optional[List[Dict[str, Any]]] = None):
         self.create_tmp_comp_db(build_path, comp_db or '[]')
-
-        self.create_tmp_file(os.path.join(build_path, 'CMakeCache.txt'),
-                             _cmake_cache_content(dependencies) if dependencies else None)
 
     @contextlib.contextmanager
     def cd_tmp_dir(self, sub_dir: Optional[str] = None):

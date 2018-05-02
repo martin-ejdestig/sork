@@ -42,7 +42,6 @@ def _analyze_source_file(source_file: SourceFile) -> str:
                           stderr=subprocess.STDOUT,
                           shell=True,
                           cwd=source_file.compile_command.work_dir,
-                          env=source_file.project.environment,
                           universal_newlines=True) as process:
         return process.communicate()[0]
 

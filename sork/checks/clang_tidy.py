@@ -106,7 +106,6 @@ class ClangTidyCheck(check.Check):
                               stderr=subprocess.STDOUT,
                               shell=True,
                               cwd=source_file.compile_command.work_dir,
-                              env=source_file.project.environment,
                               universal_newlines=True) as process:
             output = process.communicate()[0]
 

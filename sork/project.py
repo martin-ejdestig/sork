@@ -15,15 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-import itertools
 import os
 
-from typing import Dict, List
+from typing import List
 
-from . import build_systems
 from . import compilation_database
 from . import config
-from . import environment
 from . import paths
 
 
@@ -52,19 +49,6 @@ _CONFIG_SCHEMA = config.Schema({
 })
 
 
-ENV_C_INCLUDE_PATH = 'C_INCLUDE_PATH'
-ENV_CPLUS_INCLUDE_PATH = 'CPLUS_INCLUDE_PATH'
-
-
-def _create_environment(dependency_include_paths: List[str]) -> Dict[str, str]:
-    env = os.environ.copy()
-
-    environment.append_paths(env, ENV_C_INCLUDE_PATH, dependency_include_paths)
-    environment.append_paths(env, ENV_CPLUS_INCLUDE_PATH, dependency_include_paths)
-
-    return env
-
-
 class Project:
     def __init__(self, project_path: str, build_path: str) -> None:
         self.project_path = project_path
@@ -76,13 +60,6 @@ class Project:
 
         self.compilation_database = compilation_database.CompilationDatabase(self.project_path,
                                                                              self.build_path)
-
-        self.dependencies = build_systems.find_dependencies(self.build_path)
-
-        dependency_include_paths = sorted(set(itertools.chain.from_iterable(
-            [dep.include_paths for dep in self.dependencies])))
-
-        self.environment = _create_environment(dependency_include_paths)
 
     def normalize_path(self, unnormalized_path: str) -> str:
         return os.path.normpath(os.path.relpath(unnormalized_path, start=self.project_path))

@@ -49,7 +49,6 @@ def _assembler_for_source_file(source_file: SourceFile, verbose: bool = False) -
     with subprocess.Popen(command_args,
                           stdout=subprocess.PIPE,
                           cwd=source_file.compile_command.work_dir,
-                          env=source_file.project.environment,
                           shell=True,
                           universal_newlines=True) as process:
         stdout, _ = process.communicate()
