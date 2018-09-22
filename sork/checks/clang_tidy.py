@@ -75,7 +75,7 @@ def _header_filter_override(source_file: SourceFile) -> Optional[str]:
     if not header_filter:
         return None
 
-    return re.sub(r"(\^?)([^|]*)", r"\1" + path + r"/\2", header_filter)
+    return re.sub(r"(\^?)([^|]+)", r"\1" + path + r"/\2", header_filter)
 
 
 def _compiler_exe_replacement(source_file: SourceFile) -> str:
