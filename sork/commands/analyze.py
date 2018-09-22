@@ -19,8 +19,6 @@ import argparse
 import re
 import subprocess
 
-from . import command
-
 from .. import concurrent
 from ..project import Project
 from ..progress_printer import ProgressPrinter
@@ -46,32 +44,33 @@ def _analyze_source_file(source_file: SourceFile) -> str:
         return process.communicate()[0]
 
 
-class AnalyzeCommand(command.Command):
-    def __init__(self) -> None:
-        super().__init__('analyze', arg_help='run static analyzer')
+def add_argparse_subparser(subparsers, source_paths_arg_name: str):
+    parser = subparsers.add_parser('analyze', help='run static analyzer')
 
-    def _add_argparse_arguments(self, parser: argparse.ArgumentParser):
-        parser.add_argument(self.SOURCE_PATHS_ARG_NAME,
-                            nargs='*',
-                            help='Analyze path(s). Directories are recursed. All source code in '
-                                 'project, subject to configuration in .sork, is analyzed if no '
-                                 '%(metavar)s is passed or if only %(metavar)s passed is the '
-                                 'project\'s root.',
-                            metavar='<path>')
+    parser.set_defaults(run_command=run)
 
-    def run(self, args: argparse.Namespace, project: Project):
-        source_files = SourceFinder(project).find_buildable_files(args.source_paths)
+    parser.add_argument(source_paths_arg_name,
+                        nargs='*',
+                        help='Analyze path(s). Directories are recursed. All source code in '
+                             'project, subject to configuration in .sork, is analyzed if no '
+                             '%(metavar)s is passed or if only %(metavar)s passed is the '
+                             'project\'s root.',
+                        metavar='<path>')
 
-        printer = ProgressPrinter(verbose=args.verbose)
-        printer.start('Analyzing source', len(source_files))
 
-        def analyze(source_file: SourceFile):
-            printer.start_with_item(source_file.path)
-            output = _analyze_source_file(source_file)
-            printer.done_with_item(output)
+def run(args: argparse.Namespace, project: Project):
+    source_files = SourceFinder(project).find_buildable_files(args.source_paths)
 
-        try:
-            concurrent.for_each(analyze, source_files, num_threads=args.jobs)
-        except BaseException:
-            printer.abort()
-            raise
+    printer = ProgressPrinter(verbose=args.verbose)
+    printer.start('Analyzing source', len(source_files))
+
+    def analyze(source_file: SourceFile):
+        printer.start_with_item(source_file.path)
+        output = _analyze_source_file(source_file)
+        printer.done_with_item(output)
+
+    try:
+        concurrent.for_each(analyze, source_files, num_threads=args.jobs)
+    except BaseException:
+        printer.abort()
+        raise

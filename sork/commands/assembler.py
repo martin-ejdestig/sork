@@ -21,8 +21,6 @@ import subprocess
 
 from typing import Dict, List, Tuple
 
-from . import command
-
 from .. import error
 from ..project import Project
 from ..source import SourceFile, SourceFinder
@@ -108,37 +106,38 @@ class OpcodeCounter:
         return comment
 
 
-class AssemblerCommand(command.Command):
-    def __init__(self):
-        super().__init__('asm',
-                         aliases=['assembler'],
-                         arg_help='output assembler for compilation unit')
+def add_argparse_subparser(subparsers, source_paths_arg_name: str):
+    parser = subparsers.add_parser('asm',
+                                   aliases=['assembler'],
+                                   help='output assembler for compilation unit')
 
-    def _add_argparse_arguments(self, parser: argparse.ArgumentParser):
-        parser.add_argument('-c',
-                            '--count',
-                            action='store_true',
-                            help='Count occurance of different opcodes per global label and in '
-                                 'total if there is more than one global label. Result is printed '
-                                 'as a comment before the generated assembly.')
+    parser.set_defaults(run_command=run)
 
-        parser.add_argument('-va',
-                            '--verbose-asm',
-                            action='store_true',
-                            help='Tell compiler to output verbose assembler.')
+    parser.add_argument('-c',
+                        '--count',
+                        action='store_true',
+                        help='Count occurance of different opcodes per global label and in '
+                             'total if there is more than one global label. Result is printed '
+                             'as a comment before the generated assembly.')
 
-        parser.add_argument(self.SOURCE_PATHS_ARG_NAME,
-                            nargs=1,
-                            help='Source file to output assembler for.',
-                            metavar='<file>')
+    parser.add_argument('-va',
+                        '--verbose-asm',
+                        action='store_true',
+                        help='Tell compiler to output verbose assembler.')
 
-    def run(self, args: argparse.Namespace, project: Project):
-        source_file = SourceFinder(project).find_file(args.source_paths[0])
-        asm = _assembler_for_source_file(source_file, args.verbose_asm)
+    parser.add_argument(source_paths_arg_name,
+                        nargs=1,
+                        help='Source file to output assembler for.',
+                        metavar='<file>')
 
-        if args.count:
-            counter = OpcodeCounter()
-            counter.count_in_string(asm)
-            asm = counter.get_comment() + asm
 
-        print(asm)
+def run(args: argparse.Namespace, project: Project):
+    source_file = SourceFinder(project).find_file(args.source_paths[0])
+    asm = _assembler_for_source_file(source_file, args.verbose_asm)
+
+    if args.count:
+        counter = OpcodeCounter()
+        counter.count_in_string(asm)
+        asm = counter.get_comment() + asm
+
+    print(asm)

@@ -20,17 +20,10 @@ import os
 
 from typing import Optional, List
 
-from .commands.analyze import AnalyzeCommand
-from .commands.assembler import AssemblerCommand
-from .commands.check import CheckCommand
-from .commands.command import Command
+from . import commands
 
 
-_COMMANDS = [
-    AnalyzeCommand(),
-    AssemblerCommand(),
-    CheckCommand()
-]
+_SOURCE_PATHS_ARG_NAME = 'source_paths'
 
 
 def _int_argument_greater_than_zero(string: str) -> int:
@@ -67,8 +60,9 @@ def _create_arg_parser() -> argparse.ArgumentParser:
     # Fix for bug introduced in 3.3.5. See http://bugs.python.org/issue9253#msg186387 .
     subparsers.required = True  # type: ignore
 
-    for cmd in _COMMANDS:
-        cmd.add_argparse_subparser(subparsers)
+    commands.analyze.add_argparse_subparser(subparsers, _SOURCE_PATHS_ARG_NAME)
+    commands.assembler.add_argparse_subparser(subparsers, _SOURCE_PATHS_ARG_NAME)
+    commands.check.add_argparse_subparser(subparsers, _SOURCE_PATHS_ARG_NAME)
 
     return parser
 
@@ -79,5 +73,5 @@ def parse(argv: Optional[List[str]] = None) -> argparse.Namespace:
 
 
 def path_in_project(args: argparse.Namespace) -> str:
-    source_paths = getattr(args, Command.SOURCE_PATHS_ARG_NAME, None)
+    source_paths = getattr(args, _SOURCE_PATHS_ARG_NAME, None)
     return source_paths[0] if source_paths else os.path.curdir

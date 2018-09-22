@@ -33,7 +33,7 @@ def main():
         project_path = paths.find_project_path(arguments.path_in_project(args))
         build_path = args.build_path or paths.find_build_path(project_path)
         project = Project(project_path, build_path)
-        args.command.run(args, project)
+        args.run_command(args, project)
     except KeyboardInterrupt:
         pass
     except error.Error as exception:

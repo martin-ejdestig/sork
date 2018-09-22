@@ -17,8 +17,6 @@
 
 import argparse
 
-from . import command
-
 from .. import checks
 from .. import concurrent
 from ..project import Project
@@ -26,44 +24,45 @@ from ..progress_printer import ProgressPrinter
 from ..source import SourceFile, SourceFinder
 
 
-class CheckCommand(command.Command):
-    def __init__(self) -> None:
-        super().__init__('check', arg_help='style check source code')
+def add_argparse_subparser(subparsers, source_paths_arg_name: str):
+    parser = subparsers.add_parser('check', help='style check source code')
 
-    def _add_argparse_arguments(self, parser: argparse.ArgumentParser):
-        parser.add_argument('-c',
-                            '--checks',
-                            type=str,
-                            help='Comma separated list of checks to perform. Overrides '
-                            'configuration in .sork. Prepend - to disable a check. Regular '
-                            'expressions may be used. All checks except foo: --checks=-foo . '
-                            'Checks starting with clang-: --checks=clang-.* .',
-                            metavar='<checks>')
+    parser.set_defaults(run_command=run)
 
-        parser.add_argument(self.SOURCE_PATHS_ARG_NAME,
-                            nargs='*',
-                            help='Check path(s). Directories are recursed. All source code in '
-                                 'project, subject to configuration in .sork, is checked if no '
-                                 '%(metavar)s is passed or if only %(metavar)s passed is the '
-                                 'project\'s root.',
-                            metavar='<path>')
+    parser.add_argument('-c',
+                        '--checks',
+                        type=str,
+                        help='Comma separated list of checks to perform. Overrides '
+                             'configuration in .sork. Prepend - to disable a check. Regular '
+                             'expressions may be used. All checks except foo: --checks=-foo . '
+                             'Checks starting with clang-: --checks=clang-.* .',
+                        metavar='<checks>')
 
-    def run(self, args: argparse.Namespace, project: Project):
-        check_strings = args.checks.split(',') if args.checks else project.config['checks']
-        enabled_checks = checks.create.from_strings(project, check_strings)
+    parser.add_argument(source_paths_arg_name,
+                        nargs='*',
+                        help='Check path(s). Directories are recursed. All source code in '
+                             'project, subject to configuration in .sork, is checked if no '
+                             '%(metavar)s is passed or if only %(metavar)s passed is the '
+                             'project\'s root.',
+                        metavar='<path>')
 
-        source_files = SourceFinder(project).find_files(args.source_paths)
 
-        printer = ProgressPrinter(verbose=args.verbose)
-        printer.start('Checking source', len(source_files))
+def run(args: argparse.Namespace, project: Project):
+    check_strings = args.checks.split(',') if args.checks else project.config['checks']
+    enabled_checks = checks.create.from_strings(project, check_strings)
 
-        def check_source_file(source_file: SourceFile):
-            printer.start_with_item(source_file.path)
-            outputs = (c.check(source_file) for c in enabled_checks)
-            printer.done_with_item('\n'.join(o for o in outputs if o))
+    source_files = SourceFinder(project).find_files(args.source_paths)
 
-        try:
-            concurrent.for_each(check_source_file, source_files, num_threads=args.jobs)
-        except BaseException:
-            printer.abort()
-            raise
+    printer = ProgressPrinter(verbose=args.verbose)
+    printer.start('Checking source', len(source_files))
+
+    def check_source_file(source_file: SourceFile):
+        printer.start_with_item(source_file.path)
+        outputs = (c.check(source_file) for c in enabled_checks)
+        printer.done_with_item('\n'.join(o for o in outputs if o))
+
+    try:
+        concurrent.for_each(check_source_file, source_files, num_threads=args.jobs)
+    except BaseException:
+        printer.abort()
+        raise
