@@ -20,12 +20,12 @@ import re
 import subprocess
 
 from .. import concurrent
+from .. import source
 from ..project import Project
 from ..progress_printer import ProgressPrinter
-from ..source import SourceFile, SourceFinder
 
 
-def _analyze_source_file(source_file: SourceFile) -> str:
+def _analyze_source_file(source_file: source.SourceFile) -> str:
     args = source_file.compile_command.invocation
     args = re.sub(r"^.*?\+\+", 'clang++ --analyze -Xanalyzer -analyzer-output=text', args)
     args = re.sub(r" -c", '', args)
@@ -59,12 +59,12 @@ def add_argparse_subparser(subparsers, source_paths_arg_name: str):
 
 
 def run(args: argparse.Namespace, project: Project):
-    source_files = SourceFinder(project).find_buildable_files(args.source_paths)
+    source_files = source.find_buildable_files(project, args.source_paths)
 
     printer = ProgressPrinter(verbose=args.verbose)
     printer.start('Analyzing source', len(source_files))
 
-    def analyze(source_file: SourceFile):
+    def analyze(source_file: source.SourceFile):
         printer.start_with_item(source_file.path)
         output = _analyze_source_file(source_file)
         printer.done_with_item(output)

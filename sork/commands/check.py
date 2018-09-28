@@ -19,9 +19,9 @@ import argparse
 
 from .. import checks
 from .. import concurrent
+from .. import source
 from ..project import Project
 from ..progress_printer import ProgressPrinter
-from ..source import SourceFile, SourceFinder
 
 
 def add_argparse_subparser(subparsers, source_paths_arg_name: str):
@@ -51,12 +51,12 @@ def run(args: argparse.Namespace, project: Project):
     check_strings = args.checks.split(',') if args.checks else project.config['checks']
     enabled_checks = checks.create.from_strings(project, check_strings)
 
-    source_files = SourceFinder(project).find_files(args.source_paths)
+    source_files = source.find_files(project, args.source_paths)
 
     printer = ProgressPrinter(verbose=args.verbose)
     printer.start('Checking source', len(source_files))
 
-    def check_source_file(source_file: SourceFile):
+    def check_source_file(source_file: source.SourceFile):
         printer.start_with_item(source_file.path)
         outputs = (c.check(source_file) for c in enabled_checks)
         printer.done_with_item('\n'.join(o for o in outputs if o))

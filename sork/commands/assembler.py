@@ -22,15 +22,15 @@ import subprocess
 from typing import Dict, List, Tuple
 
 from .. import error
+from .. import source
 from ..project import Project
-from ..source import SourceFile, SourceFinder
 
 
 class Error(error.Error):
     pass
 
 
-def _assembler_for_source_file(source_file: SourceFile, verbose: bool = False) -> str:
+def _assembler_for_source_file(source_file: source.SourceFile, verbose: bool = False) -> str:
     if not source_file.compile_command:
         raise Error('Do not know how to compile "{}".'.format(source_file.path))
 
@@ -132,7 +132,7 @@ def add_argparse_subparser(subparsers, source_paths_arg_name: str):
 
 
 def run(args: argparse.Namespace, project: Project):
-    source_file = SourceFinder(project).find_file(args.source_paths[0])
+    source_file = source.find_file(project, args.source_paths[0])
     asm = _assembler_for_source_file(source_file, args.verbose_asm)
 
     if args.count:
