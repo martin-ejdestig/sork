@@ -46,7 +46,7 @@ class SourceFile:
 
         self.project = project
 
-        self._content: str = None
+        self._content: Optional[str] = None
         self._content_lock = threading.Lock()
 
     @property
