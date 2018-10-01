@@ -192,9 +192,10 @@ class ClangTidyHeaderFilterTestCase(ClangTidyBaseTestCase):
                                  ('include/public.h', Headers.PUBLIC),
                                  ('external/project/include/external_project.h', Headers.EXTERNAL)]:
                 if header & expected_headers_in_output:
-                    self.assertRegex(output, path + r":9:13: .*qux.*readability-identifier-naming")
+                    self.assertRegex(output or '',
+                                     path + r":9:13: .*qux.*readability-identifier-naming")
                 else:
-                    self.assertNotIn(path, output)
+                    self.assertNotIn(path, output or '')
         else:
             self.assertIsNone(output)
 
