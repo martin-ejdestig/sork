@@ -26,6 +26,8 @@ from ..progress_printer import ProgressPrinter
 
 
 def _analyze_source_file(source_file: source.SourceFile) -> str:
+    assert source_file.compile_command
+
     args = source_file.compile_command.invocation
     args = re.sub(r"^.*?\+\+", 'clang++ --analyze -Xanalyzer -analyzer-output=text', args)
     args = re.sub(r" -c", '', args)

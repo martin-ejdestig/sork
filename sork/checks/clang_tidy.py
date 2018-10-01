@@ -63,6 +63,8 @@ def _config_header_filter(source_file: SourceFile) -> Optional[str]:
 # TODO: Can this be removed? See https://bugs.llvm.org/show_bug.cgi?id=37281
 #       for clang-tidy bug.
 def _header_filter_override(source_file: SourceFile) -> Optional[str]:
+    assert source_file.compile_command
+
     if os.path.isabs(source_file.compile_command.file):
         path = source_file.project.project_path
     else:
@@ -79,6 +81,8 @@ def _header_filter_override(source_file: SourceFile) -> Optional[str]:
 
 
 def _compiler_exe_replacement(source_file: SourceFile) -> str:
+    assert source_file.compile_command
+
     args = ['clang-tidy']
 
     header_filter_override = _header_filter_override(source_file)
