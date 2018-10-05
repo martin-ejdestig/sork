@@ -57,20 +57,24 @@ def _assembler_for_source_file(source_file: source.SourceFile, verbose: bool = F
 
 
 def _opcode_count_comment(asm: str) -> str:
-    def count_opcode(counters: Dict[str, int], opcode: str):
+    Label = str
+    Opcode = str
+    Counters = Dict[Opcode, int]
+
+    def count_opcode(counters: Counters, opcode: Opcode):
         if opcode in counters:
             counters[opcode] += 1
         else:
             counters[opcode] = 1
 
-    def count_opcodes(asm: str) -> Tuple[Dict[str, int], List[Tuple[str, Dict[str, int]]]]:
+    def count_opcodes(asm: str) -> Tuple[Counters, List[Tuple[Label, Counters]]]:
         label_re = r"(?P<label>[a-zA-Z_]+.*):"
         opcode_re = r"\s+(?P<opcode>[a-z]+)\s+"
         regex = re.compile('|'.join([label_re, opcode_re]))
 
-        total: Dict[str, int] = {}
-        current: Dict[str, int] = total
-        per_label: List[Tuple[str, Dict[str, int]]] = []
+        total: Counters = {}
+        current: Counters = total
+        per_label: List[Tuple[Label, Counters]] = []
 
         for line in asm.splitlines(True):
             matches = regex.match(line)
