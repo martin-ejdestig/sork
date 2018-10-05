@@ -30,6 +30,8 @@ _DOT_PATHS_IN_PROJECT_ROOT = ['.git', DOT_SORK_PATH]
 
 COMPILE_COMMANDS_JSON_PATH = 'compile_commands.json'
 
+NORMALIZED_PROJECT_PATH = os.path.curdir
+
 
 class Error(error.Error):
     pass
@@ -92,3 +94,17 @@ def find_build_path(project_path: str) -> str:
                     .format('\n'.join(sorted(paths))))
 
     return paths[0]
+
+
+def normalize_path(project_path: str, unnormalized_path: str) -> str:
+    return os.path.normpath(os.path.relpath(unnormalized_path, start=project_path))
+
+
+def normalize_paths(project_path: str,
+                    unnormalized_paths: List[str],
+                    filter_project_path: bool = False) -> List[str]:
+    normalized_paths = [normalize_path(project_path, path) for path in unnormalized_paths]
+    if filter_project_path:
+        normalized_paths = [path for path in normalized_paths
+                            if path != NORMALIZED_PROJECT_PATH]
+    return normalized_paths

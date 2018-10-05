@@ -17,14 +17,9 @@
 
 import os
 
-from typing import List
-
 from . import compilation_database
 from . import config
 from . import paths
-
-
-_NORMALIZED_PROJECT_PATH = os.path.curdir
 
 
 _CONFIG_SCHEMA = config.Schema({
@@ -60,15 +55,3 @@ class Project:
 
         self.compilation_database = compilation_database.CompilationDatabase(self.project_path,
                                                                              self.build_path)
-
-    def normalize_path(self, unnormalized_path: str) -> str:
-        return os.path.normpath(os.path.relpath(unnormalized_path, start=self.project_path))
-
-    def normalize_paths(self,
-                        unnormalized_paths: List[str],
-                        filter_project_path: bool = False) -> List[str]:
-        normalized_paths = [self.normalize_path(path) for path in unnormalized_paths]
-        if filter_project_path:
-            normalized_paths = [path for path in normalized_paths
-                                if path != _NORMALIZED_PROJECT_PATH]
-        return normalized_paths

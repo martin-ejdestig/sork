@@ -24,6 +24,7 @@ import threading
 from typing import Iterator, List, Optional
 
 from . import error
+from . import paths
 from .project import Project
 
 
@@ -76,13 +77,14 @@ class SourceFile:
 
 
 def find_files(project: Project, source_paths: Optional[List[str]] = None) -> List[SourceFile]:
-    normalized_project_path = project.normalize_path(project.project_path)
-    normalized_build_path = project.normalize_path(project.build_path)
+    normalized_build_path = paths.normalize_path(project.project_path, project.build_path)
 
     if source_paths:
-        source_paths = project.normalize_paths(source_paths, filter_project_path=True)
+        source_paths = paths.normalize_paths(project.project_path,
+                                             source_paths,
+                                             filter_project_path=True)
     else:
-        source_paths = project.config['source_paths'] or [normalized_project_path]
+        source_paths = project.config['source_paths'] or [paths.NORMALIZED_PROJECT_PATH]
 
     try:
         exclude_pattern = project.config['source_exclude']
@@ -91,11 +93,11 @@ def find_files(project: Project, source_paths: Optional[List[str]] = None) -> Li
         raise Error('Failed to compile \'source_exclude\' regex (\'{}\') in '
                     'configuration.'.format(exclude_pattern))
 
-    def verify_paths_exist(paths: List[str]):
-        if not paths:
+    def verify_paths_exist(source_paths: List[str]):
+        if not source_paths:
             raise Error('No source paths specified.')
 
-        does_not_exist = [path for path in paths
+        does_not_exist = [path for path in source_paths
                           if not os.path.exists(os.path.join(project.project_path, path))]
 
         if does_not_exist:
@@ -107,7 +109,7 @@ def find_files(project: Project, source_paths: Optional[List[str]] = None) -> Li
             if exclude_regex.match(path):
                 return False
 
-        if normalized_build_path != normalized_project_path:
+        if normalized_build_path != paths.NORMALIZED_PROJECT_PATH:
             if os.path.commonpath([normalized_build_path, path]):
                 return False
 
@@ -117,26 +119,26 @@ def find_files(project: Project, source_paths: Optional[List[str]] = None) -> Li
         patterns = [os.path.join(project.project_path, dir_path, '**', '*' + extension)
                     for extension in _EXTENSIONS]
 
-        paths = itertools.chain.from_iterable(glob.iglob(pattern, recursive=True)
-                                              for pattern in patterns)
+        found_paths = itertools.chain.from_iterable(glob.iglob(pattern, recursive=True)
+                                                    for pattern in patterns)
 
-        return (project.normalize_path(path) for path in paths)
+        return (paths.normalize_path(project.project_path, path) for path in found_paths)
 
     def find_file_paths(search_paths: List[str]) -> List[str]:
-        paths = set()
+        file_paths = set()
         dir_paths = []
 
         for path in search_paths:
             if os.path.isdir(os.path.join(project.project_path, path)):
                 dir_paths.append(path)
             elif should_be_included(path):
-                paths.add(path)
+                file_paths.add(path)
 
         for dir_path in dir_paths:
-            paths.update(path for path in find_paths_in_dir(dir_path)
-                         if should_be_included(path))
+            file_paths.update(path for path in find_paths_in_dir(dir_path)
+                              if should_be_included(path))
 
-        return sorted(paths)
+        return sorted(file_paths)
 
     verify_paths_exist(source_paths)
 

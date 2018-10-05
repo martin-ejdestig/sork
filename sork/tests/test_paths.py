@@ -186,3 +186,107 @@ class FindBuildPathTestCase(TestCaseWithTmpDir):
         with self.cd_tmp_dir():
             with self.assertRaisesRegex(paths.Error, 'foo/build_'):
                 paths.find_build_path('foo')
+
+
+class NormalizePathTestCase(TestCaseWithTmpDir):
+    def test_normalize_path(self):
+        self.create_tmp_file('foo/src/bar.cpp')
+        self.create_tmp_dir('foo-build')
+
+        with self.cd_tmp_dir():
+            project_path = 'foo'
+            self.assertEqual('.', paths.normalize_path(project_path, 'foo'))
+            self.assertEqual('src', paths.normalize_path(project_path, 'foo/src'))
+            self.assertEqual('src/bar.cpp', paths.normalize_path(project_path, 'foo/src/bar.cpp'))
+            self.assertEqual('../foo-build', paths.normalize_path(project_path, 'foo-build'))
+
+        with self.cd_tmp_dir('foo'):
+            project_path = '.'
+            self.assertEqual('.', paths.normalize_path(project_path, '.'))
+            self.assertEqual('src', paths.normalize_path(project_path, 'src'))
+            self.assertEqual('src/bar.cpp', paths.normalize_path(project_path, 'src/bar.cpp'))
+            self.assertEqual('../foo-build', paths.normalize_path(project_path, '../foo-build'))
+
+        with self.cd_tmp_dir('foo-build'):
+            project_path = '../foo'
+            self.assertEqual('.', paths.normalize_path(project_path, '../foo'))
+            self.assertEqual('src', paths.normalize_path(project_path, '../foo/src'))
+            self.assertEqual('src/bar.cpp', paths.normalize_path(project_path,
+                                                                 '../foo/src/bar.cpp'))
+            self.assertEqual('../foo-build', paths.normalize_path(project_path, '.'))
+
+        with self.cd_tmp_dir('foo/src'):
+            project_path = '..'
+            self.assertEqual('.', paths.normalize_path(project_path, '..'))
+            self.assertEqual('src', paths.normalize_path(project_path, '.'))
+            self.assertEqual('src/bar.cpp', paths.normalize_path(project_path, 'bar.cpp'))
+            self.assertEqual('../foo-build', paths.normalize_path(project_path, '../../foo-build'))
+
+    def test_normalize_path_absolute(self):
+        self.create_tmp_file('foo/src/bar.cpp')
+        self.create_tmp_build_dir('foo-build')
+
+        project_path = self.tmp_path('foo')
+        self.assertEqual('.', paths.normalize_path(project_path, self.tmp_path('foo')))
+        self.assertEqual('src', paths.normalize_path(project_path, self.tmp_path('foo/src')))
+        self.assertEqual('src/bar.cpp', paths.normalize_path(project_path,
+                                                             self.tmp_path('foo/src/bar.cpp')))
+        self.assertEqual('../foo-build', paths.normalize_path(project_path,
+                                                              self.tmp_path('foo-build')))
+
+    def test_normalize_paths(self):
+        self.create_tmp_file('foo/include/bar.h')
+        self.create_tmp_file('foo/src/bar.cpp')
+        self.create_tmp_build_dir('foo-build')
+
+        norm_paths = ['.', 'include', 'include/bar.h', 'src', 'src/bar.cpp']
+        norm_filter_proj_paths = ['include', 'include/bar.h', 'src', 'src/bar.cpp']
+
+        with self.cd_tmp_dir():
+            project_path = 'foo'
+            test_paths = ['foo', 'foo/include', 'foo/include/bar.h', 'foo/src', 'foo/src/bar.cpp']
+            self.assertEqual(norm_paths, paths.normalize_paths(project_path, test_paths))
+            self.assertEqual(norm_filter_proj_paths,
+                             paths.normalize_paths(project_path,
+                                                   test_paths,
+                                                   filter_project_path=True))
+
+        with self.cd_tmp_dir('foo'):
+            project_path = '.'
+            test_paths = ['.', 'include', 'include/bar.h', 'src', 'src/bar.cpp']
+            self.assertEqual(norm_paths, paths.normalize_paths(project_path, test_paths))
+            self.assertEqual(norm_filter_proj_paths,
+                             paths.normalize_paths(project_path,
+                                                   test_paths,
+                                                   filter_project_path=True))
+
+        with self.cd_tmp_dir('foo-build'):
+            project_path = '../foo'
+            test_paths = ['../foo', '../foo/include', '../foo/include/bar.h', '../foo/src',
+                          '../foo/src/bar.cpp']
+            self.assertEqual(norm_paths, paths.normalize_paths(project_path, test_paths))
+            self.assertEqual(norm_filter_proj_paths,
+                             paths.normalize_paths(project_path,
+                                                   test_paths,
+                                                   filter_project_path=True))
+
+        with self.cd_tmp_dir('foo/src'):
+            project_path = '..'
+            test_paths = ['..', '../include', '../include/bar.h', '.', 'bar.cpp']
+            self.assertEqual(norm_paths, paths.normalize_paths(project_path, test_paths))
+            self.assertEqual(norm_filter_proj_paths,
+                             paths.normalize_paths(project_path,
+                                                   test_paths,
+                                                   filter_project_path=True))
+
+    def test_normalize_paths_absolute(self):
+        self.create_tmp_file('foo/src/bar.cpp')
+        self.create_tmp_build_dir('foo-build')
+
+        project_path = self.tmp_path('foo')
+        test_paths = [self.tmp_path(p) for p in ['foo', 'foo/src', 'foo/src/bar.cpp']]
+
+        self.assertEqual(['.', 'src', 'src/bar.cpp'],
+                         paths.normalize_paths(project_path, test_paths))
+        self.assertEqual(['src', 'src/bar.cpp'],
+                         paths.normalize_paths(project_path, test_paths, filter_project_path=True))
