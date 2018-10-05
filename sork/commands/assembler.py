@@ -56,16 +56,21 @@ def _assembler_for_source_file(source_file: source.SourceFile, verbose: bool = F
     return stdout
 
 
-class OpcodeCounter:
-    def __init__(self) -> None:
-        self._total: Dict[str, int] = {}
-        self._current: Dict[str, int] = self._total
-        self._per_label: List[Tuple[str, Dict[str, int]]] = []
+def _opcode_count_comment(asm: str) -> str:
+    def count_opcode(counters: Dict[str, int], opcode: str):
+        if opcode in counters:
+            counters[opcode] += 1
+        else:
+            counters[opcode] = 1
 
-    def count_in_string(self, asm: str):
+    def count_opcodes(asm: str) -> Tuple[Dict[str, int], List[Tuple[str, Dict[str, int]]]]:
         label_re = r"(?P<label>[a-zA-Z_]+.*):"
         opcode_re = r"\s+(?P<opcode>[a-z]+)\s+"
         regex = re.compile('|'.join([label_re, opcode_re]))
+
+        total: Dict[str, int] = {}
+        current: Dict[str, int] = total
+        per_label: List[Tuple[str, Dict[str, int]]] = []
 
         for line in asm.splitlines(True):
             matches = regex.match(line)
@@ -74,36 +79,31 @@ class OpcodeCounter:
 
             label = matches.group('label')
             if label:
-                self._current = {}
-                self._per_label.append((label, self._current))
+                current = {}
+                per_label.append((label, current))
 
             opcode = matches.group('opcode')
             if opcode:
-                self._count_opcode(self._total, opcode)
-                self._count_opcode(self._current, opcode)
+                count_opcode(total, opcode)
+                count_opcode(current, opcode)
 
-    @staticmethod
-    def _count_opcode(counters: Dict[str, int], opcode: str):
-        if opcode in counters:
-            counters[opcode] += 1
-        else:
-            counters[opcode] = 1
+        return total, per_label
 
-    def get_comment(self) -> str:
-        total_label = 'Total opcode count'
-        labels_and_counters = [(total_label, self._total)] if len(self._per_label) > 1 else []
-        labels_and_counters += self._per_label
+    total, per_label = count_opcodes(asm)
+    total_label = 'Total opcode count'
+    labels_and_counters = [(total_label, total)] if len(per_label) > 1 else []
+    labels_and_counters += per_label
 
-        comment = ''
+    comment = ''
 
-        for label, counters in labels_and_counters:
-            if counters:
-                comment += '# ' + label + ':\n'
-                for opcode, count in sorted(counters.items()):
-                    comment += '#\t' + opcode + ': ' + str(count) + '\n'
-                comment += '#\n'
+    for label, counters in labels_and_counters:
+        if counters:
+            comment += '# ' + label + ':\n'
+            for opcode, count in sorted(counters.items()):
+                comment += '#\t' + opcode + ': ' + str(count) + '\n'
+            comment += '#\n'
 
-        return comment
+    return comment
 
 
 def add_argparse_subparser(subparsers, source_paths_arg_name: str):
@@ -136,8 +136,6 @@ def run(args: argparse.Namespace, project: Project):
     asm = _assembler_for_source_file(source_file, args.verbose_asm)
 
     if args.count:
-        counter = OpcodeCounter()
-        counter.count_in_string(asm)
-        asm = counter.get_comment() + asm
+        asm = _opcode_count_comment(asm) + asm
 
     print(asm)
