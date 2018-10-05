@@ -21,6 +21,15 @@ from ..project import Project
 
 
 class ProjectTestCase(TestCaseWithTmpDir):
+    def test_create_from_empty_dir(self):
+        self.create_tmp_dir('foo')
+        self.create_tmp_build_dir('foo-build')
+
+        with self.cd_tmp_dir():
+            project = Project('foo', 'foo-build')
+            self.assertEqual('foo', project.project_path)
+            self.assertEqual('foo-build', project.build_path)
+
     def test_normalize_path(self):
         self.create_tmp_file('foo/src/bar.cpp')
         self.create_tmp_build_dir('foo-build')
