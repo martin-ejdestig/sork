@@ -37,46 +37,44 @@ class Command:
 
 class CompilationDatabase:
     def __init__(self, project_path: str, build_path: str) -> None:
+        def load_json(path: str) -> List[Dict[str, str]]:
+            try:
+                with open(path) as file:
+                    entries = json.load(file)
+            except Exception as exception:
+                raise Error('{}: {}'.format(path, exception))
+
+            if not isinstance(entries, list):
+                raise Error('{}: expected top element to be a list.'.format(path))
+
+            for entry in entries:
+                if not isinstance(entry, dict):
+                    raise Error('{}: all entries in top list must be objects.'.format(path))
+
+                if not all(key in entry.keys() for key in ['command', 'directory', 'file']):
+                    raise Error('{}: all entries must contain command, directory and '
+                                'file keys.'.format(path))
+
+                if not all(isinstance(value, str) for value in entry.values()):
+                    raise Error('{}: all values in entries must be strings.'.format(path))
+
+            return entries
+
+        def json_entries_to_commands(entries: List[Dict[str, str]],
+                                     project_path: str) -> Dict[str, Command]:
+            commands = {}
+
+            for entry in entries:
+                path = os.path.join(entry['directory'], entry['file'])
+                relpath = os.path.relpath(path, start=project_path)
+                normpath = os.path.normpath(relpath)
+                commands[normpath] = Command(entry['command'], entry['directory'], entry['file'])
+
+            return commands
+
         path = os.path.join(build_path, paths.COMPILE_COMMANDS_JSON_PATH)
-        entries = self._load_json(path)
-        self._commands = self._json_entries_to_commands(entries, project_path)
-
-    @staticmethod
-    def _load_json(path: str) -> List[Dict[str, str]]:
-        try:
-            with open(path) as file:
-                entries = json.load(file)
-        except Exception as exception:
-            raise Error('{}: {}'.format(path, exception))
-
-        if not isinstance(entries, list):
-            raise Error('{}: expected top element to be a list.'.format(path))
-
-        for entry in entries:
-            if not isinstance(entry, dict):
-                raise Error('{}: all entries in top list must be objects.'.format(path))
-
-            if not all(key in entry.keys() for key in ['command', 'directory', 'file']):
-                raise Error('{}: all entries must contain command, directory and '
-                            'file keys.'.format(path))
-
-            if not all(isinstance(value, str) for value in entry.values()):
-                raise Error('{}: all values in entries must be strings.'.format(path))
-
-        return entries
-
-    @staticmethod
-    def _json_entries_to_commands(entries: List[Dict[str, str]],
-                                  project_path: str) -> Dict[str, Command]:
-        commands = {}
-
-        for entry in entries:
-            path = os.path.join(entry['directory'], entry['file'])
-            relpath = os.path.relpath(path, start=project_path)
-            normpath = os.path.normpath(relpath)
-            commands[normpath] = Command(entry['command'], entry['directory'], entry['file'])
-
-        return commands
+        entries = load_json(path)
+        self._commands = json_entries_to_commands(entries, project_path)
 
     def get_command(self, path: str) -> Optional[Command]:
         return self._commands.get(path)
