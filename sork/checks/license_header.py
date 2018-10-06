@@ -190,7 +190,7 @@ class LicenseDetector:
         paths = self._find_license_paths()
         if not paths:
             raise Error('Unable to find any license file(s) in \'{}\'.'.
-                        format(self._project.project_path))
+                        format(self._project.path))
 
         licenses = [self._determine_license_in_file(path) for path in paths]
 
@@ -201,10 +201,10 @@ class LicenseDetector:
             return 'lgplv3'
 
         raise Error('Unable to automatically determine license in \'{}\'.'.
-                    format(self._project.project_path))
+                    format(self._project.path))
 
     def _find_license_paths(self) -> List[str]:
-        patterns = [os.path.join(self._project.project_path, self._pattern_ignore_case(n + '*'))
+        patterns = [os.path.join(self._project.path, self._pattern_ignore_case(n + '*'))
                     for n in _LICENSE_BASE_FILE_NAMES]
 
         paths = itertools.chain.from_iterable(glob.glob(p) for p in patterns)

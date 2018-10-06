@@ -27,5 +27,5 @@ class ProjectTestCase(TestCaseWithTmpDir):
 
         with self.cd_tmp_dir():
             project = Project('foo', 'foo-build')
-            self.assertEqual('foo', project.project_path)
+            self.assertEqual('foo', project.path)
             self.assertEqual('foo-build', project.build_path)

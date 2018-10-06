@@ -33,7 +33,7 @@ class ClangFormatTestCase(TestCaseWithTmpDir):
         return project, ClangFormatCheck(project)
 
     def _create_source(self, project: Project, path: str, src_lines: List[str]) -> SourceFile:
-        self.create_tmp_file(os.path.join(project.project_path, path), src_lines)
+        self.create_tmp_file(os.path.join(project.path, path), src_lines)
         return SourceFile(path, project)
 
     def _create_dot_clang_format(self, lines: List[str]):

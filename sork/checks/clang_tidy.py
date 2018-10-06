@@ -39,7 +39,7 @@ _CLANG_TIDY_NOISE_REGEX = re.compile('(?m)^(' + '|'.join(_CLANG_TIDY_NOISE_LINES
 
 
 def _config_header_filter(source_file: SourceFile) -> Optional[str]:
-    config_path = os.path.join(source_file.project.project_path, '.clang-tidy')
+    config_path = os.path.join(source_file.project.path, '.clang-tidy')
 
     if not os.path.exists(config_path):
         return None
@@ -66,9 +66,9 @@ def _header_filter_override(source_file: SourceFile) -> Optional[str]:
     assert source_file.compile_command
 
     if os.path.isabs(source_file.compile_command.file):
-        path = source_file.project.project_path
+        path = source_file.project.path
     else:
-        path = os.path.relpath(source_file.project.project_path,
+        path = os.path.relpath(source_file.project.path,
                                start=source_file.compile_command.work_dir)
         if path == os.path.curdir:
             return None

@@ -58,7 +58,7 @@ class SourceFile:
             return self._content
 
     def _read_content(self) -> str:
-        with open(os.path.join(self.project.project_path, self.path)) as file:
+        with open(os.path.join(self.project.path, self.path)) as file:
             return file.read()
 
     @property
@@ -77,12 +77,10 @@ class SourceFile:
 
 
 def find_files(project: Project, source_paths: Optional[List[str]] = None) -> List[SourceFile]:
-    normalized_build_path = paths.normalize_path(project.project_path, project.build_path)
+    normalized_build_path = paths.normalize_path(project.path, project.build_path)
 
     if source_paths:
-        source_paths = paths.normalize_paths(project.project_path,
-                                             source_paths,
-                                             filter_project_path=True)
+        source_paths = paths.normalize_paths(project.path, source_paths, filter_project_path=True)
     else:
         source_paths = project.config['source_paths'] or [paths.NORMALIZED_PROJECT_PATH]
 
@@ -98,7 +96,7 @@ def find_files(project: Project, source_paths: Optional[List[str]] = None) -> Li
             raise Error('No source paths specified.')
 
         does_not_exist = [path for path in source_paths
-                          if not os.path.exists(os.path.join(project.project_path, path))]
+                          if not os.path.exists(os.path.join(project.path, path))]
 
         if does_not_exist:
             raise Error('The following source paths do not exist:\n{}'.
@@ -116,20 +114,20 @@ def find_files(project: Project, source_paths: Optional[List[str]] = None) -> Li
         return True
 
     def find_paths_in_dir(dir_path: str) -> Iterator[str]:
-        patterns = [os.path.join(project.project_path, dir_path, '**', '*' + extension)
+        patterns = [os.path.join(project.path, dir_path, '**', '*' + extension)
                     for extension in _EXTENSIONS]
 
         found_paths = itertools.chain.from_iterable(glob.iglob(pattern, recursive=True)
                                                     for pattern in patterns)
 
-        return (paths.normalize_path(project.project_path, path) for path in found_paths)
+        return (paths.normalize_path(project.path, path) for path in found_paths)
 
     def find_file_paths(search_paths: List[str]) -> List[str]:
         file_paths = set()
         dir_paths = []
 
         for path in search_paths:
-            if os.path.isdir(os.path.join(project.project_path, path)):
+            if os.path.isdir(os.path.join(project.path, path)):
                 dir_paths.append(path)
             elif should_be_included(path):
                 file_paths.add(path)

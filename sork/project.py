@@ -46,11 +46,9 @@ _CONFIG_SCHEMA = config.Schema({
 
 class Project:
     def __init__(self, project_path: str, build_path: str) -> None:
-        self.project_path = project_path
+        self.path = project_path
         self.build_path = build_path
 
-        self.config = config.create(os.path.join(self.project_path,
-                                                 paths.DOT_SORK_PATH),
-                                    _CONFIG_SCHEMA)
+        self.config = config.create(os.path.join(self.path, paths.DOT_SORK_PATH), _CONFIG_SCHEMA)
 
-        self.compilation_database = CompilationDatabase(self.project_path, self.build_path)
+        self.compilation_database = CompilationDatabase(self.path, self.build_path)

@@ -37,14 +37,14 @@ class ClangTidyBaseTestCase(TestCaseWithTmpDir):
         return project, ClangTidyCheck(project)
 
     def _create_source(self, project: Project, path: str, src_lines: List[str]) -> SourceFile:
-        self.create_tmp_file(os.path.join(project.project_path, path), src_lines)
+        self.create_tmp_file(os.path.join(project.path, path), src_lines)
         return SourceFile(path, project)
 
     def _create_header(self, project, path: str, header_lines: List[str]):
-        self.create_tmp_file(os.path.join(project.project_path, path), header_lines)
+        self.create_tmp_file(os.path.join(project.path, path), header_lines)
 
     def _create_dot_clang_tidy(self, project: Project, lines: List[str]):
-        self.create_tmp_file(os.path.join(project.project_path, '.clang-tidy'), lines)
+        self.create_tmp_file(os.path.join(project.path, '.clang-tidy'), lines)
 
 
 class ClangTidyTestCase(ClangTidyBaseTestCase):
