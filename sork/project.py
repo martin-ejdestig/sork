@@ -17,9 +17,9 @@
 
 import os
 
-from . import compilation_database
 from . import config
 from . import paths
+from .compilation_database import CompilationDatabase
 
 
 _CONFIG_SCHEMA = config.Schema({
@@ -53,5 +53,4 @@ class Project:
                                                  paths.DOT_SORK_PATH),
                                     _CONFIG_SCHEMA)
 
-        self.compilation_database = compilation_database.CompilationDatabase(self.project_path,
-                                                                             self.build_path)
+        self.compilation_database = CompilationDatabase(self.project_path, self.build_path)
