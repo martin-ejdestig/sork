@@ -18,7 +18,7 @@
 import json
 import os
 
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from . import error
 from . import paths
@@ -74,7 +74,4 @@ class CompilationDatabase:
 
         path = os.path.join(build_path, paths.COMPILE_COMMANDS_JSON_PATH)
         entries = load_json(path)
-        self._commands = json_entries_to_commands(entries, project_path)
-
-    def get_command(self, path: str) -> Optional[Command]:
-        return self._commands.get(path)
+        self.commands = json_entries_to_commands(entries, project_path)

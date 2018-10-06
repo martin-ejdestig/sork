@@ -43,7 +43,7 @@ class Error(error.Error):
 class SourceFile:
     def __init__(self, path: str, project: Project) -> None:
         self.path = path
-        self.compile_command = project.compilation_database.get_command(path)
+        self.compile_command = project.compilation_database.commands.get(path)
 
         self.project = project
 

@@ -54,24 +54,24 @@ class CompilationDatabaseTestCase(TestCaseWithTmpDir):
             with self.cd_tmp_dir(cd_path):
                 database = CompilationDatabase(project_dir, build_dir)
 
-                command = database.get_command('src/bar.cpp')
+                command = database.commands.get('src/bar.cpp')
                 self.assertEqual('c++ -o src/bar.o -c ../src/bar.cpp', command.invocation)
                 self.assertEqual(self.tmp_path('foo/build'), command.work_dir)
                 self.assertEqual('../src/bar.cpp', command.file)
 
-                command = database.get_command('src/baz.cpp')
+                command = database.commands.get('src/baz.cpp')
                 self.assertEqual('c++ -o src/baz.o -c ../src/baz.cpp', command.invocation)
                 self.assertEqual(self.tmp_path('foo/build'), command.work_dir)
                 self.assertEqual('../src/baz.cpp', command.file)
 
-                command = database.get_command('src/absolute.cpp')
+                command = database.commands.get('src/absolute.cpp')
                 self.assertEqual('/usr/bin/c++ -o src/absolute.o -c ' +
                                  self.tmp_path('foo/src/absolute.cpp'), command.invocation)
                 self.assertEqual(self.tmp_path('foo/build'), command.work_dir)
                 self.assertTrue(os.path.isabs(command.file))
                 self.assertEqual(self.tmp_path('foo/src/absolute.cpp'), command.file)
 
-                self.assertIsNone(database.get_command('does_not_exist.cpp'))
+                self.assertIsNone(database.commands.get('does_not_exist.cpp'))
 
     def test_no_entries(self):
         self.create_tmp_comp_db('foo/build', [])
