@@ -81,7 +81,7 @@ def find_files(project: Project, source_paths: Optional[List[str]] = None) -> Li
 
     if source_paths:
         source_paths = paths.normalize_paths(project.path, source_paths, filter_project_path=True)
-    else:
+    if not source_paths:
         source_paths = project.config['source_paths'] or [paths.NORMALIZED_PROJECT_PATH]
 
     try:

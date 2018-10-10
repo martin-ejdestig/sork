@@ -150,6 +150,9 @@ class SourceFindingTestCase(TestCaseWithTmpDir):
             # Empty paths same as none.
             self._assert_paths(src_paths, source.find_files(project, []))
 
+            # Project path not filtered away.
+            self._assert_paths(src_paths, source.find_files(project, ['.']))
+
             # Single subdir.
             self._assert_paths(['src/def/ghi.cpp', 'src/def/ghi.h'],
                                source.find_files(project, ['src/def']))
@@ -243,6 +246,7 @@ class SourceFindingTestCase(TestCaseWithTmpDir):
         with self.cd_tmp_dir():
             project = Project('.', 'build')
             self._assert_paths(['abc/def.cpp', 'ghi/jkl.cpp'], source.find_files(project))
+            self._assert_paths(['abc/def.cpp', 'ghi/jkl.cpp'], source.find_files(project, ['.']))
             self._assert_paths(['abc/def.cpp'], source.find_files(project, ['abc']))
 
         self.create_tmp_config('.', {'source_paths': ['abc', 'does_not_exist']})
