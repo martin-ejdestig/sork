@@ -26,6 +26,7 @@ from typing import Any, Dict, List, Optional, Pattern, Sequence
 from . import check
 
 from .. import error
+from ..config import Config
 from ..project import Project
 from ..source import SourceFile
 
@@ -171,13 +172,6 @@ _LICENSES: Dict[str, Dict[str, Any]] = {
 _LICENSE_BASE_FILE_NAMES = ['COPYING', 'LICENSE']
 
 
-def _escape_regex_chars(unescaped: str) -> str:
-    escaped = unescaped
-    escaped = re.sub(r'\*', r'\*', escaped)
-    escaped = re.sub(r'([()])', r'\\\1', escaped)
-    return escaped
-
-
 class Error(error.Error):
     pass
 
@@ -225,28 +219,9 @@ def _detect_license(project: Project) -> str:
     raise Error('Unable to automatically determine license in \'{}\'.'. format(project.path))
 
 
-class LicenseHeaderCheck(check.Check):
-    NAME = 'license_header'
-
-    def __init__(self, project: Project) -> None:
-        super().__init__(project)
-        self._license_regex = self._compile_license_regex()
-
-    def _compile_license_regex(self) -> Pattern:
-        template_str = self._join_header_lines(self._get_header_lines())
-
-        template = string.Template(_escape_regex_chars(template_str))
-
-        regex_str = template.safe_substitute(project=self._config['project'],
-                                             year=r"[0-9]{4}(-[0-9]{4})?",
-                                             author=r".+")
-        try:
-            return re.compile(regex_str, flags=re.DOTALL)
-        except re.error:
-            raise Error('Failed to compile regular expression for license header')
-
-    def _get_header_lines(self) -> Sequence[str]:
-        key_or_lines = self._config['license']
+def _compile_license_regex(project: Project, config: Config) -> Pattern:
+    def get_header_lines() -> Sequence[str]:
+        key_or_lines = config['license']
 
         if isinstance(key_or_lines, list):
             return key_or_lines
@@ -256,19 +231,46 @@ class LicenseHeaderCheck(check.Check):
             if key not in _LICENSES:
                 raise Error('{} is an unknown license'.format(key_or_lines))
         else:
-            key = _detect_license(self._project)
+            key = _detect_license(project)
 
         return _LICENSES[key]['header_lines']
 
-    def _join_header_lines(self, lines: Sequence[str]) -> str:
-        prefix = self._config['prefix']
-        line_prefix = self._config['line_prefix']
-        suffix = self._config['suffix']
+    def join_header_lines(lines: Sequence[str]) -> str:
+        prefix = config['prefix']
+        line_prefix = config['line_prefix']
+        suffix = config['suffix']
 
         def prepend_prefix(line):
             return line_prefix + line if line else line_prefix.rstrip()
 
         return ''.join([prefix, '\n'.join(prepend_prefix(l) for l in lines), suffix])
+
+    def escape_regex_chars(unescaped: str) -> str:
+        escaped = unescaped
+        escaped = re.sub(r'\*', r'\*', escaped)
+        escaped = re.sub(r'([()])', r'\\\1', escaped)
+        return escaped
+
+    template_str = join_header_lines(get_header_lines())
+
+    template = string.Template(escape_regex_chars(template_str))
+
+    regex_str = template.safe_substitute(project=config['project'],
+                                         year=r"[0-9]{4}(-[0-9]{4})?",
+                                         author=r".+")
+    try:
+        return re.compile(regex_str, flags=re.DOTALL)
+    except re.error:
+        raise Error('Failed to compile regular expression for license header')
+
+
+class LicenseHeaderCheck(check.Check):
+    NAME = 'license_header'
+
+    def __init__(self, project: Project) -> None:
+        super().__init__(project)
+        assert self._config  # Silence mypy. TODO: Fix probably be fixed in a better way.
+        self._license_regex = _compile_license_regex(project, self._config)
 
     def check(self, source_file: SourceFile) -> Optional[str]:
         if not self._license_regex.match(source_file.content):
