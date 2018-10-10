@@ -26,9 +26,8 @@ from ..source import SourceFile
 class Check(abc.ABC):
     NAME = ''
 
-    def __init__(self, project: Project) -> None:
+    def __init__(self, _: Project) -> None:
         super().__init__()
-        self._project = project
 
     @abc.abstractmethod
     def check(self, source_file: SourceFile) -> Optional[str]:
