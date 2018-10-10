@@ -33,8 +33,10 @@ class IncludeGuardCheck(check.Check):
     def __init__(self, project: Project) -> None:
         super().__init__(project)
 
-        self._prefix = self._config['prefix']
-        self._suffix = self._config['suffix']
+        config = project.config['checks.' + self.NAME]
+        self._prefix = config['prefix']
+        self._suffix = config['suffix']
+        self._strip_paths = config['strip_paths']
 
         self._regex = re.compile(r"^(?:\s*|/\*.*?\*/|//[^\n]*)*"
                                  r"#ifndef\s+(\S*)\s*\n\s*"
@@ -78,7 +80,7 @@ class IncludeGuardCheck(check.Check):
         return ''.join([self._prefix, path_part, self._suffix])
 
     def _strip_path(self, path: str) -> str:
-        for strip_path in self._config['strip_paths']:
+        for strip_path in self._strip_paths:
             if os.path.commonpath([path, strip_path]):
                 return os.path.relpath(path, start=strip_path)
 

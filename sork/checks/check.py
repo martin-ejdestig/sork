@@ -29,7 +29,6 @@ class Check(abc.ABC):
     def __init__(self, project: Project) -> None:
         super().__init__()
         self._project = project
-        self._config = project.config.get('checks.' + self.NAME) if self.NAME else None
 
     @abc.abstractmethod
     def check(self, source_file: SourceFile) -> Optional[str]:

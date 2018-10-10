@@ -269,8 +269,9 @@ class LicenseHeaderCheck(check.Check):
 
     def __init__(self, project: Project) -> None:
         super().__init__(project)
-        assert self._config  # Silence mypy. TODO: Fix probably be fixed in a better way.
-        self._license_regex = _compile_license_regex(project, self._config)
+
+        config = project.config['checks.' + self.NAME]
+        self._license_regex = _compile_license_regex(project, config)
 
     def check(self, source_file: SourceFile) -> Optional[str]:
         if not self._license_regex.match(source_file.content):
