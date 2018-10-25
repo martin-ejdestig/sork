@@ -56,11 +56,13 @@ def _assembler_for_source_file(source_file: source.SourceFile, verbose: bool = F
     return stdout
 
 
-def _opcode_count_comment(asm: str) -> str:
-    Label = str
-    Opcode = str
-    Counters = Dict[Opcode, int]
+# Declaring these locally in _opcode_count_comment() does not work.
+Label = str
+Opcode = str
+Counters = Dict[Opcode, int]
 
+
+def _opcode_count_comment(asm: str) -> str:
     def count_opcode(counters: Counters, opcode: Opcode):
         if opcode in counters:
             counters[opcode] += 1
