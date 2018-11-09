@@ -119,29 +119,27 @@ class Schema:
         verify_values(self._values, config, None)
 
 
-def _merge(default_config: Config, override_config: Config) -> Config:
-    config = {}
-
-    for key, value in override_config.items():
-        if isinstance(value, dict):
-            config[key] = _merge(default_config[key], value)
-        else:
-            config[key] = value
-
-    return {**default_config, **config}
-
-
-def _load(path: str) -> Config:
-    try:
-        with open(path) as file:
-            return json.load(file)
-    except FileNotFoundError:
-        return {}
-
-
 def create(path: str, schema: Schema) -> Config:
+    def merge(default_config: Config, override_config: Config) -> Config:
+        config = {}
+
+        for key, value in override_config.items():
+            if isinstance(value, dict):
+                config[key] = merge(default_config[key], value)
+            else:
+                config[key] = value
+
+        return {**default_config, **config}
+
+    def load(path: str) -> Config:
+        try:
+            with open(path) as file:
+                return json.load(file)
+        except FileNotFoundError:
+            return {}
+
     try:
-        config = _merge(schema.get_default(), _load(path))
+        config = merge(schema.get_default(), load(path))
         schema.verify(config)
     except Exception as exception:
         raise Error('{}: {}'.format(path, exception))

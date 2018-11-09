@@ -38,20 +38,6 @@ _CLANG_TIDY_NOISE_LINES = [
 _CLANG_TIDY_NOISE_REGEX = re.compile('(?m)^(' + '|'.join(_CLANG_TIDY_NOISE_LINES) + ')$')
 
 
-def _config_header_filter(source_file: SourceFile) -> Optional[str]:
-    config_path = os.path.join(source_file.project.path, '.clang-tidy')
-
-    if not os.path.exists(config_path):
-        return None
-
-    with open(config_path, 'r') as file:
-        line = next((l for l in file.readlines() if l.startswith('HeaderFilterRegex')), '')
-
-    split = line.split(':', maxsplit=1)
-
-    return split[1].strip('\n "\'') if len(split) == 2 else None
-
-
 # Current working directory matters when clang-tidy uses HeaderFilterRegex to
 # determine if errors from headers should be displayed or not.
 #
@@ -65,6 +51,19 @@ def _config_header_filter(source_file: SourceFile) -> Optional[str]:
 def _header_filter_override(source_file: SourceFile) -> Optional[str]:
     assert source_file.compile_command
 
+    def config_header_filter(source_file: SourceFile) -> Optional[str]:
+        config_path = os.path.join(source_file.project.path, '.clang-tidy')
+
+        if not os.path.exists(config_path):
+            return None
+
+        with open(config_path, 'r') as file:
+            line = next((l for l in file.readlines() if l.startswith('HeaderFilterRegex')), '')
+
+        split = line.split(':', maxsplit=1)
+
+        return split[1].strip('\n "\'') if len(split) == 2 else None
+
     if os.path.isabs(source_file.compile_command.file):
         path = source_file.project.path
     else:
@@ -73,7 +72,7 @@ def _header_filter_override(source_file: SourceFile) -> Optional[str]:
         if path == os.path.curdir:
             return None
 
-    header_filter = _config_header_filter(source_file)
+    header_filter = config_header_filter(source_file)
     if not header_filter:
         return None
 

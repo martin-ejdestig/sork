@@ -37,15 +37,13 @@ class Error(error.Error):
     pass
 
 
-def _is_project_path(path: str) -> bool:
-    return any(os.path.exists(os.path.join(path, dp))
-               for dp in _DOT_PATHS_IN_PROJECT_ROOT)
-
-
 def find_project_path(path_in_project: str) -> str:
+    def is_project_path(path: str) -> bool:
+        return any(os.path.exists(os.path.join(path, dp)) for dp in _DOT_PATHS_IN_PROJECT_ROOT)
+
     path = os.path.dirname(path_in_project) if os.path.isfile(path_in_project) else path_in_project
 
-    while not _is_project_path(path):
+    while not is_project_path(path):
         parent_path = os.path.relpath(os.path.join(path, os.path.pardir))
 
         if path == parent_path:
@@ -58,33 +56,31 @@ def find_project_path(path_in_project: str) -> str:
     return path
 
 
-def _build_path_patterns(project_path: str, basename: str) -> List[str]:
-    pattern_dir_components = [
-        ['*'],
-        [os.path.pardir, basename + '*'],
-        [os.path.pardir, 'build*', basename + '*'],
-        [os.path.pardir, 'build-' + basename + '*']
-    ]
-    return [os.path.join(project_path, *cs) for cs in pattern_dir_components]
-
-
-def _find_potential_build_paths(project_path: str) -> List[str]:
-    basename = os.path.basename(os.path.abspath(project_path))
-
-    patterns = [os.path.join(pattern, COMPILE_COMMANDS_JSON_PATH)
-                for pattern in _build_path_patterns(project_path, basename)]
-
-    paths = itertools.chain.from_iterable([glob.glob(p) for p in patterns])
-
-    return [os.path.dirname(os.path.normpath(path)) for path in paths]
-
-
 def find_build_path(project_path: str) -> str:
-    paths = _find_potential_build_paths(project_path)
+    def build_path_patterns(project_path: str, basename: str) -> List[str]:
+        pattern_dir_components = [
+            ['*'],
+            [os.path.pardir, basename + '*'],
+            [os.path.pardir, 'build*', basename + '*'],
+            [os.path.pardir, 'build-' + basename + '*']
+        ]
+        return [os.path.join(project_path, *cs) for cs in pattern_dir_components]
+
+    def find_potential_build_paths(project_path: str) -> List[str]:
+        basename = os.path.basename(os.path.abspath(project_path))
+
+        patterns = [os.path.join(pattern, COMPILE_COMMANDS_JSON_PATH)
+                    for pattern in build_path_patterns(project_path, basename)]
+
+        paths = itertools.chain.from_iterable([glob.glob(p) for p in patterns])
+
+        return [os.path.dirname(os.path.normpath(path)) for path in paths]
+
+    paths = find_potential_build_paths(project_path)
 
     if not paths:
-        standard_locations = _build_path_patterns('path_to_project',
-                                                  'name_of_project_directory')
+        standard_locations = build_path_patterns('path_to_project',
+                                                 'name_of_project_directory')
         raise Error('Unable to determine build path. Specify a path manually or '
                     'use one of the standard locations:\n{}'
                     .format('\n'.join(standard_locations)))

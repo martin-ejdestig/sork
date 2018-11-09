@@ -43,31 +43,30 @@ class Error(error.Error):
     pass
 
 
-def _strings_to_names(check_strings: List[str]) -> Set[str]:
-    names_set = set()
-
-    if not check_strings or check_strings[0].startswith('-'):
-        names_set.update(NAMES)
-
-    for check_string in check_strings:
-        disable = check_string.startswith('-')
-        match_str = check_string.lstrip('-')
-        names = [n for n in NAMES if re.match(match_str, n)]
-
-        if not names:
-            raise Error('{} does not match any of the available checks ({}).'.
-                        format(match_str, ', '.join(NAMES)))
-
-        if disable:
-            names_set.difference_update(names)
-        else:
-            names_set.update(names)
-
-    return names_set
-
-
 def from_strings(project: Project, check_strings: List[str]) -> List[Check]:
-    names = _strings_to_names(check_strings)
+    def strings_to_names(check_strings: List[str]) -> Set[str]:
+        names_set = set()
+
+        if not check_strings or check_strings[0].startswith('-'):
+            names_set.update(NAMES)
+
+        for check_string in check_strings:
+            disable = check_string.startswith('-')
+            match_str = check_string.lstrip('-')
+            names = [n for n in NAMES if re.match(match_str, n)]
+
+            if not names:
+                raise Error('{} does not match any of the available checks ({}).'.
+                            format(match_str, ', '.join(NAMES)))
+
+            if disable:
+                names_set.difference_update(names)
+            else:
+                names_set.update(names)
+
+        return names_set
+
+    names = strings_to_names(check_strings)
 
     if not names:
         raise Error('{} results in no checks.'.format(check_strings))
