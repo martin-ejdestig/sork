@@ -20,11 +20,14 @@ import subprocess
 
 from typing import Optional
 
-from . import check
+from .check import Check
 
 from .. import string
+from ..project import Project
 from ..source import SourceFile
 
+
+NAME = 'clang-format'
 
 DIFF_CONTEXT = 1
 
@@ -57,10 +60,8 @@ def _custom_diff(path: str, content: str, formatted: str) -> str:
     return ''.join(diff_lines)
 
 
-class ClangFormatCheck(check.Check):
-    NAME = 'clang-format'
-
-    def run(self, source_file: SourceFile) -> Optional[str]:
+def create(_: Project) -> Check:
+    def run(source_file: SourceFile) -> Optional[str]:
         with subprocess.Popen(['clang-format', '-assume-filename=' + source_file.path],
                               stdin=subprocess.PIPE,
                               stdout=subprocess.PIPE,
@@ -74,3 +75,5 @@ class ClangFormatCheck(check.Check):
         diff_str = _custom_diff(source_file.path, source_file.content, stdout)
 
         return string.rstrip_single_char(diff_str, '\n') or None
+
+    return Check(NAME, run)

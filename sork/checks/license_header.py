@@ -23,7 +23,7 @@ import string
 
 from typing import Any, Dict, List, Optional, Pattern, Sequence
 
-from . import check
+from .check import Check
 
 from .. import error
 from ..config import Config
@@ -36,6 +36,7 @@ from ..source import SourceFile
 # TODO: Add License class and License.Type enum... or something... more structured, more type safe
 #       and will be easier to test.
 
+NAME = 'license_header'
 
 _LICENSES: Dict[str, Dict[str, Any]] = {
     'apache2': {
@@ -264,17 +265,14 @@ def _compile_license_regex(project: Project, config: Config) -> Pattern:
         raise Error('Failed to compile regular expression for license header')
 
 
-class LicenseHeaderCheck(check.Check):
-    NAME = 'license_header'
+def create(project: Project) -> Check:
+    config = project.config['checks.' + NAME]
+    license_regex = _compile_license_regex(project, config)
 
-    def __init__(self, project: Project) -> None:
-        super().__init__(project)
-
-        config = project.config['checks.' + self.NAME]
-        self._license_regex = _compile_license_regex(project, config)
-
-    def run(self, source_file: SourceFile) -> Optional[str]:
-        if not self._license_regex.match(source_file.content):
+    def run(source_file: SourceFile) -> Optional[str]:
+        if not license_regex.match(source_file.content):
             return '{}: error: invalid license header'.format(source_file.path)
 
         return None
+
+    return Check(NAME, run)

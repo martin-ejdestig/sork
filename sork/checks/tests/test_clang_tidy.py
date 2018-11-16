@@ -24,17 +24,18 @@ from ...project import Project
 from ...source import SourceFile
 from ...tests.test_case_with_tmp_dir import TestCaseWithTmpDir
 
-from ..clang_tidy import ClangTidyCheck
+from .. import clang_tidy
+from ..check import Check
 
 
 class ClangTidyBaseTestCase(TestCaseWithTmpDir):
     def _create(self,
                 project_path: str,
                 build_path: str,
-                comp_db: List[Dict[str, Any]]) -> Tuple[Project, ClangTidyCheck]:
+                comp_db: List[Dict[str, Any]]) -> Tuple[Project, Check]:
         self.create_tmp_build_dir(build_path, comp_db=comp_db)
         project = Project(self.tmp_path(project_path), self.tmp_path(build_path))
-        return project, ClangTidyCheck(project)
+        return project, clang_tidy.create(project)
 
     def _create_source(self, project: Project, path: str, src_lines: List[str]) -> SourceFile:
         self.create_tmp_file(os.path.join(project.path, path), src_lines)

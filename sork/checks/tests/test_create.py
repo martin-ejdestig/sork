@@ -35,7 +35,7 @@ class CreateFromStringsTestCase(TestCaseWithTmpDir):
         self._project = Project(self.tmp_path('.'), self.tmp_path('build'))
 
     def _created_names(self, check_strings: List[str]) -> List[str]:
-        return [check.NAME for check in create.from_strings(self._project, check_strings)]
+        return [check.name for check in create.from_strings(self._project, check_strings)]
 
     def test_none_creates_all(self):
         self.assertEqual(create.NAMES, self._created_names([]))

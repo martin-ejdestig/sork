@@ -21,10 +21,13 @@ import subprocess
 
 from typing import Optional
 
-from . import check
+from .check import Check
 
+from ..project import Project
 from ..source import SourceFile
 
+
+NAME = 'clang-tidy'
 
 _CLANG_TIDY_NOISE_LINES = [
     r"[0-9]+ warnings? (and [0-9]+ errors? )?generated.",
@@ -93,10 +96,8 @@ def _compiler_exe_replacement(source_file: SourceFile) -> str:
     return ' '.join(args)
 
 
-class ClangTidyCheck(check.Check):
-    NAME = 'clang-tidy'
-
-    def run(self, source_file: SourceFile) -> Optional[str]:
+def create(_: Project) -> Check:
+    def run(source_file: SourceFile) -> Optional[str]:
         if not source_file.compile_command:
             return None
 
@@ -113,3 +114,5 @@ class ClangTidyCheck(check.Check):
             output = process.communicate()[0]
 
         return _CLANG_TIDY_NOISE_REGEX.sub('', output).strip() or None
+
+    return Check(NAME, run)

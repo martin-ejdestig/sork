@@ -20,40 +20,54 @@ import re
 
 from typing import Optional
 
-from . import check
+from .check import Check
 
 from .. import string
 from ..project import Project
 from ..source import SourceFile
 
 
-class IncludeGuardCheck(check.Check):
-    NAME = 'include_guard'
+NAME = 'include_guard'
 
-    def __init__(self, project: Project) -> None:
-        super().__init__(project)
 
-        config = project.config['checks.' + self.NAME]
-        self._prefix = config['prefix']
-        self._suffix = config['suffix']
-        self._strip_paths = config['strip_paths']
+def create(project: Project) -> Check:
+    config = project.config['checks.' + NAME]
+    prefix = config['prefix']
+    suffix = config['suffix']
+    strip_paths = config['strip_paths']
 
-        self._regex = re.compile(r"^(?:\s*|/\*.*?\*/|//[^\n]*)*"
-                                 r"#ifndef\s+(\S*)\s*\n\s*"
-                                 r"#define\s(\S*).*\n.*"
-                                 r"#endif(?:\s+//\s+(?P<endif_comment>\S*))?\s*$",
-                                 flags=re.DOTALL)
+    regex = re.compile(r"^(?:\s*|/\*.*?\*/|//[^\n]*)*"
+                       r"#ifndef\s+(\S*)\s*\n\s*"
+                       r"#define\s(\S*).*\n.*"
+                       r"#endif(?:\s+//\s+(?P<endif_comment>\S*))?\s*$",
+                       flags=re.DOTALL)
 
-    def run(self, source_file: SourceFile) -> Optional[str]:
+    def strip_path(path: str) -> str:
+        for strip_path in strip_paths:
+            if os.path.commonpath([path, strip_path]):
+                return os.path.relpath(path, start=strip_path)
+
+        return path
+
+    def include_guard_for_source_file(source_file: SourceFile) -> str:
+        stripped_path = strip_path(source_file.stem)
+        path_part = re.sub(r"[ /\\-]", '_', stripped_path).upper()
+
+        if path_part.startswith(prefix):
+            path_part = path_part[len(prefix):]
+
+        return ''.join([prefix, path_part, suffix])
+
+    def run(source_file: SourceFile) -> Optional[str]:
         if not source_file.is_header:
             return None
 
-        match = self._regex.match(source_file.content)
+        match = regex.match(source_file.content)
 
         if not match:
             return '{}: error: missing include guard'.format(source_file.path)
 
-        guard = self._include_guard_for_source_file(source_file)
+        guard = include_guard_for_source_file(source_file)
 
         error_positions = [string.index_to_line_and_column(source_file.content, match.start(group))
                            for group, found_guard in enumerate(match.groups(), start=1)
@@ -70,18 +84,4 @@ class IncludeGuardCheck(check.Check):
 
         return '\n'.join(output)
 
-    def _include_guard_for_source_file(self, source_file: SourceFile) -> str:
-        stripped_path = self._strip_path(source_file.stem)
-        path_part = re.sub(r"[ /\\-]", '_', stripped_path).upper()
-
-        if path_part.startswith(self._prefix):
-            path_part = path_part[len(self._prefix):]
-
-        return ''.join([self._prefix, path_part, self._suffix])
-
-    def _strip_path(self, path: str) -> str:
-        for strip_path in self._strip_paths:
-            if os.path.commonpath([path, strip_path]):
-                return os.path.relpath(path, start=strip_path)
-
-        return path
+    return Check(NAME, run)

@@ -23,14 +23,15 @@ from ...project import Project
 from ...source import SourceFile
 from ...tests.test_case_with_tmp_dir import TestCaseWithTmpDir
 
-from ..clang_format import ClangFormatCheck, DIFF_CONTEXT
+from .. import clang_format
+from ..check import Check
 
 
 class ClangFormatTestCase(TestCaseWithTmpDir):
-    def _create(self) -> Tuple[Project, ClangFormatCheck]:
+    def _create(self) -> Tuple[Project, Check]:
         self.create_tmp_build_dir('build')
         project = Project(self.tmp_path('.'), self.tmp_path('build'))
-        return project, ClangFormatCheck(project)
+        return project, clang_format.create(project)
 
     def _create_source(self, project: Project, path: str, src_lines: List[str]) -> SourceFile:
         self.create_tmp_file(os.path.join(project.path, path), src_lines)
@@ -122,7 +123,7 @@ class ClangFormatTestCase(TestCaseWithTmpDir):
     def test_line_number_for_hunk(self):
         project, check = self._create()
         lines_around_error = 8
-        hunk_line_number = lines_around_error + 1 - DIFF_CONTEXT
+        hunk_line_number = lines_around_error + 1 - clang_format.DIFF_CONTEXT
         src = self._create_source(project, 'src/foo.cpp',
                                   ['// bar'] * lines_around_error +
                                   [' int baz = 0;'] +

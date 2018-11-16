@@ -17,26 +17,26 @@
 
 import re
 
-from typing import List, Type, Set
+from typing import Callable, List, Tuple, Set
 
 from .check import Check
-from .clang_format import ClangFormatCheck
-from .clang_tidy import ClangTidyCheck
-from .include_guard import IncludeGuardCheck
-from .license_header import LicenseHeaderCheck
+from . import clang_format
+from . import clang_tidy
+from . import include_guard
+from . import license_header
 
 from .. import error
 from ..project import Project
 
 
-_CLASSES: List[Type[Check]] = [
-    ClangFormatCheck,
-    ClangTidyCheck,
-    IncludeGuardCheck,
-    LicenseHeaderCheck
+_CREATE_FUNCTIONS: List[Tuple[str, Callable[[Project], Check]]] = [
+    (clang_format.NAME, clang_format.create),
+    (clang_tidy.NAME, clang_tidy.create),
+    (include_guard.NAME, include_guard.create),
+    (license_header.NAME, license_header.create)
 ]
 
-NAMES = [c.NAME for c in _CLASSES]
+NAMES = [name for (name, _) in _CREATE_FUNCTIONS]
 
 
 class Error(error.Error):
@@ -71,4 +71,4 @@ def from_strings(project: Project, check_strings: List[str]) -> List[Check]:
     if not names:
         raise Error('{} results in no checks.'.format(check_strings))
 
-    return [c(project) for c in _CLASSES if c.NAME in names]
+    return [create(project) for (name, create) in _CREATE_FUNCTIONS if name in names]

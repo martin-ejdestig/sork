@@ -15,20 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with Sork. If not, see <http://www.gnu.org/licenses/>.
 
-import abc
+from typing import Callable, Optional
 
-from typing import Optional
-
-from ..project import Project
 from ..source import SourceFile
 
 
-class Check(abc.ABC):
-    NAME = ''
+Run = Callable[[SourceFile], Optional[str]]
 
-    def __init__(self, _: Project) -> None:
-        super().__init__()
 
-    @abc.abstractmethod
-    def run(self, source_file: SourceFile) -> Optional[str]:
-        pass
+class Check:
+    def __init__(self, name: str, run: Run) -> None:
+        self.name = name
+        self.run = run
