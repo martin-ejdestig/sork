@@ -58,7 +58,7 @@ def run(args: argparse.Namespace, project: Project):
 
     def check_source_file(source_file: source.SourceFile):
         printer.start_with_item(source_file.path)
-        outputs = (c.check(source_file) for c in enabled_checks)
+        outputs = (c.run(source_file) for c in enabled_checks)
         printer.done_with_item('\n'.join(o for o in outputs if o))
 
     try:

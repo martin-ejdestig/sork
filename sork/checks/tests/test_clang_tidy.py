@@ -57,7 +57,7 @@ class ClangTidyTestCase(ClangTidyBaseTestCase):
         src = self._create_source(project, 'src/foo.cpp', ['int *p = nullptr;'])
         self._create_dot_clang_tidy(project, ['Checks: "modernize-use-nullptr"'])
 
-        self.assertIsNone(check.check(src))
+        self.assertIsNone(check.run(src))
 
     def test_error_position_in_output(self):
         project, check = self._create('.', 'build', comp_db=[{
@@ -68,7 +68,7 @@ class ClangTidyTestCase(ClangTidyBaseTestCase):
         src = self._create_source(project, 'src/foo.cpp', ['int *p = 0;'])
         self._create_dot_clang_tidy(project, ['Checks: "modernize-use-nullptr"'])
 
-        self.assertIn('src/foo.cpp:1:10', check.check(src))
+        self.assertIn('src/foo.cpp:1:10', check.run(src))
 
     def test_source_without_compile_command_is_ignored(self):
         project, check = self._create('.', 'build', comp_db=[{
@@ -79,7 +79,7 @@ class ClangTidyTestCase(ClangTidyBaseTestCase):
         src = self._create_source(project, 'src/bar.cpp', ['int *p = 0;'])
         self._create_dot_clang_tidy(project, ['Checks: "modernize-use-nullptr"'])
 
-        self.assertIsNone(check.check(src))
+        self.assertIsNone(check.run(src))
 
     def test_gcc_specific_warning_flags_ignored(self):
         project, check = self._create('.', 'build', comp_db=[{
@@ -89,7 +89,7 @@ class ClangTidyTestCase(ClangTidyBaseTestCase):
         }])
         src = self._create_source(project, 'src/foo.cpp', [''])
 
-        self.assertIsNone(check.check(src))
+        self.assertIsNone(check.run(src))
 
     def test_absolute_compiler_path_replaced_correctly(self):
         project, check = self._create('.', 'build', comp_db=[{
@@ -100,7 +100,7 @@ class ClangTidyTestCase(ClangTidyBaseTestCase):
         src = self._create_source(project, 'src/foo.cpp', ['int *p = 0;'])
         self._create_dot_clang_tidy(project, ['Checks: "modernize-use-nullptr"'])
 
-        self.assertIn('src/foo.cpp:1:10', check.check(src))
+        self.assertIn('src/foo.cpp:1:10', check.run(src))
 
 
 class Headers(enum.Flag):
@@ -185,7 +185,7 @@ class ClangTidyHeaderFilterTestCase(ClangTidyBaseTestCase):
             ''
         ])
 
-        output = check.check(src)
+        output = check.run(src)
 
         if expected_headers_in_output:
             for path, header in [('src/private.h', Headers.PRIVATE),

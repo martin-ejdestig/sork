@@ -44,7 +44,7 @@ class IncludeGuardCheck(check.Check):
                                  r"#endif(?:\s+//\s+(?P<endif_comment>\S*))?\s*$",
                                  flags=re.DOTALL)
 
-    def check(self, source_file: SourceFile) -> Optional[str]:
+    def run(self, source_file: SourceFile) -> Optional[str]:
         if not source_file.is_header:
             return None
 

@@ -50,7 +50,7 @@ class ClangFormatTestCase(TestCaseWithTmpDir):
             '}'
         ])
 
-        self.assertIsNone(check.check(src))
+        self.assertIsNone(check.run(src))
 
     def test_remove_and_add_lines(self):
         project, check = self._create()
@@ -65,7 +65,7 @@ class ClangFormatTestCase(TestCaseWithTmpDir):
             '  return j;',
             '}'
         ])
-        output = check.check(src)
+        output = check.run(src)
 
         self.assertIn('-void foo()\n', output)
         self.assertIn('-{\n', output)
@@ -81,7 +81,7 @@ class ClangFormatTestCase(TestCaseWithTmpDir):
         project, check = self._create()
         src = self._create_source(project, 'src/wrong.cpp', ['void foo () {  }'])
 
-        self.assertIn('src/wrong.cpp', check.check(src))
+        self.assertIn('src/wrong.cpp', check.run(src))
 
     def test_assume_filename(self):
         # File content is passed to clang-format through stdin which means -assume-filename argument
@@ -111,10 +111,10 @@ class ClangFormatTestCase(TestCaseWithTmpDir):
         ])
 
         self._create_dot_clang_format(cfg_lines('Preserve'))  # Verify that formatted correctly.
-        self.assertIsNone(check.check(src))
+        self.assertIsNone(check.run(src))
 
         self._create_dot_clang_format(cfg_lines('Regroup'))  # Now test that main header is moved.
-        output = check.check(src)
+        output = check.run(src)
         self.assertIsNotNone(output)
         self.assertIn('+#include "baz/foo.h"\n+\n', output)
         self.assertIn('-#include "baz/foo.h"\n', output)
@@ -128,5 +128,5 @@ class ClangFormatTestCase(TestCaseWithTmpDir):
                                   [' int baz = 0;'] +
                                   ['// qux'] * lines_around_error)
 
-        output = check.check(src)
+        output = check.run(src)
         self.assertIn('src/foo.cpp:' + str(hunk_line_number), output)

@@ -96,7 +96,7 @@ def _compiler_exe_replacement(source_file: SourceFile) -> str:
 class ClangTidyCheck(check.Check):
     NAME = 'clang-tidy'
 
-    def check(self, source_file: SourceFile) -> Optional[str]:
+    def run(self, source_file: SourceFile) -> Optional[str]:
         if not source_file.compile_command:
             return None
 

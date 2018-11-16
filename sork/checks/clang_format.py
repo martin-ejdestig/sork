@@ -60,7 +60,7 @@ def _custom_diff(path: str, content: str, formatted: str) -> str:
 class ClangFormatCheck(check.Check):
     NAME = 'clang-format'
 
-    def check(self, source_file: SourceFile) -> Optional[str]:
+    def run(self, source_file: SourceFile) -> Optional[str]:
         with subprocess.Popen(['clang-format', '-assume-filename=' + source_file.path],
                               stdin=subprocess.PIPE,
                               stdout=subprocess.PIPE,

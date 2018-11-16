@@ -30,5 +30,5 @@ class Check(abc.ABC):
         super().__init__()
 
     @abc.abstractmethod
-    def check(self, source_file: SourceFile) -> Optional[str]:
+    def run(self, source_file: SourceFile) -> Optional[str]:
         pass

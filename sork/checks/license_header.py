@@ -273,7 +273,7 @@ class LicenseHeaderCheck(check.Check):
         config = project.config['checks.' + self.NAME]
         self._license_regex = _compile_license_regex(project, config)
 
-    def check(self, source_file: SourceFile) -> Optional[str]:
+    def run(self, source_file: SourceFile) -> Optional[str]:
         if not self._license_regex.match(source_file.content):
             return '{}: error: invalid license header'.format(source_file.path)
 
