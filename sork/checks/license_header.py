@@ -21,7 +21,7 @@ import os
 import re
 import string
 
-from typing import Any, Dict, List, Optional, Pattern, Sequence
+from typing import Dict, List, Optional, Pattern, Sequence
 
 from .check import Check
 
@@ -32,143 +32,163 @@ from ..source import SourceFile
 
 
 # TODO: More informative error output than "invalid header". (diff? just print erroneous line #?)
-#
-# TODO: Add License class and License.Type enum... or something... more structured, more type safe
-#       and will be easier to test.
+
 
 NAME = 'license_header'
 
-_LICENSES: Dict[str, Dict[str, Any]] = {
-    'apache2': {
-        'content_pattern': r"\s*Apache License\s*\n"
-                           r"\s*Version 2.0, January 2004",
-        'header_lines': [
-            'Copyright $year $author',
-            '',
-            'Licensed under the Apache License, Version 2.0 (the "License");',
-            'you may not use this file except in compliance with the License.',
-            'You may obtain a copy of the License at',
-            '',
-            '    http://www.apache.org/licenses/LICENSE-2.0',
-            '',
-            'Unless required by applicable law or agreed to in writing, software',
-            'distributed under the License is distributed on an "AS IS" BASIS,',
-            'WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.',
-            'See the License for the specific language governing permissions and',
-            'limitations under the License.'
-        ]
-    },
-    'gplv2': {
-        'content_pattern': r"\s*GNU GENERAL PUBLIC LICENSE\s*\n"
-                           r"\s*Version 2, June 1991",
-        'header_lines': [
-            'This file is part of $project.',
-            '',
-            'Copyright (C) $year $author',
-            '',
-            '$project is free software; you can redistribute it and/or modify',
-            'it under the terms of the GNU General Public License as published by',
-            'the Free Software Foundation; either version 2 of the License, or',
-            '(at your option) any later version.',
-            '',
-            '$project is distributed in the hope that it will be useful,',
-            'but WITHOUT ANY WARRANTY; without even the implied warranty of',
-            'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the',
-            'GNU General Public License for more details.',
-            '',
-            'You should have received a copy of the GNU General Public License',
-            'along with $project. If not, see <http://www.gnu.org/licenses/>.'
-        ]
-    },
-    'gplv3': {
-        'content_pattern': r"\s*GNU GENERAL PUBLIC LICENSE\s*\n"
-                           r"\s*Version 3, 29 June 2007",
-        'header_lines': [
-            'This file is part of $project.',
-            '',
-            'Copyright (C) $year $author',
-            '',
-            '$project is free software: you can redistribute it and/or modify',
-            'it under the terms of the GNU General Public License as published by',
-            'the Free Software Foundation, either version 3 of the License, or',
-            '(at your option) any later version.',
-            '',
-            '$project is distributed in the hope that it will be useful,',
-            'but WITHOUT ANY WARRANTY; without even the implied warranty of',
-            'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the',
-            'GNU General Public License for more details.',
-            '',
-            'You should have received a copy of the GNU General Public License',
-            'along with $project. If not, see <http://www.gnu.org/licenses/>.'
-        ]
-    },
-    'lgplv2': {
-        'content_pattern': r"\s*GNU LIBRARY GENERAL PUBLIC LICENSE\s*\n"
-                           r"\s*Version 2, June 1991",
-        'header_lines': [
-            'This file is part of $project.',
-            '',
-            'Copyright (C) $year $author',
-            '',
-            '$project is free software; you can redistribute it and/or modify',
-            'it under the terms of the GNU Library General Public License as published by',
-            'the Free Software Foundation; either version 2 of the License, or',
-            '(at your option) any later version.',
-            '',
-            '$project is distributed in the hope that it will be useful,',
-            'but WITHOUT ANY WARRANTY; without even the implied warranty of',
-            'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the',
-            'GNU Library General Public License for more details.',
-            '',
-            'You should have received a copy of the GNU Library General Public License',
-            'along with $project. If not, see <http://www.gnu.org/licenses/>.'
-        ]
-    },
-    'lgplv2.1': {
-        'content_pattern': r"\s*GNU LESSER GENERAL PUBLIC LICENSE\s*\n"
-                           r"\s*Version 2.1, February 1999",
-        'header_lines': [
-            'This file is part of $project.',
-            '',
-            'Copyright (C) $year $author',
-            '',
-            '$project is free software; you can redistribute it and/or modify',
-            'it under the terms of the GNU Lesser General Public License as published by',
-            'the Free Software Foundation; either version 2.1 of the License, or',
-            '(at your option) any later version.',
-            '',
-            '$project is distributed in the hope that it will be useful,',
-            'but WITHOUT ANY WARRANTY; without even the implied warranty of',
-            'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the',
-            'GNU Lesser General Public License for more details.',
-            '',
-            'You should have received a copy of the GNU Lesser General Public License',
-            'along with $project. If not, see <http://www.gnu.org/licenses/>.'
-        ]
-    },
-    'lgplv3': {
-        'content_pattern': r"\s*GNU LESSER GENERAL PUBLIC LICENSE\s*\n"
-                           r"\s*Version 3, 29 June 2007",
-        'header_lines': [
-            'This file is part of $project.',
-            '',
-            'Copyright (C) $year $author',
-            '',
-            '$project is free software: you can redistribute it and/or modify',
-            'it under the terms of the GNU Lesser General Public License as published by',
-            'the Free Software Foundation, either version 3 of the License, or',
-            '(at your option) any later version.',
-            '',
-            '$project is distributed in the hope that it will be useful,',
-            'but WITHOUT ANY WARRANTY; without even the implied warranty of',
-            'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the',
-            'GNU Lesser General Public License for more details.',
-            '',
-            'You should have received a copy of the GNU Lesser General Public License',
-            'along with $project. If not, see <http://www.gnu.org/licenses/>.'
-        ]
-    }
-}
+
+class License:
+    def __init__(self, name: str, content_pattern: str, header_lines: List[str]) -> None:
+        self.name = name
+        self.content_pattern = content_pattern
+        self.header_lines = header_lines
+
+
+_LICENSE_APACHE2 = \
+    License('apache2',
+            content_pattern=r"\s*Apache License\s*\n"
+                            r"\s*Version 2.0, January 2004",
+            header_lines=[
+                'Copyright $year $author',
+                '',
+                'Licensed under the Apache License, Version 2.0 (the "License");',
+                'you may not use this file except in compliance with the License.',
+                'You may obtain a copy of the License at',
+                '',
+                '    http://www.apache.org/licenses/LICENSE-2.0',
+                '',
+                'Unless required by applicable law or agreed to in writing, software',
+                'distributed under the License is distributed on an "AS IS" BASIS,',
+                'WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.',
+                'See the License for the specific language governing permissions and',
+                'limitations under the License.'
+            ])
+
+_LICENSE_GPLV2 = \
+    License('gplv2',
+            content_pattern=r"\s*GNU GENERAL PUBLIC LICENSE\s*\n"
+                            r"\s*Version 2, June 1991",
+            header_lines=[
+                'This file is part of $project.',
+                '',
+                'Copyright (C) $year $author',
+                '',
+                '$project is free software; you can redistribute it and/or modify',
+                'it under the terms of the GNU General Public License as published by',
+                'the Free Software Foundation; either version 2 of the License, or',
+                '(at your option) any later version.',
+                '',
+                '$project is distributed in the hope that it will be useful,',
+                'but WITHOUT ANY WARRANTY; without even the implied warranty of',
+                'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the',
+                'GNU General Public License for more details.',
+                '',
+                'You should have received a copy of the GNU General Public License',
+                'along with $project. If not, see <http://www.gnu.org/licenses/>.'
+            ])
+
+_LICENSE_GPLV3 = \
+    License('gplv3',
+            content_pattern=r"\s*GNU GENERAL PUBLIC LICENSE\s*\n"
+                            r"\s*Version 3, 29 June 2007",
+            header_lines=[
+                'This file is part of $project.',
+                '',
+                'Copyright (C) $year $author',
+                '',
+                '$project is free software: you can redistribute it and/or modify',
+                'it under the terms of the GNU General Public License as published by',
+                'the Free Software Foundation, either version 3 of the License, or',
+                '(at your option) any later version.',
+                '',
+                '$project is distributed in the hope that it will be useful,',
+                'but WITHOUT ANY WARRANTY; without even the implied warranty of',
+                'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the',
+                'GNU General Public License for more details.',
+                '',
+                'You should have received a copy of the GNU General Public License',
+                'along with $project. If not, see <http://www.gnu.org/licenses/>.'
+            ])
+
+_LICENSE_LGPLV2 = \
+    License('lgplv2',
+            content_pattern=r"\s*GNU LIBRARY GENERAL PUBLIC LICENSE\s*\n"
+                            r"\s*Version 2, June 1991",
+            header_lines=[
+                'This file is part of $project.',
+                '',
+                'Copyright (C) $year $author',
+                '',
+                '$project is free software; you can redistribute it and/or modify',
+                'it under the terms of the GNU Library General Public License as published by',
+                'the Free Software Foundation; either version 2 of the License, or',
+                '(at your option) any later version.',
+                '',
+                '$project is distributed in the hope that it will be useful,',
+                'but WITHOUT ANY WARRANTY; without even the implied warranty of',
+                'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the',
+                'GNU Library General Public License for more details.',
+                '',
+                'You should have received a copy of the GNU Library General Public License',
+                'along with $project. If not, see <http://www.gnu.org/licenses/>.'
+            ])
+
+_LICENSE_LGPLV2_1 = \
+    License('lgplv2.1',
+            content_pattern=r"\s*GNU LESSER GENERAL PUBLIC LICENSE\s*\n"
+                            r"\s*Version 2.1, February 1999",
+            header_lines=[
+                'This file is part of $project.',
+                '',
+                'Copyright (C) $year $author',
+                '',
+                '$project is free software; you can redistribute it and/or modify',
+                'it under the terms of the GNU Lesser General Public License as published by',
+                'the Free Software Foundation; either version 2.1 of the License, or',
+                '(at your option) any later version.',
+                '',
+                '$project is distributed in the hope that it will be useful,',
+                'but WITHOUT ANY WARRANTY; without even the implied warranty of',
+                'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the',
+                'GNU Lesser General Public License for more details.',
+                '',
+                'You should have received a copy of the GNU Lesser General Public License',
+                'along with $project. If not, see <http://www.gnu.org/licenses/>.'
+            ])
+
+_LICENSE_LGPLV3 = \
+    License('lgplv3',
+            content_pattern=r"\s*GNU LESSER GENERAL PUBLIC LICENSE\s*\n"
+                            r"\s*Version 3, 29 June 2007",
+            header_lines=[
+                'This file is part of $project.',
+                '',
+                'Copyright (C) $year $author',
+                '',
+                '$project is free software: you can redistribute it and/or modify',
+                'it under the terms of the GNU Lesser General Public License as published by',
+                'the Free Software Foundation, either version 3 of the License, or',
+                '(at your option) any later version.',
+                '',
+                '$project is distributed in the hope that it will be useful,',
+                'but WITHOUT ANY WARRANTY; without even the implied warranty of',
+                'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the',
+                'GNU Lesser General Public License for more details.',
+                '',
+                'You should have received a copy of the GNU Lesser General Public License',
+                'along with $project. If not, see <http://www.gnu.org/licenses/>.'
+            ])
+
+_LICENSE_LIST: List[License] = [
+    _LICENSE_APACHE2,
+    _LICENSE_GPLV2,
+    _LICENSE_GPLV3,
+    _LICENSE_LGPLV2,
+    _LICENSE_LGPLV2_1,
+    _LICENSE_LGPLV3
+]
+
+_LICENSE_DICT: Dict[str, License] = {l.name: l for l in _LICENSE_LIST}
 
 _LICENSE_BASE_FILE_NAMES = ['COPYING', 'LICENSE']
 
@@ -199,9 +219,9 @@ def _detect_license(project: Project) -> str:
         except OSError as exception:
             raise Error(exception)
 
-        for key, value in _LICENSES.items():
-            if re.match(value['content_pattern'], content):
-                return key
+        for license_ in _LICENSE_LIST:
+            if re.match(license_.content_pattern, content):
+                return license_.name
 
         raise Error('Unknown license in {}.'.format(path))
 
@@ -214,27 +234,27 @@ def _detect_license(project: Project) -> str:
     if len(paths) == 1:
         return licenses[0]
 
-    if len(paths) == 2 and 'gplv3' in licenses and 'lgplv3' in licenses:
-        return 'lgplv3'
+    if len(paths) == 2 and _LICENSE_GPLV3.name in licenses and _LICENSE_LGPLV3.name in licenses:
+        return _LICENSE_LGPLV3.name
 
     raise Error('Unable to automatically determine license in \'{}\'.'. format(project.path))
 
 
 def _compile_license_regex(project: Project, config: Config) -> Pattern:
     def get_header_lines() -> Sequence[str]:
-        key_or_lines = config['license']
+        name_or_lines = config['license']
 
-        if isinstance(key_or_lines, list):
-            return key_or_lines
+        if isinstance(name_or_lines, list):
+            return name_or_lines
 
-        if key_or_lines:
-            key = key_or_lines.lower()
-            if key not in _LICENSES:
-                raise Error('{} is an unknown license'.format(key_or_lines))
+        if name_or_lines:
+            name = name_or_lines.lower()
+            if name not in _LICENSE_DICT:
+                raise Error('{} is an unknown license'.format(name_or_lines))
         else:
-            key = _detect_license(project)
+            name = _detect_license(project)
 
-        return _LICENSES[key]['header_lines']
+        return _LICENSE_DICT[name].header_lines
 
     def join_header_lines(lines: Sequence[str]) -> str:
         prefix = config['prefix']
