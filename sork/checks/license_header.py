@@ -198,7 +198,7 @@ class Error(error.Error):
 
 
 def _detect_license(project: Project) -> License:
-    def ignore_case_if_alpha(char):
+    def ignore_case_if_alpha(char) -> str:
         return '[{}{}]'.format(char.upper(), char.lower()) if char.isalpha() else char
 
     def pattern_ignore_case(pattern: str) -> str:
