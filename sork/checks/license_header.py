@@ -197,7 +197,7 @@ class Error(error.Error):
     pass
 
 
-def _detect_license(project: Project) -> str:
+def _detect_license(project: Project) -> License:
     def ignore_case_if_alpha(char):
         return '[{}{}]'.format(char.upper(), char.lower()) if char.isalpha() else char
 
@@ -212,7 +212,7 @@ def _detect_license(project: Project) -> str:
 
         return list(paths)
 
-    def determine_license_in_file(path: str) -> str:
+    def determine_license_in_file(path: str) -> License:
         try:
             with open(path) as file:
                 content = file.read()
@@ -221,7 +221,7 @@ def _detect_license(project: Project) -> str:
 
         for license_ in _LICENSE_LIST:
             if re.match(license_.content_pattern, content):
-                return license_.name
+                return license_
 
         raise Error('Unknown license in {}.'.format(path))
 
@@ -231,11 +231,11 @@ def _detect_license(project: Project) -> str:
 
     licenses = [determine_license_in_file(path) for path in paths]
 
-    if len(paths) == 1:
+    if len(licenses) == 1:
         return licenses[0]
 
-    if len(paths) == 2 and _LICENSE_GPLV3.name in licenses and _LICENSE_LGPLV3.name in licenses:
-        return _LICENSE_LGPLV3.name
+    if len(licenses) == 2 and _LICENSE_GPLV3 in licenses and _LICENSE_LGPLV3 in licenses:
+        return _LICENSE_LGPLV3
 
     raise Error('Unable to automatically determine license in \'{}\'.'. format(project.path))
 
@@ -251,10 +251,11 @@ def _compile_license_regex(project: Project, config: Config) -> Pattern:
             name = name_or_lines.lower()
             if name not in _LICENSE_DICT:
                 raise Error('{} is an unknown license'.format(name_or_lines))
+            license_ = _LICENSE_DICT[name]
         else:
-            name = _detect_license(project)
+            license_ = _detect_license(project)
 
-        return _LICENSE_DICT[name].header_lines
+        return license_.header_lines
 
     def join_header_lines(lines: Sequence[str]) -> str:
         prefix = config['prefix']
