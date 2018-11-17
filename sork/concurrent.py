@@ -35,7 +35,8 @@ def for_each(func: Callable[[Arg], None], values: Sequence[Arg], num_threads: Op
             futures = [executor.submit(wrapped_func, value) for value in values]
             for future in concurrent.futures.as_completed(futures):
                 if future.exception():
-                    raise future.exception()
+                    # No control over Future.exception() and it confuses mypy, skip type checking.
+                    raise future.exception()  # type: ignore
         except BaseException:
             aborted = True
             raise
