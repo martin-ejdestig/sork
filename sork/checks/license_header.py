@@ -21,7 +21,7 @@ import os
 import re
 import string
 
-from typing import Dict, List, Optional, Pattern, Sequence
+from typing import List, Optional, Pattern, Sequence
 
 from .check import Check
 
@@ -179,7 +179,7 @@ _LICENSE_LGPLV3 = \
                 'along with $project. If not, see <http://www.gnu.org/licenses/>.'
             ])
 
-_LICENSE_LIST: List[License] = [
+_LICENSES: List[License] = [
     _LICENSE_APACHE2,
     _LICENSE_GPLV2,
     _LICENSE_GPLV3,
@@ -187,8 +187,6 @@ _LICENSE_LIST: List[License] = [
     _LICENSE_LGPLV2_1,
     _LICENSE_LGPLV3
 ]
-
-_LICENSE_DICT: Dict[str, License] = {l.name: l for l in _LICENSE_LIST}
 
 _LICENSE_BASE_FILE_NAMES = ['COPYING', 'LICENSE']
 
@@ -219,7 +217,7 @@ def _detect_license(project: Project) -> License:
         except OSError as exception:
             raise Error(exception)
 
-        for license_ in _LICENSE_LIST:
+        for license_ in _LICENSES:
             if re.match(license_.content_pattern, content):
                 return license_
 
@@ -249,9 +247,9 @@ def _compile_license_regex(project: Project, config: Config) -> Pattern:
 
         if name_or_lines:
             name = name_or_lines.lower()
-            if name not in _LICENSE_DICT:
+            license_ = next((l for l in _LICENSES if l.name == name), None)
+            if not license_:
                 raise Error('{} is an unknown license'.format(name_or_lines))
-            license_ = _LICENSE_DICT[name]
         else:
             license_ = _detect_license(project)
 
