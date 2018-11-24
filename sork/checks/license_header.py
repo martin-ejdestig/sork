@@ -196,7 +196,7 @@ class Error(error.Error):
 
 
 def _detect_license(project: Project) -> License:
-    def ignore_case_if_alpha(char) -> str:
+    def ignore_case_if_alpha(char: str) -> str:
         return '[{}{}]'.format(char.upper(), char.lower()) if char.isalpha() else char
 
     def pattern_ignore_case(pattern: str) -> str:
@@ -260,7 +260,7 @@ def _compile_license_regex(project: Project, config: Config) -> Pattern:
         line_prefix = config['line_prefix']
         suffix = config['suffix']
 
-        def prepend_prefix(line):
+        def prepend_prefix(line: str) -> str:
             return line_prefix + line if line else line_prefix.rstrip()
 
         return ''.join([prefix, '\n'.join(prepend_prefix(l) for l in lines), suffix])

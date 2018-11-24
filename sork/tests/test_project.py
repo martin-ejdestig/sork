@@ -21,7 +21,7 @@ from ..project import Project
 
 
 class ProjectTestCase(TestCaseWithTmpDir):
-    def test_create_from_empty_dir(self):
+    def test_create_from_empty_dir(self) -> None:
         self.create_tmp_dir('foo')
         self.create_tmp_build_dir('foo-build')
 

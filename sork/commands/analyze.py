@@ -46,8 +46,10 @@ def _analyze_source_file(source_file: source.SourceFile) -> str:
         return process.communicate()[0]
 
 
-def add_argparse_subparser(subparsers, source_paths_arg_name: str):
-    parser = subparsers.add_parser('analyze', help='run static analyzer')
+def add_argparse_subparser(subparsers: argparse.Action, source_paths_arg_name: str) -> None:
+    # TODO: Better fix? Have to silence mypy since Action does not have add_parser() and
+    #       argparse._SubParserAction is not public.
+    parser = subparsers.add_parser('analyze', help='run static analyzer')  # type: ignore
 
     parser.set_defaults(run_command=run)
 
@@ -60,13 +62,13 @@ def add_argparse_subparser(subparsers, source_paths_arg_name: str):
                         metavar='<path>')
 
 
-def run(args: argparse.Namespace, project: Project):
+def run(args: argparse.Namespace, project: Project) -> None:
     source_files = source.find_buildable_files(project, args.source_paths)
 
     printer = ProgressPrinter(verbose=args.verbose)
     printer.start('Analyzing source', len(source_files))
 
-    def analyze(source_file: source.SourceFile):
+    def analyze(source_file: source.SourceFile) -> None:
         printer.start_with_item(source_file.path)
         output = _analyze_source_file(source_file)
         printer.done_with_item(output)

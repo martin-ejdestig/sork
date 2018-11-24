@@ -21,7 +21,7 @@ from .. import string
 
 
 class StringTestCase(unittest.TestCase):
-    def test_index_to_line_and_column(self):
+    def test_index_to_line_and_column(self) -> None:
         self.assertEqual(string.index_to_line_and_column('a', 0), (1, 1))
 
         self.assertEqual(string.index_to_line_and_column('ab', 0), (1, 1))
@@ -57,7 +57,7 @@ class StringTestCase(unittest.TestCase):
         self.assertRaises(ValueError, string.index_to_line_and_column, 'ab', -1)
         self.assertRaises(ValueError, string.index_to_line_and_column, 'abc\nd\nef\ngh', 11)
 
-    def test_rstrip_single_char(self):
+    def test_rstrip_single_char(self) -> None:
         self.assertEqual(string.rstrip_single_char('abc'), 'abc')
         self.assertEqual(string.rstrip_single_char('abc '), 'abc')
         self.assertEqual(string.rstrip_single_char('abc  '), 'abc ')

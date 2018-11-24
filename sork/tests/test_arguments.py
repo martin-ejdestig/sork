@@ -30,7 +30,7 @@ _VALID_COMMAND = 'check'
 
 
 class ArgumentsTestCase(unittest.TestCase):
-    def test_jobs_must_be_greater_than_zero(self):
+    def test_jobs_must_be_greater_than_zero(self) -> None:
         def args(jobs: int) -> List[str]:
             return ['--jobs', str(jobs), _VALID_COMMAND]
 
@@ -38,20 +38,22 @@ class ArgumentsTestCase(unittest.TestCase):
         self.assertEqual(2, arguments.parse(args(2)).jobs)
 
         with unittest.mock.patch('sys.stderr', new=io.StringIO()):
-            with self.assertRaises(SystemExit):
+            # TODO: Fixed? mypy barfs with:
+            # Value of type variable "_E" of "assertRaises" of "TestCase" cannot be "SystemExit"
+            with self.assertRaises(SystemExit):  # type: ignore
                 _ = arguments.parse(args(0))
 
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(SystemExit):  # type: ignore
                 _ = arguments.parse(args(-1))
 
-    def test_jobs_greater_than_zero_by_default(self):
+    def test_jobs_greater_than_zero_by_default(self) -> None:
         self.assertGreater(arguments.parse([_VALID_COMMAND]).jobs, 0)
 
-    def test_path_in_project_defaults_to_curdir(self):
+    def test_path_in_project_defaults_to_curdir(self) -> None:
         args = arguments.parse([_VALID_COMMAND])
         self.assertEqual(os.path.curdir, arguments.path_in_project(args))
 
-    def test_path_in_project_from_command_source_path(self):
+    def test_path_in_project_from_command_source_path(self) -> None:
         args1 = arguments.parse([_VALID_COMMAND, 'test_dir'])
         self.assertEqual('test_dir', arguments.path_in_project(args1))
 

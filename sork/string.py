@@ -37,5 +37,5 @@ def index_to_line_and_column(text: str, index: int) -> Tuple[int, int]:
     return (line, column)
 
 
-def rstrip_single_char(to_strip: str, chars: str = string.whitespace):
+def rstrip_single_char(to_strip: str, chars: str = string.whitespace) -> str:
     return to_strip[:-1] if to_strip.endswith(tuple(chars)) else to_strip

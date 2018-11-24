@@ -24,7 +24,7 @@ from . import paths
 from .project import Project
 
 
-def main():
+def main() -> None:
     logging.basicConfig(format='%(levelname)s: %(message)s')
 
     args = arguments.parse()

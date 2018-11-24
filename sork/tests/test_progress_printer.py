@@ -44,20 +44,20 @@ def _random_strings(count: int) -> List[str]:
 
 
 class ProgressPrinterTestCase(unittest.TestCase):
-    def test_start_prints_info_and_count(self):
+    def test_start_prints_info_and_count(self) -> None:
         printer = TestProgressPrinter()
         printer.start('Foo', 123)
         self.assertIn('Foo', printer.value)
         self.assertIn('123', printer.value)
 
-    def test_abort_prints_aborted_and_newline(self):
+    def test_abort_prints_aborted_and_newline(self) -> None:
         printer = TestProgressPrinter()
         printer.start('Foo', 123)
         self.assertNotIn(progress_printer.ABORTED_STR, printer.value)
         printer.abort()
         self.assertRegex(printer.value, progress_printer.ABORTED_STR + r".*\n")
 
-    def test_done_not_printed_until_done(self):
+    def test_done_not_printed_until_done(self) -> None:
         printer = TestProgressPrinter()
         items = _random_strings(4)
         printer.start('Foo', len(items))
@@ -69,7 +69,7 @@ class ProgressPrinterTestCase(unittest.TestCase):
 
         self.assertRegex(printer.value, progress_printer.DONE_STR + r".*\n")
 
-    def test_progress(self):
+    def test_progress(self) -> None:
         for verbose in [False, True]:
             printer = TestProgressPrinter(verbose=verbose)
             items = _random_strings(10)

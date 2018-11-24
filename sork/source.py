@@ -91,7 +91,7 @@ def find_files(project: Project, source_paths: Optional[List[str]] = None) -> Li
         raise Error('Failed to compile \'source_exclude\' regex (\'{}\') in '
                     'configuration.'.format(exclude_pattern))
 
-    def verify_paths_exist(source_paths: List[str]):
+    def verify_paths_exist(source_paths: List[str]) -> None:
         if not source_paths:
             raise Error('No source paths specified.')
 

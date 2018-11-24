@@ -44,7 +44,7 @@ class Type:
 
 
 class ListType(Type):
-    def __init__(self, element_type, min_length: int = 0) -> None:
+    def __init__(self, element_type: type, min_length: int = 0) -> None:
         super().__init__(list)
         self._element_type = element_type
         self._min_length = min_length
@@ -97,11 +97,11 @@ class Schema:
 
         return from_values(self._values)
 
-    def verify(self, config: Config):
+    def verify(self, config: Config) -> None:
         def verify_values(schema_values: Dict[str, Value],
                           config: Config,
-                          parent_path: Optional[str]):
-            def full_path(key):
+                          parent_path: Optional[str]) -> None:
+            def full_path(key: str) -> str:
                 return '{}.{}'.format(parent_path, key) if parent_path else key
 
             for key, value in config.items():

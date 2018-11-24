@@ -40,7 +40,7 @@ class ProgressPrinter:
         self._done_count = 0
         self._aborted = False
 
-    def start(self, info_string: str, done_count: int):
+    def start(self, info_string: str, done_count: int) -> None:
         with self._lock:
             self._info_string = info_string
             self._item = ''
@@ -49,12 +49,12 @@ class ProgressPrinter:
             self._aborted = False
             self._print_status()
 
-    def abort(self):
+    def abort(self) -> None:
         with self._lock:
             self._aborted = True
             self._print_status()
 
-    def start_with_item(self, item: str):
+    def start_with_item(self, item: str) -> None:
         with self._lock:
             if self._verbose:
                 self._print('{}: {}\n'.format(self._info_string, item))
@@ -62,14 +62,14 @@ class ProgressPrinter:
                 self._item = item
             self._print_status()
 
-    def done_with_item(self, output: Any):
+    def done_with_item(self, output: Any) -> None:
         with self._lock:
             self._count += 1
             if output:
                 self._print(str(output) + '\n')
             self._print_status()
 
-    def _print_status(self):
+    def _print_status(self) -> None:
         if self._count == self._done_count:
             trailing_str = '. ' + DONE_STR + '.\n'
         elif self._aborted:
@@ -85,7 +85,7 @@ class ProgressPrinter:
                                           trailing_str),
                     flush=True)
 
-    def _print(self, string: str, flush: bool = False):
+    def _print(self, string: str, flush: bool = False) -> None:
         self._output.write(_CLEAR_ENTIRE_LINE + '\r' + string)
 
         if flush:

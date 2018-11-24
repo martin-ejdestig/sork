@@ -17,13 +17,15 @@
 
 import os
 
+from typing import Any, Dict, List, Tuple
+
 from .test_case_with_tmp_dir import TestCaseWithTmpDir
 
 from ..compilation_database import CompilationDatabase, Error
 
 
 class CompilationDatabaseTestCase(TestCaseWithTmpDir):
-    def test_load_success(self):
+    def test_load_success(self) -> None:
         self.create_tmp_file('foo/src/bar.cpp')
         self.create_tmp_file('foo/src/baz.cpp')
         self.create_tmp_file('foo/src/absolute.cpp')
@@ -55,16 +57,22 @@ class CompilationDatabaseTestCase(TestCaseWithTmpDir):
                 database = CompilationDatabase(project_dir, build_dir)
 
                 command = database.commands.get('src/bar.cpp')
+                self.assertIsNotNone(command)
+                assert command  # mypy does not get that assertIsNotNone makes this redundant.
                 self.assertEqual('c++ -o src/bar.o -c ../src/bar.cpp', command.invocation)
                 self.assertEqual(self.tmp_path('foo/build'), command.work_dir)
                 self.assertEqual('../src/bar.cpp', command.file)
 
                 command = database.commands.get('src/baz.cpp')
+                self.assertIsNotNone(command)
+                assert command  # mypy does not get that assertIsNotNone makes this redundant.
                 self.assertEqual('c++ -o src/baz.o -c ../src/baz.cpp', command.invocation)
                 self.assertEqual(self.tmp_path('foo/build'), command.work_dir)
                 self.assertEqual('../src/baz.cpp', command.file)
 
                 command = database.commands.get('src/absolute.cpp')
+                self.assertIsNotNone(command)
+                assert command  # mypy does not get that assertIsNotNone makes this redundant.
                 self.assertEqual('/usr/bin/c++ -o src/absolute.o -c ' +
                                  self.tmp_path('foo/src/absolute.cpp'), command.invocation)
                 self.assertEqual(self.tmp_path('foo/build'), command.work_dir)
@@ -73,35 +81,35 @@ class CompilationDatabaseTestCase(TestCaseWithTmpDir):
 
                 self.assertIsNone(database.commands.get('does_not_exist.cpp'))
 
-    def test_no_entries(self):
+    def test_no_entries(self) -> None:
         self.create_tmp_comp_db('foo/build', [])
 
         with self.cd_tmp_dir():
             _ = CompilationDatabase('foo', 'foo/build')
 
-    def test_does_not_exist(self):
+    def test_does_not_exist(self) -> None:
         self.create_tmp_dir('foo/build')
 
         with self.cd_tmp_dir():
             with self.assertRaisesRegex(Error, self.comp_db_path('foo/build')):
                 _ = CompilationDatabase('foo', 'foo/build')
 
-    def test_top_level_dict(self):
+    def test_top_level_dict(self) -> None:
         self.create_tmp_comp_db('foo/build', '{}')
 
         with self.cd_tmp_dir():
             with self.assertRaisesRegex(Error, self.comp_db_path('foo/build')):
                 _ = CompilationDatabase('foo', 'foo/build')
 
-    def test_garbage(self):
+    def test_garbage(self) -> None:
         self.create_tmp_comp_db('foo/build', 'garbage')
 
         with self.cd_tmp_dir():
             with self.assertRaisesRegex(Error, self.comp_db_path('foo/build')):
                 _ = CompilationDatabase('foo', 'foo/build')
 
-    def test_invalid_entries(self):
-        dir_paths_and_db_lists = [
+    def test_invalid_entries(self) -> None:
+        dir_paths_and_db_lists: List[Tuple[str, List[Dict[str, Any]]]] = [
             ('directory_missing', [{'command': 'c++ -o src/bar.o -c ../src/bar.cpp',
                                     'file': '../src/bar.cpp'}]),
             ('command_missing', [{'directory': self.tmp_path('command_missing/build'),
@@ -126,5 +134,5 @@ class CompilationDatabaseTestCase(TestCaseWithTmpDir):
         with self.cd_tmp_dir():
             for dir_path, _ in dir_paths_and_db_lists:
                 build_path = os.path.join(dir_path, 'build')
-                with self.assertRaisesRegex(Error, self.comp_db_path(build_path), msg=dir_path):
+                with self.assertRaisesRegex(Error, self.comp_db_path(build_path)):
                     _ = CompilationDatabase(dir_path, build_path)

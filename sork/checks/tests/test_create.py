@@ -28,7 +28,7 @@ from .. import create
 #       changing create module to not have hardcoded list of available checks though and do not
 #       really want that.
 class CreateFromStringsTestCase(TestCaseWithTmpDir):
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
         self.create_tmp_build_dir('build')
         self.create_tmp_config('.', {'checks.license_header': {'license': ['foo']}})
@@ -37,23 +37,23 @@ class CreateFromStringsTestCase(TestCaseWithTmpDir):
     def _created_names(self, check_strings: List[str]) -> List[str]:
         return [check.name for check in create.from_strings(self._project, check_strings)]
 
-    def test_none_creates_all(self):
+    def test_none_creates_all(self) -> None:
         self.assertEqual(create.NAMES, self._created_names([]))
 
-    def test_explicitly_enable(self):
+    def test_explicitly_enable(self) -> None:
         self.assertEqual(['include_guard'], self._created_names(['include_guard']))
 
         self.assertEqual(['clang-format', 'include_guard'],
                          self._created_names(['clang-format', 'include_guard']))
 
-    def test_explicitly_disable(self):
+    def test_explicitly_disable(self) -> None:
         self.assertEqual([n for n in create.NAMES if not n == 'include_guard'],
                          self._created_names(['-include_guard']))
 
         self.assertEqual([n for n in create.NAMES if n not in ['clang-format', 'include_guard']],
                          self._created_names(['-clang-format', '-include_guard']))
 
-    def test_regex(self):
+    def test_regex(self) -> None:
         clang_names = [n for n in create.NAMES if n.startswith('clang')]
         clang_names_not_tidy = [n for n in clang_names if not n.endswith('tidy')]
         non_clang_names = [n for n in create.NAMES if n not in clang_names]
@@ -67,11 +67,11 @@ class CreateFromStringsTestCase(TestCaseWithTmpDir):
         # TODO: Is this wanted behaviour? Modify to return same as above?
         self.assertEqual(create.NAMES, self._created_names(['-.*tidy', 'clang.*']))
 
-    def test_no_checks_not_allowed(self):
+    def test_no_checks_not_allowed(self) -> None:
         with self.assertRaisesRegex(create.Error, '-.*'):
             _ = self._created_names(['-.*'])
 
-    def test_name_matches_nothing(self):
+    def test_name_matches_nothing(self) -> None:
         with self.assertRaisesRegex(create.Error, 'invalid_name'):
             _ = self._created_names(['invalid_name'])
 

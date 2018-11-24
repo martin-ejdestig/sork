@@ -21,7 +21,7 @@ from .. import paths
 
 
 class FindProjectPathTestCase(TestCaseWithTmpDir):
-    def test_dir_does_not_exist(self):
+    def test_dir_does_not_exist(self) -> None:
         self.create_tmp_dir('foo')
 
         with self.cd_tmp_dir():
@@ -31,14 +31,14 @@ class FindProjectPathTestCase(TestCaseWithTmpDir):
             with self.assertRaises(paths.Error):
                 paths.find_project_path('foo/does_not_exist')
 
-    def test_empty_dir(self):
+    def test_empty_dir(self) -> None:
         self.create_tmp_dir('empty')
 
         with self.cd_tmp_dir():
             with self.assertRaises(paths.Error):
                 paths.find_project_path('empty')
 
-    def test_relative_outside(self):
+    def test_relative_outside(self) -> None:
         self.create_tmp_file('foo/.sork')
         self.create_tmp_file('foo/bar/baz.cpp')
 
@@ -54,7 +54,7 @@ class FindProjectPathTestCase(TestCaseWithTmpDir):
             self.assertEqual('../foo', paths.find_project_path('../foo/bar'))
             self.assertEqual('../foo', paths.find_project_path('../foo/bar/baz.cpp'))
 
-    def test_relative_inside(self):
+    def test_relative_inside(self) -> None:
         self.create_tmp_file('foo/.sork')
         self.create_tmp_file('foo/bar/baz.cpp')
 
@@ -68,7 +68,7 @@ class FindProjectPathTestCase(TestCaseWithTmpDir):
             self.assertEqual('..', paths.find_project_path('..'))
             self.assertEqual('..', paths.find_project_path('baz.cpp'))
 
-    def test_no_dot_sork_only_dot_git(self):
+    def test_no_dot_sork_only_dot_git(self) -> None:
         self.create_tmp_dir('foo/.git')
         self.create_tmp_file('foo/bar/baz.cpp')
 
@@ -79,14 +79,14 @@ class FindProjectPathTestCase(TestCaseWithTmpDir):
 
 
 class FindBuildPathTestCase(TestCaseWithTmpDir):
-    def test_no_build_dir_exists(self):
+    def test_no_build_dir_exists(self) -> None:
         self.create_tmp_file('foo/bar/baz.cpp')
 
         with self.cd_tmp_dir():
             with self.assertRaises(paths.Error):
                 paths.find_build_path('foo')
 
-    def test_in_project_root(self):
+    def test_in_project_root(self) -> None:
         self.create_tmp_file('foo/bar/baz.cpp')
         self.create_tmp_build_dir('foo/build')
 
@@ -109,7 +109,7 @@ class FindBuildPathTestCase(TestCaseWithTmpDir):
         with self.cd_tmp_dir('qux/bar'):
             self.assertEqual('../build_release', paths.find_build_path('..'))
 
-    def test_in_same_dir_as_project_dir(self):
+    def test_in_same_dir_as_project_dir(self) -> None:
         self.create_tmp_file('foo/bar/baz.cpp')
         self.create_tmp_build_dir('foo-build')
 
@@ -132,7 +132,7 @@ class FindBuildPathTestCase(TestCaseWithTmpDir):
         with self.cd_tmp_dir('qux/bar'):
             self.assertEqual('../../qux-build_release', paths.find_build_path('..'))
 
-    def test_build_subdir_in_same_dir_as_project(self):
+    def test_build_subdir_in_same_dir_as_project(self) -> None:
         self.create_tmp_file('foo/bar/baz.cpp')
         self.create_tmp_build_dir('build/foo')
 
@@ -155,7 +155,7 @@ class FindBuildPathTestCase(TestCaseWithTmpDir):
         with self.cd_tmp_dir('qux/bar'):
             self.assertEqual('../../build/qux_release', paths.find_build_path('..'))
 
-    def test_build_dash_dir_in_same_dir_as_project(self):
+    def test_build_dash_dir_in_same_dir_as_project(self) -> None:
         self.create_tmp_file('foo/bar/baz.cpp')
         self.create_tmp_build_dir('build-foo')
 
@@ -178,7 +178,7 @@ class FindBuildPathTestCase(TestCaseWithTmpDir):
         with self.cd_tmp_dir('qux/bar'):
             self.assertEqual('../../build-qux_release', paths.find_build_path('..'))
 
-    def test_multiple_build_paths(self):
+    def test_multiple_build_paths(self) -> None:
         self.create_tmp_file('foo/bar/baz.cpp')
         self.create_tmp_build_dir('foo/build_debug')
         self.create_tmp_build_dir('foo/build_release')
@@ -189,7 +189,7 @@ class FindBuildPathTestCase(TestCaseWithTmpDir):
 
 
 class NormalizePathTestCase(TestCaseWithTmpDir):
-    def test_normalize_path(self):
+    def test_normalize_path(self) -> None:
         self.create_tmp_file('foo/src/bar.cpp')
         self.create_tmp_dir('foo-build')
 
@@ -222,7 +222,7 @@ class NormalizePathTestCase(TestCaseWithTmpDir):
             self.assertEqual('src/bar.cpp', paths.normalize_path(project_path, 'bar.cpp'))
             self.assertEqual('../foo-build', paths.normalize_path(project_path, '../../foo-build'))
 
-    def test_normalize_path_absolute(self):
+    def test_normalize_path_absolute(self) -> None:
         self.create_tmp_file('foo/src/bar.cpp')
         self.create_tmp_build_dir('foo-build')
 
@@ -234,7 +234,7 @@ class NormalizePathTestCase(TestCaseWithTmpDir):
         self.assertEqual('../foo-build', paths.normalize_path(project_path,
                                                               self.tmp_path('foo-build')))
 
-    def test_normalize_paths(self):
+    def test_normalize_paths(self) -> None:
         self.create_tmp_file('foo/include/bar.h')
         self.create_tmp_file('foo/src/bar.cpp')
         self.create_tmp_build_dir('foo-build')
@@ -279,7 +279,7 @@ class NormalizePathTestCase(TestCaseWithTmpDir):
                                                    test_paths,
                                                    filter_project_path=True))
 
-    def test_normalize_paths_absolute(self):
+    def test_normalize_paths_absolute(self) -> None:
         self.create_tmp_file('foo/src/bar.cpp')
         self.create_tmp_build_dir('foo-build')
 

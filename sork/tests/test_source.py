@@ -28,7 +28,7 @@ from ..project import Project
 
 
 class SourceFileTestCase(TestCaseWithTmpDir):
-    def test_compile_command(self):
+    def test_compile_command(self) -> None:
         self.create_tmp_build_dir('build', comp_db=[
             {
                 'directory': self.tmp_path('build'),
@@ -48,17 +48,21 @@ class SourceFileTestCase(TestCaseWithTmpDir):
             bar_src = SourceFile('bar.cpp', project)
             no_compile_command_src = SourceFile('has_no_compile_command.cpp', project)
 
+            self.assertIsNotNone(foo_src.compile_command)
+            assert foo_src.compile_command  # assertIsNotNone is not enough for mypy.
             self.assertEqual(self.tmp_path('build'), foo_src.compile_command.work_dir)
             self.assertEqual('c++ -o foo.o -c ../foo.cpp', foo_src.compile_command.invocation)
             self.assertEqual('../foo.cpp', foo_src.compile_command.file)
 
+            self.assertIsNotNone(bar_src.compile_command)
+            assert bar_src.compile_command  # assertIsNotNone is not enough for mypy.
             self.assertEqual(self.tmp_path('build'), bar_src.compile_command.work_dir)
             self.assertEqual('c++ -o bar.o -c ../bar.cpp', bar_src.compile_command.invocation)
             self.assertEqual('../bar.cpp', bar_src.compile_command.file)
 
             self.assertIsNone(no_compile_command_src.compile_command)
 
-    def test_content(self):
+    def test_content(self) -> None:
         content = 'void foo()\n{\n}\n'
         self.create_tmp_file('src/foo.cpp', content)
         self.create_tmp_build_dir('build')
@@ -72,7 +76,7 @@ class SourceFileTestCase(TestCaseWithTmpDir):
             with self.assertRaisesRegex(FileNotFoundError, 'src/does_not_exist.cpp'):
                 _ = does_not_exist.content
 
-    def test_content_absolute_project_path(self):
+    def test_content_absolute_project_path(self) -> None:
         content = 'void foo()\n{\n}\n'
         self.create_tmp_file('src/foo.cpp', content)
         self.create_tmp_build_dir('build')
@@ -82,7 +86,7 @@ class SourceFileTestCase(TestCaseWithTmpDir):
 
         self.assertEqual(content, src_file.content)
 
-    def test_is_header(self):
+    def test_is_header(self) -> None:
         self.create_tmp_build_dir('build')
         project = Project(self.tmp_path('.'), self.tmp_path('build'))
 
@@ -95,7 +99,7 @@ class SourceFileTestCase(TestCaseWithTmpDir):
         self.assertFalse(SourceFile('stu', project).is_header)
         self.assertFalse(SourceFile('vxy.in', project).is_header)
 
-    def test_stem(self):
+    def test_stem(self) -> None:
         self.create_tmp_build_dir('build')
         project = Project(self.tmp_path('.'), self.tmp_path('build'))
 
@@ -113,10 +117,10 @@ class SourceFindingTestCase(TestCaseWithTmpDir):
     def _assert_paths(self,
                       paths: List[str],
                       src_files: List[SourceFile],
-                      msg: Optional[str] = None):
+                      msg: Optional[str] = None) -> None:
         self.assertEqual(paths, [src_file.path for src_file in src_files], msg)
 
-    def test_find_files(self):
+    def test_find_files(self) -> None:
         src_paths = [
             'src/abc.cpp',
             'src/abc.h',
@@ -174,15 +178,15 @@ class SourceFindingTestCase(TestCaseWithTmpDir):
             # Subdir and file. Always sorted the same.
             for find_paths in itertools.permutations(['src/abc.cpp', 'src/def']):
                 self._assert_paths(['src/abc.cpp', 'src/def/ghi.cpp', 'src/def/ghi.h'],
-                                   source.find_files(project, find_paths))
+                                   source.find_files(project, list(find_paths)))
 
             # Two subdirs and one file. Always sorted the same.
             for find_paths in itertools.permutations(['src/abc.cpp', 'src/def', 'src/jkl']):
                 self._assert_paths(['src/abc.cpp', 'src/def/ghi.cpp', 'src/def/ghi.h',
                                     'src/jkl/mno/pqr.cpp', 'src/jkl/mno/pqr.h'],
-                                   source.find_files(project, find_paths))
+                                   source.find_files(project, list(find_paths)))
 
-    def test_find_file(self):
+    def test_find_file(self) -> None:
         self.create_tmp_file('abc.cpp')
         self.create_tmp_file('src/def.cpp')
         self.create_tmp_file('src/ghi.cpp')
@@ -197,7 +201,7 @@ class SourceFindingTestCase(TestCaseWithTmpDir):
             with self.assertRaisesRegex(Error, 'src'):
                 _ = source.find_file(project, 'src')
 
-    def test_find_buildable_files(self):
+    def test_find_buildable_files(self) -> None:
         self.create_tmp_build_dir('build', comp_db=[
             {
                 'directory': self.tmp_path('build'),
@@ -218,7 +222,7 @@ class SourceFindingTestCase(TestCaseWithTmpDir):
 
             self._assert_paths(['abc.cpp', 'ghi.cpp'], source.find_buildable_files(project))
 
-    def test_source_path_does_not_exist(self):
+    def test_source_path_does_not_exist(self) -> None:
         self.create_tmp_file('exists.cpp')
         self.create_tmp_file('dir_exists/exists.cpp')
         self.create_tmp_build_dir('build')
@@ -235,7 +239,7 @@ class SourceFindingTestCase(TestCaseWithTmpDir):
             with self.assertRaisesRegex(Error, 'dir_does_not_exist'):
                 source.find_files(project, ['exists.cpp', 'dir_exists', 'dir_does_not_exist'])
 
-    def test_config_source_paths(self):
+    def test_config_source_paths(self) -> None:
         self.create_tmp_file('abc/def.cpp')
         self.create_tmp_file('ghi/jkl.cpp')
         self.create_tmp_file('mno/pqr.cpp')
@@ -256,7 +260,7 @@ class SourceFindingTestCase(TestCaseWithTmpDir):
             with self.assertRaisesRegex(Error, 'does_not_exist'):
                 _ = source.find_files(project)
 
-    def test_config_exclude_regex(self):
+    def test_config_exclude_regex(self) -> None:
         self.create_tmp_file('src/abc.cpp')
         self.create_tmp_file('src/def_skip.cpp')
         self.create_tmp_file('src/ghi.cpp')
@@ -270,7 +274,7 @@ class SourceFindingTestCase(TestCaseWithTmpDir):
             project = Project('.', 'build')
             self._assert_paths(['src/abc.cpp', 'src/ghi.cpp'], source.find_files(project))
 
-    def test_build_path_ignored(self):
+    def test_build_path_ignored(self) -> None:
         self.create_tmp_file('abc.cpp')
         self.create_tmp_file('def.cpp')
         self.create_tmp_build_dir('build')
@@ -280,7 +284,7 @@ class SourceFindingTestCase(TestCaseWithTmpDir):
             project = Project('.', 'build')
             self._assert_paths(['abc.cpp', 'def.cpp'], source.find_files(project))
 
-    def test_build_path_same_as_project_path_not_ignored(self):
+    def test_build_path_same_as_project_path_not_ignored(self) -> None:
         # If build system allows build path to be the same as project path, and user decides to do
         # this, there is nothing we can do to automatically ignore generated sources in the build
         # directory. Make sure that source is still found so check that excludes it does not exclude

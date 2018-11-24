@@ -24,8 +24,10 @@ from ..project import Project
 from ..progress_printer import ProgressPrinter
 
 
-def add_argparse_subparser(subparsers, source_paths_arg_name: str):
-    parser = subparsers.add_parser('check', help='style check source code')
+def add_argparse_subparser(subparsers: argparse.Action, source_paths_arg_name: str) -> None:
+    # TODO: Better fix? Have to silence mypy since Action does not have add_parser() and
+    #       argparse._SubParserAction is not public.
+    parser = subparsers.add_parser('check', help='style check source code')  # type: ignore
 
     parser.set_defaults(run_command=run)
 
@@ -47,7 +49,7 @@ def add_argparse_subparser(subparsers, source_paths_arg_name: str):
                         metavar='<path>')
 
 
-def run(args: argparse.Namespace, project: Project):
+def run(args: argparse.Namespace, project: Project) -> None:
     check_strings = args.checks.split(',') if args.checks else project.config['checks']
     enabled_checks = checks.create.from_strings(project, check_strings)
 
@@ -56,7 +58,7 @@ def run(args: argparse.Namespace, project: Project):
     printer = ProgressPrinter(verbose=args.verbose)
     printer.start('Checking source', len(source_files))
 
-    def check_source_file(source_file: source.SourceFile):
+    def check_source_file(source_file: source.SourceFile) -> None:
         printer.start_with_item(source_file.path)
         outputs = (c.run(source_file) for c in enabled_checks)
         printer.done_with_item('\n'.join(o for o in outputs if o))

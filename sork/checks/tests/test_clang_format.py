@@ -37,10 +37,10 @@ class ClangFormatTestCase(TestCaseWithTmpDir):
         self.create_tmp_file(os.path.join(project.path, path), src_lines)
         return SourceFile(path, project)
 
-    def _create_dot_clang_format(self, lines: List[str]):
+    def _create_dot_clang_format(self, lines: List[str]) -> None:
         self.create_tmp_file('.clang-format', lines)
 
-    def test_no_output_when_correctly_formatted(self):
+    def test_no_output_when_correctly_formatted(self) -> None:
         project, check = self._create()
         src = self._create_source(project, 'src/correct.cpp', [
             'void foo() {}',
@@ -53,7 +53,7 @@ class ClangFormatTestCase(TestCaseWithTmpDir):
 
         self.assertIsNone(check.run(src))
 
-    def test_remove_and_add_lines(self):
+    def test_remove_and_add_lines(self) -> None:
         project, check = self._create()
         src = self._create_source(project, 'src/wrong.cpp', [
             'void foo()',
@@ -68,27 +68,27 @@ class ClangFormatTestCase(TestCaseWithTmpDir):
         ])
         output = check.run(src)
 
-        self.assertIn('-void foo()\n', output)
-        self.assertIn('-{\n', output)
-        self.assertIn('-}\n', output)
-        self.assertIn('+void foo() {}\n', output)
-        self.assertIn('-int bar( int  i)\n', output)
-        self.assertIn('- { \n', output)
-        self.assertIn('-  int j = i+1;\n', output)
-        self.assertIn('+int bar(int i) {\n', output)
-        self.assertIn('+  int j = i + 1;\n', output)
+        self.assertIn('-void foo()\n', output or '')
+        self.assertIn('-{\n', output or '')
+        self.assertIn('-}\n', output or '')
+        self.assertIn('+void foo() {}\n', output or '')
+        self.assertIn('-int bar( int  i)\n', output or '')
+        self.assertIn('- { \n', output or '')
+        self.assertIn('-  int j = i+1;\n', output or '')
+        self.assertIn('+int bar(int i) {\n', output or '')
+        self.assertIn('+  int j = i + 1;\n', output or '')
 
-    def test_source_path(self):
+    def test_source_path(self) -> None:
         project, check = self._create()
         src = self._create_source(project, 'src/wrong.cpp', ['void foo () {  }'])
 
-        self.assertIn('src/wrong.cpp', check.run(src))
+        self.assertIn('src/wrong.cpp', check.run(src) or '')
 
-    def test_assume_filename(self):
+    def test_assume_filename(self) -> None:
         # File content is passed to clang-format through stdin which means -assume-filename argument
         # must be used for clang-format to know name of file. Sorting of include blocks, where main
         # header gets prio 0 (see clang-format documentation), requires this so use it to test.
-        def cfg_lines(include_blocks_value: str):
+        def cfg_lines(include_blocks_value: str) -> List[str]:
             return ['IncludeBlocks: ' + include_blocks_value,
                     'IncludeCategories:',
                     '  - Regex: \'^<.*\\.h>\'',
@@ -117,10 +117,10 @@ class ClangFormatTestCase(TestCaseWithTmpDir):
         self._create_dot_clang_format(cfg_lines('Regroup'))  # Now test that main header is moved.
         output = check.run(src)
         self.assertIsNotNone(output)
-        self.assertIn('+#include "baz/foo.h"\n+\n', output)
-        self.assertIn('-#include "baz/foo.h"\n', output)
+        self.assertIn('+#include "baz/foo.h"\n+\n', output or '')
+        self.assertIn('-#include "baz/foo.h"\n', output or '')
 
-    def test_line_number_for_hunk(self):
+    def test_line_number_for_hunk(self) -> None:
         project, check = self._create()
         lines_around_error = 8
         hunk_line_number = lines_around_error + 1 - clang_format.DIFF_CONTEXT
@@ -130,4 +130,4 @@ class ClangFormatTestCase(TestCaseWithTmpDir):
                                   ['// qux'] * lines_around_error)
 
         output = check.run(src)
-        self.assertIn('src/foo.cpp:' + str(hunk_line_number), output)
+        self.assertIn('src/foo.cpp:' + str(hunk_line_number), output or '')

@@ -23,10 +23,12 @@ from typing import Callable, Optional, Sequence, TypeVar
 Arg = TypeVar('Arg')
 
 
-def for_each(func: Callable[[Arg], None], values: Sequence[Arg], num_threads: Optional[int] = None):
+def for_each(func: Callable[[Arg], None],
+             values: Sequence[Arg],
+             num_threads: Optional[int] = None) -> None:
     aborted = False
 
-    def wrapped_func(value):
+    def wrapped_func(value: Arg) -> None:
         if not aborted:
             func(value)
 

@@ -41,15 +41,15 @@ class ClangTidyBaseTestCase(TestCaseWithTmpDir):
         self.create_tmp_file(os.path.join(project.path, path), src_lines)
         return SourceFile(path, project)
 
-    def _create_header(self, project, path: str, header_lines: List[str]):
+    def _create_header(self, project: Project, path: str, header_lines: List[str]) -> None:
         self.create_tmp_file(os.path.join(project.path, path), header_lines)
 
-    def _create_dot_clang_tidy(self, project: Project, lines: List[str]):
+    def _create_dot_clang_tidy(self, project: Project, lines: List[str]) -> None:
         self.create_tmp_file(os.path.join(project.path, '.clang-tidy'), lines)
 
 
 class ClangTidyTestCase(ClangTidyBaseTestCase):
-    def test_no_error_returns_none(self):
+    def test_no_error_returns_none(self) -> None:
         project, check = self._create('.', 'build', comp_db=[{
             'directory': self.tmp_path('build'),
             'command': 'c++ -o src/foo.o -c ../src/foo.cpp',
@@ -60,7 +60,7 @@ class ClangTidyTestCase(ClangTidyBaseTestCase):
 
         self.assertIsNone(check.run(src))
 
-    def test_error_position_in_output(self):
+    def test_error_position_in_output(self) -> None:
         project, check = self._create('.', 'build', comp_db=[{
             'directory': self.tmp_path('build'),
             'command': 'c++ -o src/foo.o -c ../src/foo.cpp',
@@ -69,9 +69,9 @@ class ClangTidyTestCase(ClangTidyBaseTestCase):
         src = self._create_source(project, 'src/foo.cpp', ['int *p = 0;'])
         self._create_dot_clang_tidy(project, ['Checks: "modernize-use-nullptr"'])
 
-        self.assertIn('src/foo.cpp:1:10', check.run(src))
+        self.assertIn('src/foo.cpp:1:10', check.run(src) or '')
 
-    def test_source_without_compile_command_is_ignored(self):
+    def test_source_without_compile_command_is_ignored(self) -> None:
         project, check = self._create('.', 'build', comp_db=[{
             'directory': self.tmp_path('build'),
             'command': 'c++ -o src/foo.o -c ../src/foo.cpp',
@@ -82,7 +82,7 @@ class ClangTidyTestCase(ClangTidyBaseTestCase):
 
         self.assertIsNone(check.run(src))
 
-    def test_gcc_specific_warning_flags_ignored(self):
+    def test_gcc_specific_warning_flags_ignored(self) -> None:
         project, check = self._create('.', 'build', comp_db=[{
             'directory': self.tmp_path('build'),
             'command': 'g++ -Wsuggest-override -o src/foo.o -c ../src/foo.cpp',
@@ -92,7 +92,7 @@ class ClangTidyTestCase(ClangTidyBaseTestCase):
 
         self.assertIsNone(check.run(src))
 
-    def test_absolute_compiler_path_replaced_correctly(self):
+    def test_absolute_compiler_path_replaced_correctly(self) -> None:
         project, check = self._create('.', 'build', comp_db=[{
             'directory': self.tmp_path('build'),
             'command': '/usr/bin/c++ -o src/foo.o -c ../src/foo.cpp',
@@ -101,7 +101,7 @@ class ClangTidyTestCase(ClangTidyBaseTestCase):
         src = self._create_source(project, 'src/foo.cpp', ['int *p = 0;'])
         self._create_dot_clang_tidy(project, ['Checks: "modernize-use-nullptr"'])
 
-        self.assertIn('src/foo.cpp:1:10', check.run(src))
+        self.assertIn('src/foo.cpp:1:10', check.run(src) or '')
 
 
 class Headers(enum.Flag):
@@ -134,7 +134,7 @@ class ClangTidyHeaderFilterTestCase(ClangTidyBaseTestCase):
                    header_filter: Optional[str],
                    project_path: str,
                    build_path: str,
-                   relative_comp_db_paths: bool):
+                   relative_comp_db_paths: bool) -> None:
         comp_db = self._comp_db(project_path, build_path, relative_paths=relative_comp_db_paths)
         project, check = self._create(project_path, build_path, comp_db)
 
@@ -200,7 +200,7 @@ class ClangTidyHeaderFilterTestCase(ClangTidyBaseTestCase):
         else:
             self.assertIsNone(output)
 
-    def _run_checks(self, headers_in_output: Headers, header_filter: Optional[str]):
+    def _run_checks(self, headers_in_output: Headers, header_filter: Optional[str]) -> None:
         for project_path, build_path, relative_comp_db_paths in [('foo1', 'foo1/build', True),
                                                                  ('foo2', 'foo2-build', True),
                                                                  ('foo3', 'build/foo3', True),
@@ -213,20 +213,20 @@ class ClangTidyHeaderFilterTestCase(ClangTidyBaseTestCase):
                             build_path,
                             relative_comp_db_paths)
 
-    def test_empty_string_filters_all_headers(self):
+    def test_empty_string_filters_all_headers(self) -> None:
         self._run_checks(Headers.NONE, '')
 
-    def test_not_present_filters_all_headers(self):
+    def test_not_present_filters_all_headers(self) -> None:
         self._run_checks(Headers.NONE, None)
 
-    def test_single_dir_private_header(self):
+    def test_single_dir_private_header(self) -> None:
         self._run_checks(Headers.PRIVATE, '^src/')
 
-    def test_single_dir_public_header(self):
+    def test_single_dir_public_header(self) -> None:
         self._run_checks(Headers.PUBLIC, '^include/')
 
-    def test_multiple_dirs_private_and_public_headers(self):
+    def test_multiple_dirs_private_and_public_headers(self) -> None:
         self._run_checks(Headers.PRIVATE | Headers.PUBLIC, '^include/|^src/')
 
-    def test_dot_star_filters_nothing(self):
+    def test_dot_star_filters_nothing(self) -> None:
         self._run_checks(Headers.PRIVATE | Headers.PUBLIC | Headers.EXTERNAL, '.*')

@@ -63,7 +63,7 @@ Counters = Dict[Opcode, int]
 
 
 def _opcode_count_comment(asm: str) -> str:
-    def count_opcode(counters: Counters, opcode: Opcode):
+    def count_opcode(counters: Counters, opcode: Opcode) -> None:
         if opcode in counters:
             counters[opcode] += 1
         else:
@@ -112,8 +112,10 @@ def _opcode_count_comment(asm: str) -> str:
     return comment
 
 
-def add_argparse_subparser(subparsers, source_paths_arg_name: str):
-    parser = subparsers.add_parser('asm',
+def add_argparse_subparser(subparsers: argparse.Action, source_paths_arg_name: str) -> None:
+    # TODO: Better fix? Have to silence mypy since Action does not have add_parser() and
+    #       argparse._SubParserAction is not public.
+    parser = subparsers.add_parser('asm',  # type: ignore
                                    aliases=['assembler'],
                                    help='output assembler for compilation unit')
 
@@ -137,7 +139,7 @@ def add_argparse_subparser(subparsers, source_paths_arg_name: str):
                         metavar='<file>')
 
 
-def run(args: argparse.Namespace, project: Project):
+def run(args: argparse.Namespace, project: Project) -> None:
     source_file = source.find_file(project, args.source_paths[0])
     asm = _assembler_for_source_file(source_file, args.verbose_asm)
 

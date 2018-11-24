@@ -23,11 +23,11 @@ from .. import concurrent
 
 
 class ForEachTestCase(unittest.TestCase):
-    def test_called_for_all(self):
+    def test_called_for_all(self) -> None:
         lock = threading.Lock()
         called = [False] * 10
 
-        def set_called(index):
+        def set_called(index: int) -> None:
             with lock:
                 called[index] = True
 
@@ -35,8 +35,8 @@ class ForEachTestCase(unittest.TestCase):
 
         self.assertTrue(all(called))
 
-    def test_exception_reraised(self):
-        def check_value(value):
+    def test_exception_reraised(self) -> None:
+        def check_value(value: int) -> None:
             if value == 8:
                 raise ValueError('bar')
 
@@ -45,11 +45,11 @@ class ForEachTestCase(unittest.TestCase):
 
         self.assertEqual(ctx.exception.args[0], 'bar')
 
-    def test_not_called_in_main_thread(self):
+    def test_not_called_in_main_thread(self) -> None:
         lock = threading.Lock()
         thread_ids = set()
 
-        def add_thread_id(_):
+        def add_thread_id(_: int) -> None:
             with lock:
                 thread_ids.add(threading.get_ident())
 
@@ -57,12 +57,12 @@ class ForEachTestCase(unittest.TestCase):
 
         self.assertNotIn(threading.get_ident(), thread_ids)
 
-    def test_num_threads(self):
-        def threads_used(num_threads):
+    def test_num_threads(self) -> None:
+        def threads_used(num_threads: int) -> int:
             lock = threading.Lock()
             thread_ids = set()
 
-            def add_thread_id_and_wait(_):
+            def add_thread_id_and_wait(_: int) -> None:
                 with lock:
                     thread_ids.add(threading.get_ident())
                 time.sleep(0.001)

@@ -21,14 +21,14 @@ import os
 import tempfile
 import unittest
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Iterator, List, Optional, Union
 
 from .. import paths
 from ..config import Config
 
 
 class TestCaseWithTmpDir(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.tmp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp_dir.cleanup)
 
@@ -37,10 +37,12 @@ class TestCaseWithTmpDir(unittest.TestCase):
             return path
         return os.path.join(self.tmp_dir.name, path)
 
-    def create_tmp_dir(self, dir_path: str):
+    def create_tmp_dir(self, dir_path: str) -> None:
         os.makedirs(self.tmp_path(dir_path), exist_ok=True)
 
-    def create_tmp_file(self, file_path: str, content: Optional[Union[str, List[str]]] = None):
+    def create_tmp_file(self,
+                        file_path: str,
+                        content: Optional[Union[str, List[str]]] = None) -> None:
         dir_path = os.path.dirname(file_path)
         if dir_path:
             self.create_tmp_dir(dir_path)
@@ -51,7 +53,7 @@ class TestCaseWithTmpDir(unittest.TestCase):
         with open(self.tmp_path(file_path), 'w') as file:
             file.write(content if content else '')
 
-    def create_tmp_config(self, project_path: str, config: Config):
+    def create_tmp_config(self, project_path: str, config: Config) -> None:
         self.create_tmp_file(os.path.join(project_path, paths.DOT_SORK_PATH),
                              json.dumps(config))
 
@@ -61,7 +63,7 @@ class TestCaseWithTmpDir(unittest.TestCase):
 
     def create_tmp_comp_db(self,
                            build_path: str,
-                           content: Union[str, List[Dict[str, Any]]]):
+                           content: Union[str, List[Dict[str, Any]]]) -> None:
         if not isinstance(content, str):
             content = json.dumps(content)
 
@@ -69,11 +71,11 @@ class TestCaseWithTmpDir(unittest.TestCase):
 
     def create_tmp_build_dir(self,
                              build_path: str,
-                             comp_db: Optional[List[Dict[str, Any]]] = None):
+                             comp_db: Optional[List[Dict[str, Any]]] = None) -> None:
         self.create_tmp_comp_db(build_path, comp_db or '[]')
 
     @contextlib.contextmanager
-    def cd_tmp_dir(self, sub_dir: Optional[str] = None):
+    def cd_tmp_dir(self, sub_dir: Optional[str] = None) -> Iterator[None]:
         orig_work_dir = os.getcwd()
         os.chdir(self.tmp_path(sub_dir) if sub_dir else self.tmp_dir.name)
         try:
