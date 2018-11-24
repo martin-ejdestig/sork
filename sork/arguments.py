@@ -58,7 +58,7 @@ def parse(argv: Optional[List[str]] = None) -> argparse.Namespace:
                                            help='-h or --help after <command> for more help',
                                            metavar='<command>')
         # Fix for bug introduced in 3.3.5. See http://bugs.python.org/issue9253#msg186387 .
-        subparsers.required = True  # type: ignore
+        subparsers.required = True
 
         commands.analyze.add_argparse_subparser(subparsers, _SOURCE_PATHS_ARG_NAME)
         commands.assembler.add_argparse_subparser(subparsers, _SOURCE_PATHS_ARG_NAME)
