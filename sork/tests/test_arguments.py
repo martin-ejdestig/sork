@@ -40,10 +40,10 @@ class ArgumentsTestCase(unittest.TestCase):
         with unittest.mock.patch('sys.stderr', new=io.StringIO()):
             # TODO: Fixed? mypy barfs with:
             # Value of type variable "_E" of "assertRaises" of "TestCase" cannot be "SystemExit"
-            with self.assertRaises(SystemExit):  # type: ignore
+            with self.assertRaises(SystemExit):
                 _ = arguments.parse(args(0))
 
-            with self.assertRaises(SystemExit):  # type: ignore
+            with self.assertRaises(SystemExit):
                 _ = arguments.parse(args(-1))
 
     def test_jobs_greater_than_zero_by_default(self) -> None:
