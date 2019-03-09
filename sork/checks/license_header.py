@@ -176,13 +176,26 @@ _LICENSE_LGPLV3 = \
                 'along with $project. If not, see <http://www.gnu.org/licenses/>.'
             ])
 
+_LICENSE_MPL2 = \
+    License('mpl2',
+            content_pattern=r"Mozilla Public License Version 2.0\n"
+                            r"==================================",
+            header_lines=[
+                'Copyright (C) $year $author',
+                '',
+                'This Source Code Form is subject to the terms of the Mozilla Public',
+                'License, v. 2.0. If a copy of the MPL was not distributed with this',
+                'file, You can obtain one at https://mozilla.org/MPL/2.0/.'
+            ])
+
 _LICENSES: List[License] = [
     _LICENSE_APACHE2,
     _LICENSE_GPLV2,
     _LICENSE_GPLV3,
     _LICENSE_LGPLV2,
     _LICENSE_LGPLV2_1,
-    _LICENSE_LGPLV3
+    _LICENSE_LGPLV3,
+    _LICENSE_MPL2
 ]
 
 _LICENSE_BASE_FILE_NAMES = ['COPYING', 'LICENSE']

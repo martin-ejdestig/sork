@@ -244,8 +244,8 @@ Configuration:
   - `license`: License used in project. If set to the empty string (the default) Sork tries to
     detect the license automatically by examining files matching COPYING\* and LICENSE\* in the
     project root (case is ignored). List of licenses currently recognized: Apache2, GPLv2, GPLv3,
-    LGPLv2, LGPLv2.1 and LGPLv3. Value is case insensitive. A custom license can be specified by
-    setting the value to a list of strings. Each element in the list is a line. Lines should not
+    LGPLv2, LGPLv2.1, LGPLv3 and MPL2. Value is case insensitive. A custom license can be specified
+    by setting the value to a list of strings. Each element in the list is a line. Lines should not
     end with newlines.
   - `project`: String to insert for project in license header.
   - `prefix`: String to insert before license text. Defaults to "/\*\*\\n" .
