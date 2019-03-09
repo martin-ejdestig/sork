@@ -223,9 +223,9 @@ Configuration:
     "checks.license_header": {
         "license": "",
         "project": "",
-        "prefix": "/**\n",
-        "line_prefix": " * ",
-        "suffix": "\n */\n"
+        "prefix": "",
+        "line_prefix": "// ",
+        "suffix": ""
     }
 }
 ```
@@ -249,9 +249,9 @@ Configuration:
     end with newlines.
   - `project`: String to insert for project in license header. If set to the empty string, the
      default, any non empty string will match.
-  - `prefix`: String to insert before license text. Defaults to "/\*\*\\n" .
-  - `line_prefix`: String to insert before each line in license text. Defaults to " \* ".
-  - `suffix`: String to insert after license text. Defaults to "\\n \*/\\n".
+  - `prefix`: String to insert before license text. Defaults to "" .
+  - `line_prefix`: String to insert before each line in license text. Defaults to "// ".
+  - `suffix`: String to insert after license text. Defaults to "".
 
 
 ## Build system targets examples

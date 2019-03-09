@@ -37,9 +37,9 @@ _CONFIG_SCHEMA = config.Schema({
     'checks.license_header': config.Value({
         'license': config.Value('', types=[config.Type(str), config.ListType(str, min_length=1)]),
         'project': config.Value(''),
-        'prefix': config.Value('/**\n'),
-        'line_prefix': config.Value(' * '),
-        'suffix': config.Value('\n */\n')
+        'prefix': config.Value(''),
+        'line_prefix': config.Value('// '),
+        'suffix': config.Value('')
     })
 })
 
