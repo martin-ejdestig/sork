@@ -287,9 +287,12 @@ def _compile_license_regex(config: Config, template_str: str) -> Pattern:
 
     template = string.Template(escape_regex_chars(template_str))
 
+    year_regex_str = r"[0-9]{4}(-[0-9]{4})?"
+    author_regex_str = r".+"
+
     regex_str = template.safe_substitute(project=config['project'],
-                                         year=r"[0-9]{4}(-[0-9]{4})?",
-                                         author=r".+")
+                                         year=year_regex_str,
+                                         author=author_regex_str)
     try:
         return re.compile(regex_str, flags=re.DOTALL)
     except re.error:
