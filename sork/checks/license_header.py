@@ -31,9 +31,6 @@ from ..project import Project
 from ..source import SourceFile
 
 
-# TODO: More informative error output than "invalid header". (diff? just print erroneous line #?)
-
-
 NAME = 'license_header'
 
 
@@ -238,7 +235,7 @@ def _detect_license(project: Project) -> License:
     raise Error('Unable to automatically determine license in \'{}\'.'. format(project.path))
 
 
-def _compile_license_regex(project: Project, config: Config) -> Pattern:
+def _get_license_template_str(project: Project, config: Config) -> str:
     def get_header_lines() -> Sequence[str]:
         name_or_lines = config['license']
 
@@ -265,13 +262,15 @@ def _compile_license_regex(project: Project, config: Config) -> Pattern:
 
         return ''.join([prefix, '\n'.join(prepend_prefix(l) for l in lines), suffix])
 
+    return join_header_lines(get_header_lines())
+
+
+def _compile_license_regex(config: Config, template_str: str) -> Pattern:
     def escape_regex_chars(unescaped: str) -> str:
         escaped = unescaped
         escaped = re.sub(r'\*', r'\*', escaped)
         escaped = re.sub(r'([()])', r'\\\1', escaped)
         return escaped
-
-    template_str = join_header_lines(get_header_lines())
 
     template = string.Template(escape_regex_chars(template_str))
 
@@ -286,11 +285,13 @@ def _compile_license_regex(project: Project, config: Config) -> Pattern:
 
 def create(project: Project) -> Check:
     config = project.config['checks.' + NAME]
-    license_regex = _compile_license_regex(project, config)
+    template_str = _get_license_template_str(project, config)
+    license_regex = _compile_license_regex(config, template_str)
 
     def run(source_file: SourceFile) -> Optional[str]:
         if not license_regex.match(source_file.content):
-            return '{}: error: invalid license header'.format(source_file.path)
+            return '{}: error: invalid license header, must match template:\n{}'. \
+                format(source_file.path, template_str)
 
         return None
 
