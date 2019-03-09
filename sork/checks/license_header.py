@@ -58,7 +58,9 @@ _LICENSE_APACHE2 = \
                 'distributed under the License is distributed on an "AS IS" BASIS,',
                 'WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.',
                 'See the License for the specific language governing permissions and',
-                'limitations under the License.'
+                'limitations under the License.',
+                '',
+                'SPDX-License-Identifier: Apache-2.0'
             ])
 
 _LICENSE_GPLV2 = \
@@ -81,7 +83,9 @@ _LICENSE_GPLV2 = \
                 'GNU General Public License for more details.',
                 '',
                 'You should have received a copy of the GNU General Public License',
-                'along with $project. If not, see <http://www.gnu.org/licenses/>.'
+                'along with $project. If not, see <http://www.gnu.org/licenses/>.',
+                '',
+                'SPDX-License-Identifier: GPL-2.0-or-later'
             ])
 
 _LICENSE_GPLV3 = \
@@ -104,7 +108,9 @@ _LICENSE_GPLV3 = \
                 'GNU General Public License for more details.',
                 '',
                 'You should have received a copy of the GNU General Public License',
-                'along with $project. If not, see <http://www.gnu.org/licenses/>.'
+                'along with $project. If not, see <http://www.gnu.org/licenses/>.',
+                '',
+                'SPDX-License-Identifier: GPL-3.0-or-later'
             ])
 
 _LICENSE_LGPLV2 = \
@@ -127,7 +133,9 @@ _LICENSE_LGPLV2 = \
                 'GNU Library General Public License for more details.',
                 '',
                 'You should have received a copy of the GNU Library General Public License',
-                'along with $project. If not, see <http://www.gnu.org/licenses/>.'
+                'along with $project. If not, see <http://www.gnu.org/licenses/>.',
+                '',
+                'SPDX-License-Identifier: LGPL-2.0-or-later'
             ])
 
 _LICENSE_LGPLV2_1 = \
@@ -150,7 +158,9 @@ _LICENSE_LGPLV2_1 = \
                 'GNU Lesser General Public License for more details.',
                 '',
                 'You should have received a copy of the GNU Lesser General Public License',
-                'along with $project. If not, see <http://www.gnu.org/licenses/>.'
+                'along with $project. If not, see <http://www.gnu.org/licenses/>.',
+                '',
+                'SPDX-License-Identifier: LGPL-2.1-or-later'
             ])
 
 _LICENSE_LGPLV3 = \
@@ -173,7 +183,9 @@ _LICENSE_LGPLV3 = \
                 'GNU Lesser General Public License for more details.',
                 '',
                 'You should have received a copy of the GNU Lesser General Public License',
-                'along with $project. If not, see <http://www.gnu.org/licenses/>.'
+                'along with $project. If not, see <http://www.gnu.org/licenses/>.',
+                '',
+                'SPDX-License-Identifier: LGPL-3.0-or-later'
             ])
 
 _LICENSE_MPL2 = \
@@ -185,7 +197,9 @@ _LICENSE_MPL2 = \
                 '',
                 'This Source Code Form is subject to the terms of the Mozilla Public',
                 'License, v. 2.0. If a copy of the MPL was not distributed with this',
-                'file, You can obtain one at https://mozilla.org/MPL/2.0/.'
+                'file, You can obtain one at https://mozilla.org/MPL/2.0/.',
+                '',
+                'SPDX-License-Identifier: MPL-2.0'
             ])
 
 _LICENSES: List[License] = [
