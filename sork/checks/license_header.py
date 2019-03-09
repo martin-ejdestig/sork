@@ -290,7 +290,7 @@ def create(project: Project) -> Check:
 
     def run(source_file: SourceFile) -> Optional[str]:
         if not license_regex.match(source_file.content):
-            return '{}: error: invalid license header, must match template:\n{}'. \
+            return '{}:1: error: invalid license header, must match template:\n{}'. \
                 format(source_file.path, template_str)
 
         return None
