@@ -247,7 +247,8 @@ Configuration:
     LGPLv2, LGPLv2.1, LGPLv3 and MPL2. Value is case insensitive. A custom license can be specified
     by setting the value to a list of strings. Each element in the list is a line. Lines should not
     end with newlines.
-  - `project`: String to insert for project in license header.
+  - `project`: String to insert for project in license header. If set to the empty string, the
+     default, any non empty string will match.
   - `prefix`: String to insert before license text. Defaults to "/\*\*\\n" .
   - `line_prefix`: String to insert before each line in license text. Defaults to " \* ".
   - `suffix`: String to insert after license text. Defaults to "\\n \*/\\n".
