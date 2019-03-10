@@ -4,11 +4,11 @@ include makeinc/mypy.mk
 include makeinc/pycodestyle.mk
 include makeinc/pylint.mk
 
-.PHONY: all check unittest
+.PHONY: all check test
 
 all:
 
 check: mypy pycodestyle pylint
 
-unittest:
+test:
 	@python3 -m unittest discover
