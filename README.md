@@ -236,7 +236,8 @@ Configuration:
   ["clang-.\*", "-.\*bar.\*"] . Can be overridden from command line.
 - `checks.include_guard`:
   - `prefix`: String all include guard identifiers must start with. Usually set to something like
-    PROJECT\_NAME\_. Defaults to the empty string.
+    PROJECT\_NAME\_. If set to "", the default, a prefix based on the project root path will be
+    used. Note that this will change if the name of the project directory changes.
   - `suffix`: String all include guard identifiers must end with.
   - `strip_paths`: Leading paths to remove from header path before inserting it between prefix and
     suffix.

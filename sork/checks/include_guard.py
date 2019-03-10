@@ -31,8 +31,14 @@ NAME = 'include_guard'
 
 
 def create(project: Project) -> Check:
+    def transform_path(path: str) -> str:
+        return re.sub(r"[ /\\-]", '_', path).upper()
+
+    def prefix_from_basepath(path: str) -> str:
+        return transform_path(os.path.basename(os.path.abspath(path))) + '_'
+
     config = project.config['checks.' + NAME]
-    prefix = config['prefix']
+    prefix = config['prefix'] or prefix_from_basepath(project.path)
     suffix = config['suffix']
     strip_paths = config['strip_paths']
 
@@ -51,7 +57,7 @@ def create(project: Project) -> Check:
 
     def include_guard_for_source_file(source_file: SourceFile) -> str:
         stripped_path = strip_path(source_file.stem)
-        path_part = re.sub(r"[ /\\-]", '_', stripped_path).upper()
+        path_part = transform_path(stripped_path)
 
         if path_part.startswith(prefix):
             path_part = path_part[len(prefix):]
