@@ -48,7 +48,7 @@ _LICENSE_APACHE2 = \
             content_pattern=r"\s*Apache License\s*\n"
                             r"\s*Version 2.0, January 2004",
             header_lines=[
-                'Copyright $year $author',
+                '$copyright',
                 '',
                 'Licensed under the Apache License, Version 2.0 (the "License");',
                 'you may not use this file except in compliance with the License.',
@@ -72,7 +72,7 @@ _LICENSE_GPLV2 = \
             header_lines=[
                 'This file is part of $project.',
                 '',
-                'Copyright (C) $year $author',
+                '$copyright',
                 '',
                 '$project is free software; you can redistribute it and/or modify',
                 'it under the terms of the GNU General Public License as published by',
@@ -97,7 +97,7 @@ _LICENSE_GPLV3 = \
             header_lines=[
                 'This file is part of $project.',
                 '',
-                'Copyright (C) $year $author',
+                '$copyright',
                 '',
                 '$project is free software: you can redistribute it and/or modify',
                 'it under the terms of the GNU General Public License as published by',
@@ -122,7 +122,7 @@ _LICENSE_LGPLV2 = \
             header_lines=[
                 'This file is part of $project.',
                 '',
-                'Copyright (C) $year $author',
+                '$copyright',
                 '',
                 '$project is free software; you can redistribute it and/or modify',
                 'it under the terms of the GNU Library General Public License as published by',
@@ -147,7 +147,7 @@ _LICENSE_LGPLV2_1 = \
             header_lines=[
                 'This file is part of $project.',
                 '',
-                'Copyright (C) $year $author',
+                '$copyright',
                 '',
                 '$project is free software; you can redistribute it and/or modify',
                 'it under the terms of the GNU Lesser General Public License as published by',
@@ -172,7 +172,7 @@ _LICENSE_LGPLV3 = \
             header_lines=[
                 'This file is part of $project.',
                 '',
-                'Copyright (C) $year $author',
+                '$copyright',
                 '',
                 '$project is free software: you can redistribute it and/or modify',
                 'it under the terms of the GNU Lesser General Public License as published by',
@@ -195,7 +195,7 @@ _LICENSE_MPL2 = \
             content_pattern=r"Mozilla Public License Version 2.0\n"
                             r"==================================",
             header_lines=[
-                'Copyright (C) $year $author',
+                '$copyright',
                 '',
                 'This Source Code Form is subject to the terms of the Mozilla Public',
                 'License, v. 2.0. If a copy of the MPL was not distributed with this',
@@ -306,10 +306,12 @@ def _compile_license_regex(config: Config, template_str: str) -> Pattern:
     project_regex_str = config['project'] or r"[^$\s]{1}.*"
     year_regex_str = r"[0-9]{4}(-[0-9]{4})?"
     author_regex_str = r"[^$\s]{1}.*"
+    copyright_line_regex_str = r'Copyright \(C\) ' + year_regex_str + ' ' + author_regex_str
+    copyright_regex_str = r"(" + copyright_line_regex_str + r")"
+    copyright_regex_str += r"(\n" + config['line_prefix'] + copyright_line_regex_str + r")*"
 
     regex_str = template.safe_substitute(project=project_regex_str,
-                                         year=year_regex_str,
-                                         author=author_regex_str)
+                                         copyright=copyright_regex_str)
     try:
         return re.compile(regex_str)
     except re.error:
@@ -321,11 +323,24 @@ def create(project: Project) -> Check:
     template_str = _get_license_template_str(project, config)
     license_regex = _compile_license_regex(config, template_str)
 
+    def error_message() -> str:
+        strs = ['Invalid license header, must match below template.']
+
+        if '$project' in template_str:
+            strs += ['$project can be any string not starting with space or $.']
+
+        if '$copyright' in template_str:
+            strs += [
+                '$copyright must match \'Copyright (C) $year $author\' where $year can be a',
+                'specific year (2019) or a range (2018-2019) and author can be any string not',
+                'starting with space or $. There can be multiple lines of copyright notices.'
+            ]
+
+        return ' '.join(strs) + '\n' + template_str
+
     def run(source_file: SourceFile) -> Optional[str]:
         if not license_regex.match(source_file.content):
-            template_variable_explanation = '$x should be replaced with real values everywhere'
-            return '{}:1: error: invalid license header, must match template ({}):\n{}'. \
-                format(source_file.path, template_variable_explanation, template_str)
+            return '{}:1: error: {}'.format(source_file.path, error_message())
 
         return None
 
