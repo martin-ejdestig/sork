@@ -311,7 +311,7 @@ def _compile_license_regex(config: Config, template_str: str) -> Pattern:
                                          year=year_regex_str,
                                          author=author_regex_str)
     try:
-        return re.compile(regex_str, flags=re.DOTALL)
+        return re.compile(regex_str)
     except re.error:
         raise Error('Failed to compile regular expression for license header')
 
