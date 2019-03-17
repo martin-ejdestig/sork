@@ -79,12 +79,17 @@ class SourceFile:
 
 
 def find_files(project: Project, source_paths: Optional[List[str]] = None) -> List[SourceFile]:
-    normalized_build_path = paths.normalize_path(project.path, project.build_path)
-
     if source_paths:
         source_paths = paths.normalize_paths(project.path, source_paths, filter_project_path=True)
     if not source_paths:
         source_paths = project.config['source_paths'] or [paths.NORMALIZED_PROJECT_PATH]
+
+    dir_paths_to_exclude = [path for path in project.config['source_paths_exclude']
+                            if os.path.isdir(path)]
+
+    normalized_build_path = paths.normalize_path(project.path, project.build_path)
+    if normalized_build_path != paths.NORMALIZED_PROJECT_PATH:
+        dir_paths_to_exclude.append(normalized_build_path)
 
     try:
         exclude_pattern = project.config['source_exclude']
@@ -109,8 +114,8 @@ def find_files(project: Project, source_paths: Optional[List[str]] = None) -> Li
             if exclude_regex.match(path):
                 return False
 
-        if normalized_build_path != paths.NORMALIZED_PROJECT_PATH:
-            if os.path.commonpath([normalized_build_path, path]):
+        for dir_path_to_exclude in dir_paths_to_exclude:
+            if path.startswith(dir_path_to_exclude + os.sep):
                 return False
 
         return True

@@ -27,6 +27,13 @@ from .compilation_database import CompilationDatabase
 _CONFIG_SCHEMA = config.Schema({
     'source_exclude': config.Value(''),
     'source_paths': config.Value(['.']),
+    'source_paths_exclude': config.Value([
+        'external',
+        'src/external',
+        'src/third_party',
+        'subprojects',
+        'third_party'
+    ]),
 
     'checks': config.Value([], types=[config.ListType(str)]),
 
