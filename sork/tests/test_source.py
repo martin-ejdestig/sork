@@ -302,15 +302,15 @@ class SourceFindingTestCase(TestCaseWithTmpDir):
                                source.find_files(project))
 
     def test_source_paths_exclude_ignored(self) -> None:
-       self.create_tmp_file('abc.cpp')
-       self.create_tmp_file('external/ghi.cpp')
-       self.create_tmp_file('src/def.cpp')
-       self.create_tmp_file('src/external/jkl.cpp')
-       self.create_tmp_file('src/third_party/mno.cpp')
-       self.create_tmp_file('src/third_party/stu.cpp')
-       self.create_tmp_file('subprojects/pqr.cpp')
-       self.create_tmp_build_dir('build')
+        self.create_tmp_file('abc.cpp')
+        self.create_tmp_file('external/ghi.cpp')
+        self.create_tmp_file('src/def.cpp')
+        self.create_tmp_file('src/external/jkl.cpp')
+        self.create_tmp_file('src/third_party/mno.cpp')
+        self.create_tmp_file('src/third_party/stu.cpp')
+        self.create_tmp_file('subprojects/pqr.cpp')
+        self.create_tmp_build_dir('build')
 
-       with self.cd_tmp_dir():
-           project = Project('.', 'build')
-           self._assert_paths(['abc.cpp', 'src/def.cpp'], source.find_files(project))
+        with self.cd_tmp_dir():
+            project = Project('.', 'build')
+            self._assert_paths(['abc.cpp', 'src/def.cpp'], source.find_files(project))
