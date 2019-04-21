@@ -314,3 +314,6 @@ class SourceFindingTestCase(TestCaseWithTmpDir):
         with self.cd_tmp_dir():
             project = Project('.', 'build')
             self._assert_paths(['abc.cpp', 'src/def.cpp'], source.find_files(project))
+
+        absolute_project = Project(self.tmp_path('.'), self.tmp_path('build'))
+        self._assert_paths(['abc.cpp', 'src/def.cpp'], source.find_files(absolute_project))

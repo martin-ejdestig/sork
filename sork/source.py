@@ -85,7 +85,7 @@ def find_files(project: Project, source_paths: Optional[List[str]] = None) -> Li
         source_paths = project.config['source_paths'] or [paths.NORMALIZED_PROJECT_PATH]
 
     dir_paths_to_exclude = [path for path in project.config['source_paths_exclude']
-                            if os.path.isdir(path)]
+                            if os.path.isdir(os.path.join(project.path, path))]
 
     normalized_build_path = paths.normalize_path(project.path, project.build_path)
     if normalized_build_path != paths.NORMALIZED_PROJECT_PATH:
