@@ -107,6 +107,17 @@ def create(_: Project) -> Check:
                       source_file.compile_command.invocation)
         args = re.sub(r" '?-W[a-z0-9-=]+'?", '', args)
 
+        # clang-tidy >= 6.0 outputs:
+        #
+        # error: unknown argument: '-pipe' [clang-diagnostic-error]
+        #
+        # When "-Xclang -fcolor-diagnostics -pipe" is used in compilation command.
+        # Happens when e.g. specifying CXX=clang++ with Meson.
+        # "-fdiagnostics-color=always -pipe" that is generated when using GCC is
+        # not an issue. Remove -pipe until bug is fixed in clang-tidy. See
+        # https://bugs.llvm.org/show_bug.cgi?id=37315 .
+        args = re.sub(r" '?-pipe'?", '', args)
+
         with subprocess.Popen(args,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT,
