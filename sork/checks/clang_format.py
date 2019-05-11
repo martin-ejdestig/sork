@@ -62,17 +62,16 @@ def _custom_diff(path: str, content: str, formatted: str) -> str:
 
 def create(_: Project) -> Check:
     def run(source_file: SourceFile) -> Optional[str]:
-        with subprocess.Popen(['clang-format', '-assume-filename=' + source_file.path],
-                              stdin=subprocess.PIPE,
-                              stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE,
-                              cwd=source_file.project.path,
-                              universal_newlines=True) as process:
-            stdout, stderr = process.communicate(input=source_file.content)
-            if process.returncode != 0:
-                return stderr
+        result = subprocess.run(['clang-format', '-assume-filename=' + source_file.path],
+                                input=source_file.content,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                cwd=source_file.project.path,
+                                universal_newlines=True)
+        if result.returncode != 0:
+            return result.stderr
 
-        diff_str = _custom_diff(source_file.path, source_file.content, stdout)
+        diff_str = _custom_diff(source_file.path, source_file.content, result.stdout)
 
         return string.rstrip_single_char(diff_str, '\n') or None
 

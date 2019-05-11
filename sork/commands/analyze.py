@@ -39,13 +39,13 @@ def _analyze_source_file(source_file: source.SourceFile) -> str:
     args = re.sub(r" '?-M(?:[MGPD]|MD)?'?(?= )", '', args)
     args = re.sub(r" '?-M[FTQ]'? '?.*?\.[do]'?(?= )", '', args)
 
-    with subprocess.Popen(args,
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.STDOUT,
-                          shell=True,
-                          cwd=source_file.compile_command.work_dir,
-                          universal_newlines=True) as process:
-        return process.communicate()[0]
+    result = subprocess.run(args,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT,
+                            shell=True,
+                            cwd=source_file.compile_command.work_dir,
+                            universal_newlines=True)
+    return result.stdout
 
 
 def add_argparse_subparser(subparsers: argparse.Action, source_paths_arg_name: str) -> None:

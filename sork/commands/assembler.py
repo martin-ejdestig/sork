@@ -46,16 +46,16 @@ def _assembler_for_source_file(source_file: source.SourceFile, verbose: bool = F
     command_args = re.sub(r" '?-M(?:[MGPD]|MD)?'?(?= )", '', command_args)
     command_args = re.sub(r" '?-M[FTQ]'? '?.*?\.[do]'?(?= )", '', command_args)
 
-    with subprocess.Popen(command_args,
-                          stdout=subprocess.PIPE,
-                          cwd=source_file.compile_command.work_dir,
-                          shell=True,
-                          universal_newlines=True) as process:
-        stdout, _ = process.communicate()
-        if process.returncode != 0:
-            raise Error('Failed to run compiler command for outputting assembler.')
+    result = subprocess.run(command_args,
+                            stdout=subprocess.PIPE,
+                            cwd=source_file.compile_command.work_dir,
+                            shell=True,
+                            universal_newlines=True)
 
-    return stdout
+    if result.returncode != 0:
+        raise Error('Failed to run compiler command for outputting assembler.')
+
+    return result.stdout
 
 
 # Declaring these locally in _opcode_count_comment() does not work.

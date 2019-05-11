@@ -118,14 +118,13 @@ def create(_: Project) -> Check:
         # https://bugs.llvm.org/show_bug.cgi?id=37315 .
         args = re.sub(r" '?-pipe'?", '', args)
 
-        with subprocess.Popen(args,
-                              stdout=subprocess.PIPE,
-                              stderr=subprocess.STDOUT,
-                              shell=True,
-                              cwd=source_file.compile_command.work_dir,
-                              universal_newlines=True) as process:
-            output = process.communicate()[0]
+        result = subprocess.run(args,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                shell=True,
+                                cwd=source_file.compile_command.work_dir,
+                                universal_newlines=True)
 
-        return _CLANG_TIDY_NOISE_REGEX.sub('', output).strip() or None
+        return _CLANG_TIDY_NOISE_REGEX.sub('', result.stdout).strip() or None
 
     return Check(NAME, run)
