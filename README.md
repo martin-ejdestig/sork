@@ -110,7 +110,7 @@ Detailed documentation for configuration relating to a specific command can be f
   other than the empty string.
 - `source_paths`: List of paths relative to project root to traverse when looking for source files.
   Used when no source paths are passed on the command line.
-- - `source_paths_exclude`: List of directory paths relative to project root to ignore when looking
+- `source_paths_exclude`: List of directory paths relative to project root to ignore when looking
   for source files. Defaults to a list of common names for external projects and where Meson puts
   subprojects.
 
