@@ -34,10 +34,15 @@ NAME = 'clang-tidy'
 _CLANG_TIDY_NOISE_LINES = [
     r"[0-9]+ warnings? (and [0-9]+ errors? )?generated.",
 
-    r"Suppressed [0-9]+ warnings? \([0-9]+ in non-user code(, [0-9]+ NOLINT)?\).",
+    r"Suppressed [0-9]+ warnings? \([0-9]+ in non-user code(, [0-9]+ NOLINT)?"
+    r"(, [0-9]+ with check filters)?\).",
 
     r"Use -header-filter=.* to display errors from all non-system headers.( Use -system-headers "
-    r"to display errors from system headers as well.)?"
+    r"to display errors from system headers as well.)?",
+
+    # TODO: Remove once https://bugs.llvm.org/show_bug.cgi?id=46752 is fixed.
+    r"warning: invalid case style for template parameter 'expr-type' "
+    r"\[readability-identifier-naming\]"
 ]
 
 _CLANG_TIDY_NOISE_REGEX = re.compile('(?m)^(' + '|'.join(_CLANG_TIDY_NOISE_LINES) + ')$')
